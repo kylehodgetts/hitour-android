@@ -1,5 +1,6 @@
 package uk.ac.kcl.stranders.hitour;
 
+import android.content.Context;
 import android.database.Cursor;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -10,8 +11,12 @@ import android.widget.TextView;
 
 public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder>  {
     private Cursor mCursor;
+    private Context mContext;
 
-    public FeedAdapter(Cursor cursor) { mCursor = cursor; }
+    public FeedAdapter(Cursor cursor, Context context) {
+        mCursor = cursor;
+        mContext = context;
+    }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -25,7 +30,8 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder>  {
         mCursor.moveToPosition(position);
         holder.tvTitle.setText(mCursor.getString(PrototypeData.TITLE));
         holder.tvDescription.setText(mCursor.getString(PrototypeData.DESCRIPTION));
-//        holder.ivThumbnail
+        int imageId = mCursor.getInt(PrototypeData.IMAGE);
+        holder.ivThumbnail.setImageDrawable(mContext.getResources().getDrawable(imageId));
     }
 
     @Override

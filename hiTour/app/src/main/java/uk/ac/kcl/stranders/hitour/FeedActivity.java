@@ -1,7 +1,9 @@
 package uk.ac.kcl.stranders.hitour;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -9,6 +11,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+
+import com.google.zxing.integration.android.IntentIntegrator;
 
 public class FeedActivity extends AppCompatActivity {
 
@@ -28,7 +32,7 @@ public class FeedActivity extends AppCompatActivity {
         mLayoutManager = new LinearLayoutManager(this);
 
         mFeed.setLayoutManager(mLayoutManager);
-        FeedAdapter adapter = new FeedAdapter(PrototypeData.getCursor());
+        FeedAdapter adapter = new FeedAdapter(PrototypeData.getCursor(), this);
         mFeed.setAdapter(adapter);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -41,7 +45,16 @@ public class FeedActivity extends AppCompatActivity {
     }
 
     private void scanCode() {
-        // Start activity
+        IntentIntegrator integrator = new IntentIntegrator(this);
+        integrator.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE_TYPES);
+        integrator.setPrompt("Scan the QR code");
+        integrator.setCameraId(0);  // Use a specific camera of the device
+        integrator.setBeepEnabled(false);
+        integrator.initiateScan();
+    }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        Snackbar.make(mFeed, "New information added", Snackbar.LENGTH_SHORT).show();
     }
 
     @Override
