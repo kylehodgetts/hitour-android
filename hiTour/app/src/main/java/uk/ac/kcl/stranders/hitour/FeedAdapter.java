@@ -1,6 +1,7 @@
 package uk.ac.kcl.stranders.hitour;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -21,7 +22,16 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder>  {
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_feed, parent, false);
-        ViewHolder viewHolder = new ViewHolder(v);
+        final ViewHolder viewHolder = new ViewHolder(v);
+
+        v.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(mContext, DetailActivity.class)
+                .putExtra(DetailActivity.EXTRA_BUNDLE, viewHolder.getAdapterPosition());
+                mContext.startActivity(intent);
+            }
+        });
         return viewHolder;
     }
 
