@@ -18,15 +18,14 @@
             style="?android:attr/textAppearanceLarge"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
+            android:layout_marginEnd="@dimen/text_margin"
             android:layout_marginLeft="@dimen/text_margin"
-            android:layout_marginRight="16dp"
+            android:layout_marginRight="@dimen/text_margin"
             android:layout_marginStart="@dimen/text_margin"
-            android:fontFamily="sans-serif-condensed"
+            android:layout_marginTop="16dp"
             android:lineSpacingMultiplier="0.9"
-            android:paddingBottom="16dp"
             android:textColor="@color/colorPrimaryText"
-            android:textSize="18sp"
+            android:textSize="24sp"
             android:textStyle="bold" />
 
         <TextView

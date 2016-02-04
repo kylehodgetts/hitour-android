@@ -16,6 +16,7 @@
         android:clipToPadding="false"
         android:paddingLeft="@dimen/list_side_margin"
         android:paddingRight="@dimen/list_side_margin"
+        android:paddingBottom="72dp"
         android:scrollbarStyle="outsideOverlay" />
 
 </RelativeLayout>
