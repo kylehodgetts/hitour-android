@@ -1,23 +1,18 @@
 package uk.ac.kcl.stranders.hitour;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.google.zxing.ResultPoint;
-import com.google.zxing.integration.android.IntentIntegrator;
-import com.google.zxing.integration.android.IntentResult;
 import com.journeyapps.barcodescanner.BarcodeCallback;
 import com.journeyapps.barcodescanner.BarcodeResult;
-import com.journeyapps.barcodescanner.CaptureManager;
 import com.journeyapps.barcodescanner.CompoundBarcodeView;
 
 import java.util.List;
@@ -74,7 +69,7 @@ public class ScanningActivity extends AppCompatActivity {
         }
         else {
             Log.d("FeedActivity", "Point for " + etCodePinEntry.getText() + " not found!");
-            Toast.makeText(ScanningActivity.this, "Point Not Found, Please try again.", Toast.LENGTH_LONG).show();
+            Snackbar.make(barcodeScannerView, "Point Not Found, Please try again.", Snackbar.LENGTH_LONG).show();
             barcodeScannerView.resume();
         }
     }
