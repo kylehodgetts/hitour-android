@@ -70,23 +70,25 @@ public class ScanningActivity extends AppCompatActivity {
             Intent intent = new Intent(ScanningActivity.this, DetailActivity.class);
             intent.putExtra(DetailActivity.EXTRA_BUNDLE, Integer.parseInt(etCodePinEntry.getText().toString()));
 
-            barcodeScannerView.setStatusText("");
-            etCodePinEntry.setText("");
-
             startActivity(intent);
         }
         else {
             Log.d("FeedActivity", "Point for " + etCodePinEntry.getText() + " not found!");
             Toast.makeText(ScanningActivity.this, "Point Not Found, Please try again.", Toast.LENGTH_LONG).show();
-            etCodePinEntry.setText("");
             barcodeScannerView.resume();
         }
+    }
+
+    private void clearAndResumeScanner() {
+        barcodeScannerView.resume();
+        barcodeScannerView.setStatusText("");
+        etCodePinEntry.setText("");
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        barcodeScannerView.resume();
+        clearAndResumeScanner();
     }
 
     @Override
