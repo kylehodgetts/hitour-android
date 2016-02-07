@@ -30,6 +30,10 @@ public class ScanningActivity extends AppCompatActivity {
         capture.initializeFromIntent(getIntent(), savedInstanceState);
         capture.decode();
 
+        setSubmitButtonListener();
+    }
+
+    private void setSubmitButtonListener() {
         Button btnSubmit = (Button) findViewById(R.id.btnSubmit);
         btnSubmit.setOnClickListener(new View.OnClickListener() {
             @Override
