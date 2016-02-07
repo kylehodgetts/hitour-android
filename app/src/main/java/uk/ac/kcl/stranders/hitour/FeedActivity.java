@@ -77,34 +77,4 @@ public class FeedActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-        if(result != null) {
-            if(result.getContents() == null) {
-                Log.d("ScanningActivity", "Scan Cancelled");
-                Toast.makeText(this, "Scan Cancelled", Toast.LENGTH_SHORT).show();
-            }
-            else {
-                Log.d("ScanningActivity", "Scan Successful");
-                Log.d("ScanningActivity", "Barcode Found: " + result.getContents());
-                Toast.makeText(this, result.getContents(), Toast.LENGTH_SHORT).show();
-
-                // TODO: Needs to be changed when DB ready to search QR code data with DB and display relevant DetailActivity Page
-                if(result.getContents().matches("\\d+")  && PrototypeData.containsId(Integer.parseInt(result.getContents()))) {
-                    Intent intent = new Intent(this, DetailActivity.class);
-                    intent.putExtra(DetailActivity.EXTRA_BUNDLE, Integer.parseInt(result.getContents()));
-                    startActivity(intent);
-                }
-                else {
-                    Log.d("FeedActivity", "Point for " + result.getContents() + " not found!");
-                    Toast.makeText(this, "Point Not Found, Please try again.", Toast.LENGTH_LONG).show();
-                }
-            }
-        }
-        else {
-            super.onActivityResult(requestCode, resultCode, data);
-        }
-    }
-
 }
