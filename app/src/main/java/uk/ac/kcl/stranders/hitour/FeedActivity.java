@@ -1,15 +1,25 @@
 package uk.ac.kcl.stranders.hitour;
 
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.ActionProvider;
+import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.SubMenu;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.Toast;
+
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 
 public class FeedActivity extends AppCompatActivity {
 
@@ -42,7 +52,12 @@ public class FeedActivity extends AppCompatActivity {
     }
 
     private void scanCode() {
-        startActivity(new Intent(this, ScanningActivity.class));
+        IntentIntegrator integrator = new IntentIntegrator(this);
+        integrator.setCaptureActivity(ScanningActivity.class);
+        integrator.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE_TYPES);
+        integrator.setOrientationLocked(true);
+        integrator.setBeepEnabled(false);
+        integrator.initiateScan();
     }
 
     @Override
@@ -61,4 +76,29 @@ public class FeedActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        final IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+        if(result != null) {
+            if(result.getContents() == null) {
+                Log.d("ScanningActivity", "Scan Cancelled");
+                Toast.makeText(this, "Scan Cancelled", Toast.LENGTH_LONG).show();
+            }
+            else {
+                Log.d("ScanningActivity", "Scan Successful");
+                Log.d("ScanningActivity", "Barcode Found: " + result.getContents());
+                Toast.makeText(this, result.getContents(), Toast.LENGTH_LONG).show();
+
+                // TODO: Needs to be changed when DB ready to search QR code data with DB and display relevant DetailActivity Page
+                Intent intent = new Intent(this, DetailActivity.class);
+                intent.putExtra(DetailActivity.EXTRA_BUNDLE, Integer.parseInt(result.getContents()));
+                startActivity(intent);
+            }
+        }
+        else {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
+    }
+
 }
