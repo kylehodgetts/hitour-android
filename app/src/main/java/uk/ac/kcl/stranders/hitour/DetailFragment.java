@@ -4,7 +4,6 @@ package uk.ac.kcl.stranders.hitour;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -60,7 +59,7 @@ public class DetailFragment extends Fragment {
             mRootView.setVisibility(View.VISIBLE);
             mRootView.animate().alpha(1);
             titleView.setText(mCursor.getString(PrototypeData.TITLE));
-            bodyView.setText(mCursor.getString(PrototypeData.DESCRIPTION));
+            bodyView.setText(mCursor.getString(PrototypeData.TEXT));
             int imageId = mCursor.getInt(PrototypeData.IMAGE);
             mImageView.setImageDrawable(getActivity().getResources().getDrawable(imageId));
         }
