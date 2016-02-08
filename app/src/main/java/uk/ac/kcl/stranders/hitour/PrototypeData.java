@@ -24,4 +24,8 @@ public class PrototypeData {
         return cursor;
     }
 
+    public static String[] getStringArray() {
+        return new String[] {"Tour 1", "Tour 2", "Tour 3", "Tour4"};
+    }
+
 }

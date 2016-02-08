@@ -3,6 +3,7 @@ package uk.ac.kcl.stranders.hitour;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -10,11 +11,16 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 
 public class FeedActivity extends AppCompatActivity {
 
     private RecyclerView mFeed;
     private RecyclerView.LayoutManager mLayoutManager;
+    private DrawerLayout mDrawerLayout;
+    private ListView mDrawerList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +45,14 @@ public class FeedActivity extends AppCompatActivity {
                 scanCode();
             }
         });
+
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mDrawerList = (ListView) findViewById(R.id.left_drawer);
+
+
+        mDrawerList.setPadding(0,getStatusBarHeight(),0,0);
+        mDrawerList.setAdapter(new ArrayAdapter<String>(this, R.layout.list_item_drawer, PrototypeData.getStringArray()));
+        mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
     }
 
     private void scanCode() {
@@ -61,4 +75,25 @@ public class FeedActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+    private class DrawerItemClickListener implements ListView.OnItemClickListener {
+        @Override
+        public void onItemClick(AdapterView parent, View view, int position, long id) {
+            selectItem(position);
+        }
+    }
+
+    private void selectItem(int position) {
+        //TODO change tour to the selected tour from the drawer
+    }
+
+    private int getStatusBarHeight() {
+        int result = 0;
+        int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            result = getResources().getDimensionPixelSize(resourceId);
+        }
+        return result;
+    }
+
 }
