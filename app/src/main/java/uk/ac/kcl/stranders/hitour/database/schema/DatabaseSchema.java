@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @author Adam Chlupacek
  * @version 1.0
  * An abstraction over the database schema for sqllite database
  */

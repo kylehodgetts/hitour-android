@@ -16,7 +16,6 @@ import uk.ac.kcl.stranders.hitour.database.schema.DatabaseSchema;
 import uk.ac.kcl.stranders.hitour.database.schema.TableSchema;
 
 /**
- * @author Adam Chlupacek
  * @version 1.0
  * A controlling abstraction on the database, handles all inputs and outputs to the database,
  * while checks with the schema whether the query is valid

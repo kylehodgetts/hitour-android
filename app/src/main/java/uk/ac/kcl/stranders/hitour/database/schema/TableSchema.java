@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author Adam Chlupacek
  * @version 1.0
  * An abstraction over the schema for a table in the sql database
  */

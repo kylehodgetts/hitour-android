@@ -18,8 +18,8 @@ import uk.ac.kcl.stranders.hitour.database.schema.TableSchema;
  * @version 1.0
  * Test for the database sqllite abstraction and storing
  */
-public class CachingInstrumentationTest extends ActivityInstrumentationTestCase2<FeedActivity> {
-    public CachingInstrumentationTest() {
+public class DatabaseInstrumentationTest extends ActivityInstrumentationTestCase2<FeedActivity> {
+    public DatabaseInstrumentationTest() {
         super(FeedActivity.class);
     }
 
