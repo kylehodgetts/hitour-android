@@ -1,6 +1,7 @@
 package uk.ac.kcl.stranders.hitour;
 
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -10,10 +11,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.google.zxing.BarcodeFormat;
 import com.google.zxing.ResultPoint;
 import com.journeyapps.barcodescanner.BarcodeCallback;
 import com.journeyapps.barcodescanner.BarcodeResult;
 import com.journeyapps.barcodescanner.CompoundBarcodeView;
+import com.journeyapps.barcodescanner.DecoderFactory;
 
 import java.util.List;
 
@@ -26,7 +29,7 @@ public class ScanningActivity extends AppCompatActivity {
     private BarcodeCallback callback = new BarcodeCallback() {
         @Override
         public void barcodeResult(BarcodeResult result) {
-            if(result != null) {
+            if(result != null && result.getBarcodeFormat().equals(BarcodeFormat.QR_CODE)) {
                 barcodeScannerView.setStatusText(result.getText());
                 etCodePinEntry.setText(result.getText());
                 barcodeScannerView.pause();
@@ -61,9 +64,10 @@ public class ScanningActivity extends AppCompatActivity {
     public void submit() {
         EditText etCodePinEntry = (EditText) findViewById(R.id.etCodePinEntry);
         // TODO: Needs to be changed when DB ready to search QR code data with DB and display relevant DetailActivity Page
-        if (etCodePinEntry.getText().toString().matches("\\d+") && PrototypeData.containsId(Integer.parseInt(etCodePinEntry.getText().toString()))) {
+        if (etCodePinEntry.getText().toString().matches("\\d{1,9}") && PrototypeData.containsId(Integer.parseInt(etCodePinEntry.getText().toString()))) {
             Intent intent = new Intent(ScanningActivity.this, DetailActivity.class);
             intent.putExtra(DetailActivity.EXTRA_BUNDLE, Integer.parseInt(etCodePinEntry.getText().toString()));
+            clearInput();
 
             startActivity(intent);
         }
@@ -74,8 +78,7 @@ public class ScanningActivity extends AppCompatActivity {
         }
     }
 
-    private void clearAndResumeScanner() {
-        barcodeScannerView.resume();
+    private void clearInput() {
         barcodeScannerView.setStatusText("");
         etCodePinEntry.setText("");
     }
@@ -83,7 +86,7 @@ public class ScanningActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        clearAndResumeScanner();
+        barcodeScannerView.resume();
     }
 
     @Override
