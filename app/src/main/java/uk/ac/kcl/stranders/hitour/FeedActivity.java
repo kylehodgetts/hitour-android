@@ -1,6 +1,7 @@
 package uk.ac.kcl.stranders.hitour;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.DrawerLayout;
@@ -54,7 +55,7 @@ public class FeedActivity extends AppCompatActivity {
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
 
-        mDrawerList.setPadding(0,getStatusBarHeight(),0,0);
+        mDrawerList.setPadding(0, getStatusBarHeight(), 0, 0);
         mDrawerList.setAdapter(new ArrayAdapter<String>(this, R.layout.list_item_drawer, PrototypeData.getStringArray()));
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
 
@@ -72,6 +73,19 @@ public class FeedActivity extends AppCompatActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_feed, menu);
         return true;
+    }
+
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        // Sync the toggle state after onRestoreInstanceState has occurred.
+        mDrawerToggle.syncState();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
     @Override
