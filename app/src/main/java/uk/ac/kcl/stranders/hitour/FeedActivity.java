@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -21,6 +22,7 @@ public class FeedActivity extends AppCompatActivity {
     private RecyclerView.LayoutManager mLayoutManager;
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
+    private ActionBarDrawerToggle mDrawerToggle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +30,9 @@ public class FeedActivity extends AppCompatActivity {
         setContentView(R.layout.activity_feed);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        toolbar.setNavigationIcon(R.drawable.ic_action_menu);
 
         mFeed = (RecyclerView) findViewById(R.id.rv_feed);
 
@@ -49,10 +54,13 @@ public class FeedActivity extends AppCompatActivity {
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
 
-
         mDrawerList.setPadding(0,getStatusBarHeight(),0,0);
         mDrawerList.setAdapter(new ArrayAdapter<String>(this, R.layout.list_item_drawer, PrototypeData.getStringArray()));
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
+
+        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.drawer_open, R.string.drawer_close) {};
+        mDrawerToggle.setDrawerIndicatorEnabled(true);
+        mDrawerLayout.setDrawerListener(mDrawerToggle);
     }
 
     private void scanCode() {
@@ -73,6 +81,10 @@ public class FeedActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
+        if (mDrawerToggle.onOptionsItemSelected(item)) {
+            return true;
+        }
+
         return super.onOptionsItemSelected(item);
     }
 
@@ -85,6 +97,7 @@ public class FeedActivity extends AppCompatActivity {
 
     private void selectItem(int position) {
         //TODO change tour to the selected tour from the drawer
+        mDrawerLayout.closeDrawer(mDrawerList);
     }
 
     private int getStatusBarHeight() {

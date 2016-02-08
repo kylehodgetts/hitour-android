@@ -25,7 +25,7 @@ public class PrototypeData {
     }
 
     public static String[] getStringArray() {
-        return new String[] {"Tour 1", "Tour 2", "Tour 3", "Tour4"};
+        return new String[] {"Tour 1", "Tour 2", "Tour 3", "Tour 4"};
     }
 
 }
