@@ -1,7 +1,6 @@
 package uk.ac.kcl.stranders.hitour;
 
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -16,7 +15,6 @@ import com.google.zxing.ResultPoint;
 import com.journeyapps.barcodescanner.BarcodeCallback;
 import com.journeyapps.barcodescanner.BarcodeResult;
 import com.journeyapps.barcodescanner.CompoundBarcodeView;
-import com.journeyapps.barcodescanner.DecoderFactory;
 
 import java.util.List;
 
@@ -75,6 +73,7 @@ public class ScanningActivity extends AppCompatActivity {
             Log.d("FeedActivity", "Point for " + etCodePinEntry.getText() + " not found!");
             Snackbar.make(barcodeScannerView, "Point Not Found, Please try again.", Snackbar.LENGTH_LONG).show();
             barcodeScannerView.resume();
+            clearInput();
         }
     }
 
