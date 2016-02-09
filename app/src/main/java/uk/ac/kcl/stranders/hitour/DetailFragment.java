@@ -2,14 +2,18 @@ package uk.ac.kcl.stranders.hitour;
 
 
 import android.database.Cursor;
+import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.VideoView;
 
 public class DetailFragment extends Fragment {
 
@@ -63,6 +67,44 @@ public class DetailFragment extends Fragment {
             bodyView.setText(mCursor.getString(PrototypeData.DESCRIPTION));
             int imageId = mCursor.getInt(PrototypeData.IMAGE);
             mImageView.setImageDrawable(getActivity().getResources().getDrawable(imageId));
+
+            // TODO: retrieve video links from DB when available
+            if(mCursor.getString(PrototypeData.VIDEO) != null) {
+                Uri uri = Uri.parse("android.resource://" + getActivity().getPackageName() + "/" +
+                        mCursor.getString(PrototypeData.VIDEO));
+                final VideoView videoView = new VideoView(getActivity());
+                final LinearLayout linearLayout = (LinearLayout) mRootView.findViewById(R.id.detail_body);
+
+                videoView.setVideoURI(uri);
+                videoView.requestFocus();
+                videoView.setLayoutParams(new LinearLayout.LayoutParams(1000, 1000));
+                videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                    @Override
+                    public void onPrepared(MediaPlayer mp) {
+                        videoView.setLayoutParams(new LinearLayout.LayoutParams(linearLayout.getWidth(),
+                                LinearLayout.LayoutParams.WRAP_CONTENT));
+                    }
+                });
+                videoView.setOnTouchListener(new View.OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View v, MotionEvent event) {
+                        int currentPosition = videoView.getCurrentPosition();
+                        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                            if (videoView.isPlaying()) {
+                                videoView.pause();
+                            } else {
+                                videoView.seekTo(currentPosition);
+                                videoView.start();
+                            }
+                            return true;
+                        }
+                        return false;
+                    }
+                });
+
+                linearLayout.addView(videoView);
+            }
+
         }
 
         return mRootView;
