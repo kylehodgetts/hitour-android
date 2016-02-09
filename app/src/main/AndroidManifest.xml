@@ -27,7 +27,12 @@
         <activity
             android:name=".DetailActivity"
             android:label="@string/title_activity_detail"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            android:parentActivityName="uk.ac.kcl.stranders.hitour.FeedActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="uk.ac.kcl.stranders.hitour.FeedActivity" />
+        </activity>
         <activity
             android:name=".ScanningActivity"/>
     </application>
