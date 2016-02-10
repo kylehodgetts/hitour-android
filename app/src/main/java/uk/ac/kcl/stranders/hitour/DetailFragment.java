@@ -75,8 +75,8 @@ public class DetailFragment extends Fragment {
                 Uri uri = Uri.parse("android.resource://" + getActivity().getPackageName() + "/" +
                         mCursor.getString(PrototypeData.VIDEO));
                 videoView = new VideoView(getActivity());
+                videoView.setId(Integer.parseInt("1"));
                 final LinearLayout linearLayout = (LinearLayout) mRootView.findViewById(R.id.detail_body);
-
                 videoView.setVideoURI(uri);
                 videoView.requestFocus();
                 videoView.setLayoutParams(new LinearLayout.LayoutParams(1000, 1000));
@@ -140,4 +140,5 @@ public class DetailFragment extends Fragment {
         super.onPause();
         currentPosition = videoView.getCurrentPosition();
     }
+
 }
