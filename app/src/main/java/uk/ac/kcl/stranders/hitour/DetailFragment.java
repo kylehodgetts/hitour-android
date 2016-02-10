@@ -21,7 +21,9 @@ public class DetailFragment extends Fragment {
     private int mItemId;
     private View mRootView;
     private ImageView mImageView;
+    private VideoView videoView;
     private Cursor mCursor;
+    private int currentPosition;
 
     public DetailFragment() {
         // Required empty public constructor
@@ -50,7 +52,7 @@ public class DetailFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+                             final Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         mRootView = inflater.inflate(R.layout.fragment_detail, container, false);
 
@@ -72,7 +74,7 @@ public class DetailFragment extends Fragment {
             if(mCursor.getString(PrototypeData.VIDEO) != null) {
                 Uri uri = Uri.parse("android.resource://" + getActivity().getPackageName() + "/" +
                         mCursor.getString(PrototypeData.VIDEO));
-                final VideoView videoView = new VideoView(getActivity());
+                videoView = new VideoView(getActivity());
                 final LinearLayout linearLayout = (LinearLayout) mRootView.findViewById(R.id.detail_body);
 
                 videoView.setVideoURI(uri);
@@ -83,15 +85,18 @@ public class DetailFragment extends Fragment {
                     public void onPrepared(MediaPlayer mp) {
                         videoView.setLayoutParams(new LinearLayout.LayoutParams(linearLayout.getWidth(),
                                 LinearLayout.LayoutParams.WRAP_CONTENT));
+                        if (savedInstanceState != null && savedInstanceState.containsKey("currentPosition")) {
+                            currentPosition = savedInstanceState.getInt("currentPosition");
+                        }
                     }
                 });
                 videoView.setOnTouchListener(new View.OnTouchListener() {
                     @Override
                     public boolean onTouch(View v, MotionEvent event) {
-                        int currentPosition = videoView.getCurrentPosition();
                         if (event.getAction() == MotionEvent.ACTION_DOWN) {
                             if (videoView.isPlaying()) {
                                 videoView.pause();
+                                currentPosition = videoView.getCurrentPosition();
                             } else {
                                 videoView.seekTo(currentPosition);
                                 videoView.start();
@@ -99,6 +104,12 @@ public class DetailFragment extends Fragment {
                             return true;
                         }
                         return false;
+                    }
+                });
+                videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                    @Override
+                    public void onCompletion(MediaPlayer mp) {
+                        currentPosition = 0;
                     }
                 });
 
@@ -110,4 +121,23 @@ public class DetailFragment extends Fragment {
         return mRootView;
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putInt("currentPosition", currentPosition);
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onViewStateRestored(Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+        if(savedInstanceState != null && savedInstanceState.containsKey("currentPostion")){
+            currentPosition = savedInstanceState.getInt("currentPosition");
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        currentPosition = videoView.getCurrentPosition();
+    }
 }
