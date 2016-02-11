@@ -1,25 +1,17 @@
 package uk.ac.kcl.stranders.hitour;
 
-import android.content.Intent;
-import android.graphics.drawable.Drawable;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
-import android.view.ActionProvider;
-import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.SubMenu;
 import android.view.View;
-import android.widget.EditText;
-import android.widget.Toast;
 
 import com.google.zxing.integration.android.IntentIntegrator;
-import com.google.zxing.integration.android.IntentResult;
 
 public class FeedActivity extends AppCompatActivity {
 
@@ -36,7 +28,12 @@ public class FeedActivity extends AppCompatActivity {
         mFeed = (RecyclerView) findViewById(R.id.rv_feed);
 
         mFeed.setHasFixedSize(true);
-        mLayoutManager = new LinearLayoutManager(this);
+
+        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            mLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        } else {
+            mLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+        }
 
         mFeed.setLayoutManager(mLayoutManager);
         FeedAdapter adapter = new FeedAdapter(PrototypeData.getCursor(), this);
