@@ -21,14 +21,20 @@ import android.widget.Toast;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
+import uk.ac.kcl.stranders.hitour.database.DBWrap;
+import uk.ac.kcl.stranders.hitour.database.schema.HiSchema;
+
 public class FeedActivity extends AppCompatActivity {
 
     private RecyclerView mFeed;
     private RecyclerView.LayoutManager mLayoutManager;
 
+    public static DBWrap database;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        database = new DBWrap(this, new HiSchema(1));
         setContentView(R.layout.activity_feed);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -41,6 +47,7 @@ public class FeedActivity extends AppCompatActivity {
         mFeed.setLayoutManager(mLayoutManager);
         FeedAdapter adapter = new FeedAdapter(PrototypeData.getCursor(), this);
         mFeed.setAdapter(adapter);
+
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
