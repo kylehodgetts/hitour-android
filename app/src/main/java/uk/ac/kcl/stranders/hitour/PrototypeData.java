@@ -25,4 +25,15 @@ public class PrototypeData {
         return cursor;
     }
 
+    public static boolean containsId(int toSearch) {
+        Cursor cursor = getCursor();
+        for(int i=0; i < cursor.getCount(); ++i) {
+            cursor.moveToPosition(i);
+            if(cursor.getInt(PrototypeData._ID) == toSearch) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }
