@@ -1,6 +1,6 @@
 package uk.ac.kcl.stranders.hitour.database.schema;
 
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.*
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.*;
 
 /**
  * @version 1.0
@@ -21,7 +21,7 @@ public class HiSchema extends DatabaseSchema {
         tour.addValue(AUDIENCE_ID, DataType.Text);
         addTable(tour);
 
-        TableSchema session = new TableSchema(SESSION_ID, SESSION_TABLE;
+        TableSchema session = new TableSchema(SESSION_ID, SESSION_TABLE);
         session.addValue(SESSION_CODE, DataType.Text);
         session.addValue(START_DATE, DataType.Text);
         session.addValue(END_DATE, DataType.Text);
