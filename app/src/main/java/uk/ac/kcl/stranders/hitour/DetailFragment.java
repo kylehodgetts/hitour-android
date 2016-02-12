@@ -30,6 +30,11 @@ public class DetailFragment extends Fragment {
     public static final String ARG_ITEM_ID = "ITEM_ID";
 
     /**
+     * Static String name to store in a bundle the video's current position
+     */
+    public static final String CURRENT_POSITION = "CURRENT_POSITION";
+
+    /**
      * Stores the integer ID of the current item selected to view
      */
     private int mItemId;
@@ -155,8 +160,8 @@ public class DetailFragment extends Fragment {
                 public void onPrepared(MediaPlayer mp) {
                     videoView.setLayoutParams(new LinearLayout.LayoutParams(linearLayout.getWidth(),
                             LinearLayout.LayoutParams.WRAP_CONTENT));
-                    if (savedInstanceState != null && savedInstanceState.containsKey("currentPosition")) {
-                        currentPosition = savedInstanceState.getInt("currentPosition");
+                    if (savedInstanceState != null && savedInstanceState.containsKey(CURRENT_POSITION)) {
+                        currentPosition = savedInstanceState.getInt(CURRENT_POSITION);
                     }
                 }
             });
@@ -195,7 +200,7 @@ public class DetailFragment extends Fragment {
      */
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putInt("currentPosition", currentPosition);
+        outState.putInt(CURRENT_POSITION, currentPosition);
         super.onSaveInstanceState(outState);
     }
 
@@ -208,8 +213,8 @@ public class DetailFragment extends Fragment {
     @Override
     public void onViewStateRestored(Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
-        if(savedInstanceState != null && savedInstanceState.containsKey("currentPostion")){
-            currentPosition = savedInstanceState.getInt("currentPosition");
+        if(savedInstanceState != null && savedInstanceState.containsKey(CURRENT_POSITION)){
+            currentPosition = savedInstanceState.getInt(CURRENT_POSITION);
         }
     }
 
