@@ -13,15 +13,42 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
 
+/**
+ * Provides the {@link ViewPager} to swipe between instances of {@link DetailFragment}.
+ */
 public class DetailActivity extends AppCompatActivity {
 
+    /**
+     * Stores the key for the data passed with an intent.
+     */
     public final static String EXTRA_BUNDLE = "uk.ac.kcl.stranders.hitour.DetailActivity.bundle";
 
+    /**
+     * Stores the cursor that provides access to the points data.
+     */
     private Cursor mCursor;
+
+    /**
+     * Stores the initial id value of a page in {@link ViewPager}.
+     */
     private int mStartId;
+
+    /**
+     * {@link ViewPager} to navigate between instances of {@link DetailFragment}.
+     */
     private ViewPager mPager;
+
+    /**
+     * Stores a reference to the {@link uk.ac.kcl.stranders.hitour.DetailActivity.DetailPagerAdapter}
+     * used to populate {@link DetailActivity#mPager}.
+     */
     private DetailPagerAdapter mPagerAdapter;
 
+    /**
+     * Initializes nad populates {@link DetailActivity#mPager}.
+     *
+     * {@inheritDoc}
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,6 +87,32 @@ public class DetailActivity extends AppCompatActivity {
         mPager.setCurrentItem(mStartId, false);
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_detail, menu);
+        return true;
+    }
+
+    /**
+     * Overrides the Up button to prevent a previous activity from being recreated.
+     *
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        switch (item.getItemId()) {
+            // Respond to the action bar's Up/Home button
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     private class DetailPagerAdapter extends FragmentStatePagerAdapter {
         public DetailPagerAdapter(FragmentManager fm) {
             super(fm);
@@ -81,26 +134,4 @@ public class DetailActivity extends AppCompatActivity {
             return (mCursor != null) ? mCursor.getCount() : 0;
         }
     }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_detail, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        switch (item.getItemId()) {
-            // Respond to the action bar's Up/Home button
-            case android.R.id.home:
-                onBackPressed();
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
 }

@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingTop="8dp"
     android:background="#ECEFF1"
+    android:paddingTop="8dp"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="uk.ac.kcl.stranders.hitour.FeedActivity"
     tools:showIn="@layout/activity_feed">
@@ -15,9 +15,11 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipToPadding="false"
+        android:paddingBottom="8dp"
+        android:paddingEnd="72dp"
         android:paddingLeft="@dimen/list_side_margin"
         android:paddingRight="72dp"
-        android:paddingBottom="8dp"
+        android:paddingStart="@dimen/list_side_margin"
         android:scrollbarStyle="outsideOverlay" />
 
 </RelativeLayout>

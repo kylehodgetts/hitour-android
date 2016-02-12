@@ -3,6 +3,9 @@ package uk.ac.kcl.stranders.hitour;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 
+/**
+ * Class used for testing. Will be removed when the web database is implemented.
+ */
 public class PrototypeData {
     public static final int _ID = 0;
     public static final int TITLE = 1;
