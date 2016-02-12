@@ -6,6 +6,7 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -88,7 +89,7 @@ public class DetailFragment extends Fragment {
 
     /**
      * Set's up the {@link Fragment}'s data ready for it's views to be created
-     * @param savedInstanceState
+     * @param savedInstanceState {@link Bundle} with all the saved state variables
      */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -135,7 +136,7 @@ public class DetailFragment extends Fragment {
             titleView.setText(mCursor.getString(PrototypeData.TITLE));
             bodyView.setText(mCursor.getString(PrototypeData.TEXT));
             int imageId = mCursor.getInt(PrototypeData.IMAGE);
-            mImageView.setImageDrawable(getActivity().getResources().getDrawable(imageId));
+            mImageView.setImageDrawable(ContextCompat.getDrawable(getActivity(), imageId));
 
             // TODO: retrieve video links from DB when available
             addVideos(savedInstanceState);
