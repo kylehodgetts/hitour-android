@@ -15,6 +15,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.VideoView;
 
+import java.util.ArrayList;
+
+import uk.ac.kcl.stranders.hitour.models.Data;
+
 /**
  * Fragment that shows the content for a particular point in the tour which could consist of
  * text, images, videos or any number of combinations between them.
@@ -59,6 +63,8 @@ public class DetailFragment extends Fragment {
      */
     private int currentPosition;
 
+    private ArrayList<Data> items;
+
     /**
      * Default empty required public constructor
      */
@@ -93,6 +99,17 @@ public class DetailFragment extends Fragment {
         if (getArguments().containsKey(ARG_ITEM_ID)) {
             mItemId = getArguments().getInt(ARG_ITEM_ID);
             mCursor.moveToPosition(mItemId);
+            retrieveData();
+        }
+    }
+
+    private void retrieveData() {
+        items = new ArrayList<>();
+        if(mCursor != null) {
+            items.add(new Data("PD1", "Proto Title 1", "Description 1", "Body Text for this item\n" +
+                    "Another Line\n" +
+                    "And again..."));
+            items.add(new Data("PD2", "Video 1", "Descrption for PD2", mCursor.getColumnName(PrototypeData.VIDEO)));
         }
     }
 
@@ -124,6 +141,8 @@ public class DetailFragment extends Fragment {
             bodyView.setText(mCursor.getString(PrototypeData.DESCRIPTION));
             int imageId = mCursor.getInt(PrototypeData.IMAGE);
             mImageView.setImageDrawable(getActivity().getResources().getDrawable(imageId));
+
+
 
             // TODO: retrieve video links from DB when available
             if(mCursor.getString(PrototypeData.VIDEO) != null) {
