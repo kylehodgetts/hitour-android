@@ -51,7 +51,11 @@ public class FeedActivity extends AppCompatActivity {
         if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
             mLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         } else {
-            mLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+            if(getResources().getBoolean(R.bool.isTablet)) {
+                mLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+            } else {
+                mLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+            }
         }
 
         mFeed.setLayoutManager(mLayoutManager);

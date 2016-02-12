@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:id="@+id/appbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:background="?attr/colorPrimary"
+        android:elevation="4dp"
+        android:orientation="vertical">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+        <android.support.v4.widget.Space
+            android:id="@+id/spaceLogo"
+            android:layout_width="40dp"
+            android:layout_height="0dp"
+            android:layout_marginLeft="@dimen/abc_list_item_padding_horizontal_material"
+            android:layout_marginStart="@dimen/abc_list_item_padding_horizontal_material"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@id/toolbar"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="?attr/listPreferredItemHeight"
+            android:layout_gravity="center_vertical"
+            android:layout_below="@id/spaceLogo"
+            android:layout_marginLeft="@dimen/abc_list_item_padding_horizontal_material"
+            android:layout_marginStart="@dimen/abc_list_item_padding_horizontal_material"
+            android:layout_toRightOf="@id/spaceLogo"
+            android:text="@string/app_name"
+            android:contentDescription="@string/app_name"
+            android:textColor="@color/colorIcons"
+            android:textSize="48sp"
+            android:id="@+id/textView" />
+
+    </RelativeLayout>
+
+    <android.support.v4.widget.Space
+        android:id="@+id/layout_center"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_centerInParent="true" />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rv_feed"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:paddingLeft="@dimen/list_side_margin"
+        android:paddingRight="@dimen/list_side_margin"
+        android:layout_alignEnd="@id/layout_center"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignRight="@id/layout_center"
+        android:layout_below="@id/appbar"
+        android:paddingBottom="72dp"
+        android:scrollbarStyle="outsideOverlay" />
+
+    <!--<fragment-->
+        <!--android:id="@+id/fragment_feed"-->
+        <!--android:layout_width="0dp"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:layout_alignEnd="@id/layout_center"-->
+        <!--android:layout_alignParentLeft="true"-->
+        <!--android:layout_alignParentStart="true"-->
+        <!--android:layout_alignRight="@id/layout_center"-->
+        <!--android:layout_below="@id/appbar"-->
+        <!--tools:layout="@android:layout/list_content" />-->
+    <!--android:name=""-->
+
+    <android.support.v4.widget.Space
+        android:id="@+id/pointDetailSpace"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignLeft="@id/layout_center"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="?attr/actionBarSize"
+        android:layout_alignStart="@id/layout_center"
+        android:elevation="4dp"
+        />
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/point_detail_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignLeft="@id/pointDetailSpace"
+        android:layout_alignRight="@id/pointDetailSpace"
+        android:layout_alignTop="@id/pointDetailSpace"
+        android:layout_alignBottom="@id/pointDetailSpace"
+        android:layout_marginRight="@dimen/abc_list_item_padding_horizontal_material"
+        android:layout_marginEnd="@dimen/abc_list_item_padding_horizontal_material"
+        android:layout_marginBottom="@dimen/abc_list_item_padding_horizontal_material"
+        app:cardElevation="6dp"
+        app:cardPreventCornerOverlap="false"
+        />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="@dimen/fab_margin"
+        android:src="@drawable/ic_queue_white_24dp" />
+</RelativeLayout>
