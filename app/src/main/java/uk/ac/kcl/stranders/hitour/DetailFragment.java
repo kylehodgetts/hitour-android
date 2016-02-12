@@ -104,17 +104,6 @@ public class DetailFragment extends Fragment {
         if (getArguments().containsKey(ARG_ITEM_ID)) {
             mItemId = getArguments().getInt(ARG_ITEM_ID);
             mCursor.moveToPosition(mItemId);
-            retrieveData();
-        }
-    }
-
-    private void retrieveData() {
-        items = new ArrayList<>();
-        if(mCursor != null) {
-            items.add(new Data("PD1", "Proto Title 1", "Description 1", "Body Text for this item\n" +
-                    "Another Line\n" +
-                    "And again..."));
-            items.add(new Data("PD2", "Video 1", "Descrption for PD2", mCursor.getColumnName(PrototypeData.VIDEO)));
         }
     }
 

@@ -2,6 +2,7 @@ package uk.ac.kcl.stranders.hitour;
 
 import android.database.Cursor;
 import android.database.MatrixCursor;
+import android.graphics.Matrix;
 
 public class PrototypeData {
     public static final int _ID = 0;
@@ -31,6 +32,38 @@ public class PrototypeData {
             }
         }
         return false;
+    }
+
+    public static Cursor getContentCursor(int id) {
+        String[] dataTableColumns  = new String[] {"data_id", "title", "description", "url"};
+        MatrixCursor dataTable = new MatrixCursor(dataTableColumns);
+        dataTable.addRow(new Object[] {"D001", "Data Item 1", "Image 1 Description", R.drawable.fluoroscopy});
+        dataTable.addRow(new Object[] {"D002", "Data Item 2", "Video 2 Description", R.raw.ultrasound });
+
+        String[] pointDataColumns = new String[] {"point_id", "data_id", "rank"};
+        MatrixCursor pointDataTable = new MatrixCursor(pointDataColumns);
+        pointDataTable.addRow(new Object[] {2, "D002", 0});
+        pointDataTable.addRow(new Object[] {2, "D001", 1});
+
+        pointDataTable.moveToFirst();
+
+        MatrixCursor toReturn = new MatrixCursor(dataTableColumns);
+        for(int i = 0; i < pointDataTable.getCount(); ++i) {
+            for(int j = 0; j < pointDataTable.getCount(); ++j) {
+                if(pointDataTable.getInt(0) == id && pointDataTable.getInt(2) == i) {
+                    dataTable.moveToFirst();
+                    for(int k = 0; k < dataTable.getCount(); ++k) {
+                        if(dataTable.getString(0).equals(pointDataTable.getString(1))) {
+                            toReturn.addRow(new Object[] {dataTable.getString(0), dataTable.getString(1), dataTable.getString(2), dataTable.getString(3)});
+                            break;
+                        }
+                        dataTable.moveToNext();
+                    }
+                }
+            }
+            pointDataTable.moveToNext();
+        }
+        return toReturn;
     }
 
 }
