@@ -1,4 +1,4 @@
-package uk.ac.kcl.stranders.hitour;
+package uk.ac.kcl.stranders.hitour.fragment;
 
 
 import android.database.Cursor;
@@ -16,6 +16,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.VideoView;
+
+import uk.ac.kcl.stranders.hitour.PrototypeData;
+import uk.ac.kcl.stranders.hitour.R;
 
 /**
  * Fragment that shows the content for a particular point in the tour which could consist of

@@ -1,4 +1,4 @@
-package uk.ac.kcl.stranders.hitour;
+package uk.ac.kcl.stranders.hitour.activity;
 
 import android.database.Cursor;
 import android.graphics.drawable.ColorDrawable;
@@ -12,6 +12,10 @@ import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
+
+import uk.ac.kcl.stranders.hitour.fragment.DetailFragment;
+import uk.ac.kcl.stranders.hitour.PrototypeData;
+import uk.ac.kcl.stranders.hitour.R;
 
 /**
  * Provides the {@link ViewPager} to swipe between instances of {@link DetailFragment}.
@@ -39,7 +43,7 @@ public class DetailActivity extends AppCompatActivity {
     private ViewPager mPager;
 
     /**
-     * Stores a reference to the {@link uk.ac.kcl.stranders.hitour.DetailActivity.DetailPagerAdapter}
+     * Stores a reference to the {@link DetailActivity.DetailPagerAdapter}
      * used to populate {@link DetailActivity#mPager}.
      */
     private DetailPagerAdapter mPagerAdapter;

@@ -11,6 +11,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import uk.ac.kcl.stranders.hitour.activity.DetailActivity;
+import uk.ac.kcl.stranders.hitour.activity.FeedActivity;
+
 /**
  * FeedAdapter provides a binding from a points data set to views
  * that are displayed within a {@link FeedActivity#mFeed}.

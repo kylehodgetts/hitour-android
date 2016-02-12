@@ -1,4 +1,4 @@
-package uk.ac.kcl.stranders.hitour;
+package uk.ac.kcl.stranders.hitour.activity;
 
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -11,6 +11,10 @@ import android.view.Menu;
 import android.view.View;
 
 import com.google.zxing.integration.android.IntentIntegrator;
+
+import uk.ac.kcl.stranders.hitour.FeedAdapter;
+import uk.ac.kcl.stranders.hitour.PrototypeData;
+import uk.ac.kcl.stranders.hitour.R;
 
 /**
  * The main activity that displays all available points for a given tour.

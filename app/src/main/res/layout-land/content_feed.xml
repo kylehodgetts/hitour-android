@@ -7,7 +7,7 @@
     android:background="#ECEFF1"
     android:paddingTop="8dp"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="uk.ac.kcl.stranders.hitour.FeedActivity"
+    tools:context=".activity.FeedActivity"
     tools:showIn="@layout/activity_feed">
 
     <android.support.v7.widget.RecyclerView

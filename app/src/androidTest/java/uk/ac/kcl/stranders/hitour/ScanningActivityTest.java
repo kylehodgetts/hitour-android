@@ -9,14 +9,14 @@ import android.view.KeyEvent;
 import android.widget.Button;
 import android.widget.EditText;
 
+import uk.ac.kcl.stranders.hitour.activity.DetailActivity;
+import uk.ac.kcl.stranders.hitour.activity.ScanningActivity;
+
 /**
  * Front End Instrumentation test class to test the {@link ScanningActivity} to ensure that
  * it receives input and processes the correct input. By checking the type of input and determining
  * if it is the correct type and navigates to the correct point, otherwise an error message is shown
  * to the user.
- *
- * @author Charlie Baker
- * @version 1.0
  */
 public class ScanningActivityTest extends ActivityInstrumentationTestCase2<ScanningActivity> {
 
