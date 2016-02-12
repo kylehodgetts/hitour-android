@@ -8,6 +8,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.VideoView;
 
+import uk.ac.kcl.stranders.hitour.activity.DetailActivity;
+import uk.ac.kcl.stranders.hitour.fragment.DetailFragment;
+
 /**
  * Front end instrumentation test for the {@link DetailFragment} ensuring that its content is correctly
  * populated and the video behaves as it should when interacted with.

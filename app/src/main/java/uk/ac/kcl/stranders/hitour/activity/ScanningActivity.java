@@ -1,4 +1,4 @@
-package uk.ac.kcl.stranders.hitour;
+package uk.ac.kcl.stranders.hitour.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -17,6 +17,9 @@ import com.journeyapps.barcodescanner.BarcodeResult;
 import com.journeyapps.barcodescanner.CompoundBarcodeView;
 
 import java.util.List;
+
+import uk.ac.kcl.stranders.hitour.PrototypeData;
+import uk.ac.kcl.stranders.hitour.R;
 
 /**
  * {@link AppCompatActivity} class that is used to retrieve input by means of scanning a QR Code or

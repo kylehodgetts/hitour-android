@@ -2,14 +2,12 @@ package uk.ac.kcl.stranders.hitour.database;
 
 import android.database.Cursor;
 import android.test.ActivityInstrumentationTestCase2;
-import android.util.Log;
 
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import uk.ac.kcl.stranders.hitour.FeedActivity;
+import uk.ac.kcl.stranders.hitour.activity.FeedActivity;
 import uk.ac.kcl.stranders.hitour.database.schema.DataType;
 import uk.ac.kcl.stranders.hitour.database.schema.DatabaseSchema;
 import uk.ac.kcl.stranders.hitour.database.schema.TableSchema;

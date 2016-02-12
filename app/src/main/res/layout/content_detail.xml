@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="uk.ac.kcl.stranders.hitour.DetailActivity"
+    tools:context=".activity.DetailActivity"
     tools:showIn="@layout/activity_detail">
 
     <LinearLayout
@@ -16,7 +16,6 @@
 
         <TextView
             android:id="@+id/text_title"
-            style="?android:attr/textAppearanceLarge"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/text_margin"
@@ -26,8 +25,7 @@
             android:layout_marginTop="16dp"
             android:lineSpacingMultiplier="0.9"
             android:textColor="@color/colorPrimaryText"
-            android:textSize="24sp"
-            android:textStyle="bold" />
+            android:textSize="24sp" />
 
         <TextView
             android:id="@+id/text_body"
@@ -35,11 +33,11 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
             android:layout_marginEnd="@dimen/text_margin"
-            android:layout_marginLeft="@dimen/text_margin"
+            android:layout_marginLeft="32dp"
             android:layout_marginRight="@dimen/text_margin"
-            android:layout_marginStart="@dimen/text_margin"
+            android:layout_marginStart="32dp"
             android:layout_marginTop="16dp"
-            android:textColor="@color/colorPrimaryText" />
+            android:textColor="@color/colorSecondaryText" />
     </LinearLayout>
 
 </android.support.v4.widget.NestedScrollView>
