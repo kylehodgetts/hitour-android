@@ -126,54 +126,65 @@ public class DetailFragment extends Fragment {
             mImageView.setImageDrawable(getActivity().getResources().getDrawable(imageId));
 
             // TODO: retrieve video links from DB when available
-            if(mCursor.getString(PrototypeData.VIDEO) != null) {
-                Uri uri = Uri.parse("android.resource://" + getActivity().getPackageName() + "/" +
-                        mCursor.getString(PrototypeData.VIDEO));
-                videoView = new VideoView(getActivity());
-                videoView.setId(Integer.parseInt("1"));
-                final LinearLayout linearLayout = (LinearLayout) mRootView.findViewById(R.id.detail_body);
-                videoView.setVideoURI(uri);
-                videoView.requestFocus();
-                videoView.setLayoutParams(new LinearLayout.LayoutParams(1000, 1000));
-                videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                    @Override
-                    public void onPrepared(MediaPlayer mp) {
-                        videoView.setLayoutParams(new LinearLayout.LayoutParams(linearLayout.getWidth(),
-                                LinearLayout.LayoutParams.WRAP_CONTENT));
-                        if (savedInstanceState != null && savedInstanceState.containsKey("currentPosition")) {
-                            currentPosition = savedInstanceState.getInt("currentPosition");
-                        }
-                    }
-                });
-                videoView.setOnTouchListener(new View.OnTouchListener() {
-                    @Override
-                    public boolean onTouch(View v, MotionEvent event) {
-                        if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                            if (videoView.isPlaying()) {
-                                videoView.pause();
-                                currentPosition = videoView.getCurrentPosition();
-                            } else {
-                                videoView.seekTo(currentPosition);
-                                videoView.start();
-                            }
-                            return true;
-                        }
-                        return false;
-                    }
-                });
-                videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                    @Override
-                    public void onCompletion(MediaPlayer mp) {
-                        currentPosition = 0;
-                    }
-                });
-
-                linearLayout.addView(videoView);
-            }
+            addVideos(savedInstanceState);
 
         }
 
         return mRootView;
+    }
+
+    /**
+     * Adds any videos to the {@link DetailFragment} to be shown for the particular point. Including
+     * it's listeners to resume from where it left off, to set the position of the video back to the
+     * start when it has finished and to play and pause when touched.
+     *
+     * @param savedInstanceState {@link Bundle} that contains any previous position to be restored such as rotation.
+     */
+    private void addVideos(final Bundle savedInstanceState) {
+        if(mCursor.getString(PrototypeData.VIDEO) != null) {
+            Uri uri = Uri.parse("android.resource://" + getActivity().getPackageName() + "/" +
+                    mCursor.getString(PrototypeData.VIDEO));
+            videoView = new VideoView(getActivity());
+            videoView.setId(Integer.parseInt("1"));
+            final LinearLayout linearLayout = (LinearLayout) mRootView.findViewById(R.id.detail_body);
+            videoView.setVideoURI(uri);
+            videoView.requestFocus();
+            videoView.setLayoutParams(new LinearLayout.LayoutParams(1000, 1000));
+            videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                @Override
+                public void onPrepared(MediaPlayer mp) {
+                    videoView.setLayoutParams(new LinearLayout.LayoutParams(linearLayout.getWidth(),
+                            LinearLayout.LayoutParams.WRAP_CONTENT));
+                    if (savedInstanceState != null && savedInstanceState.containsKey("currentPosition")) {
+                        currentPosition = savedInstanceState.getInt("currentPosition");
+                    }
+                }
+            });
+            videoView.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                        if (videoView.isPlaying()) {
+                            videoView.pause();
+                            currentPosition = videoView.getCurrentPosition();
+                        } else {
+                            videoView.seekTo(currentPosition);
+                            videoView.start();
+                        }
+                        return true;
+                    }
+                    return false;
+                }
+            });
+            videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mp) {
+                    currentPosition = 0;
+                }
+            });
+
+            linearLayout.addView(videoView);
+        }
     }
 
     /**
