@@ -46,21 +46,21 @@
             android:textSize="48sp"
             android:id="@+id/textView" />
 
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/fab"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
-            android:src="@drawable/ic_queue_white_24dp"
-            android:layout_below="@+id/spaceLogo"
-            android:layout_alignLeft="@+id/spaceLogo"
-            android:layout_alignStart="@+id/spaceLogo" />
+
+        <android.support.v4.widget.Space
+            android:id="@+id/space_fab"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_marginLeft="@dimen/abc_list_item_padding_horizontal_material"
+            android:layout_marginStart="@dimen/abc_list_item_padding_horizontal_material"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@id/toolbar"/>
 
     </RelativeLayout>
 
     <android.support.v4.widget.Space
         android:id="@+id/layout_center"
-        android:layout_width="0dp"
+        android:layout_width="164dp"
         android:layout_height="0dp"
         android:layout_centerInParent="true" />
 
@@ -93,13 +93,14 @@
         android:id="@+id/rv_feed"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_alignEnd="@id/layout_center"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:paddingLeft="12dp"
         android:paddingRight="12dp"
-        android:layout_alignRight="@id/layout_center"
-        android:layout_below="@id/appbar" />
+        android:paddingTop="8dp"
+        android:layout_below="@id/appbar"
+        android:layout_toLeftOf="@+id/layout_center"
+        android:layout_toStartOf="@+id/layout_center" />
 
     <android.support.v7.widget.CardView
         android:id="@+id/point_detail_container"
@@ -115,5 +116,18 @@
         app:cardElevation="6dp"
         app:cardPreventCornerOverlap="false"
         />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:src="@drawable/ic_queue_white_24dp"
+        android:layout_alignTop="@+id/pointDetailSpace"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginLeft="22dp"
+        android:layout_marginStart="22dp"
+        android:layout_marginTop="35dp" />
 
 </RelativeLayout>
