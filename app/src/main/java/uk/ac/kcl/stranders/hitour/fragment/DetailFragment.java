@@ -121,11 +121,13 @@ public class DetailFragment extends Fragment {
         // Inflate the layout for this fragment
         mRootView = inflater.inflate(R.layout.fragment_detail, container, false);
 
-        android.support.v7.widget.Toolbar toolbar = (android.support.v7.widget.Toolbar)
-                mRootView.findViewById(R.id.toolbar);
-        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
-        ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayShowTitleEnabled(false);
+        if(!getResources().getBoolean(R.bool.isTablet)) {
+            android.support.v7.widget.Toolbar toolbar = (android.support.v7.widget.Toolbar)
+                    mRootView.findViewById(R.id.toolbar);
+            ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
+            ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayShowTitleEnabled(false);
+        }
 
         mImageView = (ImageView) mRootView.findViewById(R.id.photo);
 
@@ -142,7 +144,8 @@ public class DetailFragment extends Fragment {
             mImageView.setImageDrawable(ContextCompat.getDrawable(getActivity(), imageId));
 
             // TODO: retrieve video links from DB when available
-            addVideos(savedInstanceState);
+            // commented out for testing purposes
+            // addVideos(savedInstanceState);
 
         }
 
@@ -225,7 +228,7 @@ public class DetailFragment extends Fragment {
     public void onViewStateRestored(Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
         if(savedInstanceState != null && savedInstanceState.containsKey(CURRENT_POSITION)){
-            currentPosition = savedInstanceState.getInt(CURRENT_POSITION);
+           // currentPosition = savedInstanceState.getInt(CURRENT_POSITION);
         }
     }
 
@@ -235,7 +238,7 @@ public class DetailFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        currentPosition = videoView.getCurrentPosition();
+        // currentPosition = videoView.getCurrentPosition();
     }
 
 }
