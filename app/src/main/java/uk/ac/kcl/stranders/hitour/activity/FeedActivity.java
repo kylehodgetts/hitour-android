@@ -53,6 +53,7 @@ public class FeedActivity extends AppCompatActivity {
         } else {
             if(getResources().getBoolean(R.bool.isTablet)) {
                 mLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+                getSupportActionBar().setDisplayShowTitleEnabled(false);
             } else {
                 mLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
             }
