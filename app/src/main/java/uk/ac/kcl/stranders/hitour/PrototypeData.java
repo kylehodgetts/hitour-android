@@ -3,6 +3,7 @@ package uk.ac.kcl.stranders.hitour;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.graphics.Matrix;
+import android.util.Log;
 
 public class PrototypeData {
     public static final int _ID = 0;
@@ -10,6 +11,16 @@ public class PrototypeData {
     public static final int DESCRIPTION = 2;
     public static final int IMAGE = 3;
     public static final int VIDEO = 4;
+
+    public static final int DATA_TITLE = 1;
+    public static final int DATA_DESCRIPTION = 2;
+    public static final int URL = 3;
+
+    public static final int POINT_ID = 0;
+    public static final int DATA_ID = 1;
+    public static final int RANK = 2;
+
+
 
     public static Cursor getCursor() {
         String[] columns = new String[] { "_id", "title", "description", "image", "video"};
@@ -37,8 +48,8 @@ public class PrototypeData {
     public static Cursor getContentCursor(int id) {
         String[] dataTableColumns  = new String[] {"data_id", "title", "description", "url"};
         MatrixCursor dataTable = new MatrixCursor(dataTableColumns);
-        dataTable.addRow(new Object[] {"D001", "Data Item 1", "Image 1 Description", R.drawable.fluoroscopy});
-        dataTable.addRow(new Object[] {"D002", "Data Item 2", "Video 2 Description", R.raw.ultrasound });
+        dataTable.addRow(new Object[] {"D001", "Data Item 1", "Image 1 Description", R.drawable.ctscan});
+        dataTable.addRow(new Object[] {"D002", "Data Item 2", "Video 2 Description", R.raw.ctscan });
 
         String[] pointDataColumns = new String[] {"point_id", "data_id", "rank"};
         MatrixCursor pointDataTable = new MatrixCursor(pointDataColumns);
@@ -55,14 +66,17 @@ public class PrototypeData {
                     for(int k = 0; k < dataTable.getCount(); ++k) {
                         if(dataTable.getString(0).equals(pointDataTable.getString(1))) {
                             toReturn.addRow(new Object[] {dataTable.getString(0), dataTable.getString(1), dataTable.getString(2), dataTable.getString(3)});
+                            Log.d("Row added", toReturn.getCount()+"");
                             break;
                         }
                         dataTable.moveToNext();
                     }
+                    break;
                 }
             }
             pointDataTable.moveToNext();
         }
+
         return toReturn;
     }
 

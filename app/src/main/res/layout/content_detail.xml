@@ -12,7 +12,8 @@
         android:id="@+id/detail_body"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:descendantFocusability="blocksDescendants">
 
         <TextView
             android:id="@+id/text_title"

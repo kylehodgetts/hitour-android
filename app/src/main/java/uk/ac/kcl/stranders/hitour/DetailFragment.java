@@ -53,15 +53,14 @@ public class DetailFragment extends Fragment {
      */
     private ImageView mImageView;
 
-    /**
-     * Stores the video to be shown for the point
-     */
-    private VideoView videoView;
+    private VideoView currentVideo;
 
     /**
      * Stores the cursor to navigate the around the prototype data
      */
     private Cursor mCursor;
+
+    private Cursor contentCursor;
 
     /**
      * Stores the current position of the video
@@ -104,7 +103,11 @@ public class DetailFragment extends Fragment {
         if (getArguments().containsKey(ARG_ITEM_ID)) {
             mItemId = getArguments().getInt(ARG_ITEM_ID);
             mCursor.moveToPosition(mItemId);
+
+            contentCursor = PrototypeData.getContentCursor(mItemId);
+            contentCursor.moveToFirst();
         }
+
     }
 
     /**
@@ -127,7 +130,7 @@ public class DetailFragment extends Fragment {
         TextView titleView = (TextView) mRootView.findViewById(R.id.text_title);
         TextView bodyView = (TextView) mRootView.findViewById(R.id.text_body);
 
-        if (mCursor != null) {
+        if (mCursor != null && contentCursor != null) {
             mRootView.setAlpha(0);
             mRootView.setVisibility(View.VISIBLE);
             mRootView.animate().alpha(1);
@@ -136,14 +139,39 @@ public class DetailFragment extends Fragment {
             int imageId = mCursor.getInt(PrototypeData.IMAGE);
             mImageView.setImageDrawable(getActivity().getResources().getDrawable(imageId));
 
-
-
-            // TODO: retrieve video links from DB when available
-            addVideos(savedInstanceState);
-
+            LinearLayout linearLayout = (LinearLayout) mRootView.findViewById(R.id.detail_body);
+            addContent(inflater, linearLayout, savedInstanceState);
         }
-
         return mRootView;
+    }
+
+    private void addContent(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        // TODO: retrieve links from DB when available
+
+        for(int i = 0; i < contentCursor.getCount(); ++i) {
+            LinearLayout layoutDetail = null;
+            if(contentCursor.getString(PrototypeData.DATA_DESCRIPTION).contains("Image")) {
+                layoutDetail = (LinearLayout) inflater.inflate(R.layout.image_detail, container, false);
+                ImageView imageView = (ImageView) layoutDetail.findViewById(R.id.image);
+                imageView.setImageResource(contentCursor.getInt(PrototypeData.URL));
+            }
+            else if(contentCursor.getString(PrototypeData.DATA_DESCRIPTION).contains("Video")) {
+                layoutDetail = (LinearLayout) inflater.inflate(R.layout.video_detail, container, false);
+                addVideo(savedInstanceState, layoutDetail, i);
+            }
+            else {
+                layoutDetail = (LinearLayout) inflater.inflate(R.layout.text_detail, container, false);
+                TextView tvText = (TextView) layoutDetail.findViewById(R.id.text);
+                tvText.setText(contentCursor.getString(PrototypeData.URL));
+            }
+            TextView tvTitle = (TextView) layoutDetail.findViewById(R.id.title);
+            tvTitle.setText(contentCursor.getString(PrototypeData.DATA_TITLE));
+            TextView tvDescription = (TextView) layoutDetail.findViewById(R.id.description);
+            tvDescription.setText(contentCursor.getString(PrototypeData.DATA_DESCRIPTION));
+
+            container.addView(layoutDetail);
+            contentCursor.moveToNext();
+        }
     }
 
     /**
@@ -153,16 +181,15 @@ public class DetailFragment extends Fragment {
      *
      * @param savedInstanceState {@link Bundle} that contains any previous position to be restored such as rotation.
      */
-    private void addVideos(final Bundle savedInstanceState) {
-        if(mCursor.getString(PrototypeData.VIDEO) != null) {
+    private void addVideo(final Bundle savedInstanceState, final LinearLayout linearLayout, int rank) {
+        if(contentCursor.getString(PrototypeData.URL) != null) {
             Uri uri = Uri.parse("android.resource://" + getActivity().getPackageName() + "/" +
-                    mCursor.getString(PrototypeData.VIDEO));
-            videoView = new VideoView(getActivity());
-            videoView.setId(Integer.parseInt("1"));
-            final LinearLayout linearLayout = (LinearLayout) mRootView.findViewById(R.id.detail_body);
+                    contentCursor.getString(PrototypeData.URL));
+            final VideoView videoView = (VideoView) linearLayout.findViewById(R.id.video);
+            videoView.setId(Integer.parseInt(mItemId + rank + ""));
             videoView.setVideoURI(uri);
-            videoView.requestFocus();
             videoView.setLayoutParams(new LinearLayout.LayoutParams(1000, 1000));
+            videoView.setBackgroundResource(android.R.color.transparent);
             videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 @Override
                 public void onPrepared(MediaPlayer mp) {
@@ -183,6 +210,7 @@ public class DetailFragment extends Fragment {
                         } else {
                             videoView.seekTo(currentPosition);
                             videoView.start();
+                            currentVideo = videoView;
                         }
                         return true;
                     }
@@ -196,7 +224,6 @@ public class DetailFragment extends Fragment {
                 }
             });
 
-            linearLayout.addView(videoView);
         }
     }
 
@@ -232,7 +259,9 @@ public class DetailFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        currentPosition = videoView.getCurrentPosition();
+        if(currentVideo != null) {
+            currentPosition = currentVideo.getCurrentPosition();
+        }
     }
 
 }
