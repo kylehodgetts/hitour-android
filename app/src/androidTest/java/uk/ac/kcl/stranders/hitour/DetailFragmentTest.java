@@ -1,12 +1,17 @@
 package uk.ac.kcl.stranders.hitour;
 
 import android.content.pm.ActivityInfo;
+import android.database.Cursor;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.TouchUtils;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.VideoView;
+
+import org.w3c.dom.Text;
 
 /**
  * Front end instrumentation test for the {@link DetailFragment} ensuring that its content is correctly
@@ -39,9 +44,16 @@ public class DetailFragmentTest extends ActivityInstrumentationTestCase2<DetailA
         TextView bodyView = (TextView) getActivity().findViewById(R.id.text_body);
         ImageView imageView = (ImageView) getActivity().findViewById(R.id.photo);
 
+        VideoView videoView = (VideoView) getActivity().findViewById(Integer.parseInt(0+""+0));
+        TextView videoTitle = (TextView) getActivity().findViewById(R.id.title);
+        TextView videoDescription = (TextView) getActivity().findViewById(R.id.description);
+
         assertNotNull(titleView);
         assertNotNull(bodyView);
         assertNotNull(imageView);
+        assertNotNull(videoView);
+        assertNotNull(videoTitle);
+        assertNotNull(videoDescription);
     }
 
     /**
@@ -49,7 +61,7 @@ public class DetailFragmentTest extends ActivityInstrumentationTestCase2<DetailA
      * {@link DetailFragment} and the height wrapped to its content.
      */
     public void testVideoSize() {
-        VideoView videoView = (VideoView) getActivity().findViewById(Integer.parseInt("1"));
+        VideoView videoView = (VideoView) getActivity().findViewById(Integer.parseInt(0+""+0));
         LinearLayout linearLayout = (LinearLayout) getActivity().findViewById(R.id.detail_body);
 
         getInstrumentation().waitForIdleSync();
@@ -62,7 +74,7 @@ public class DetailFragmentTest extends ActivityInstrumentationTestCase2<DetailA
      * start to play.
      */
     public void testVideoPlayPause() {
-        VideoView videoView = (VideoView) getActivity().findViewById(Integer.parseInt("1"));
+        VideoView videoView = (VideoView) getActivity().findViewById(Integer.parseInt(0+""+0));
         getInstrumentation().waitForIdleSync();
 
         TouchUtils.clickView(this, videoView);
@@ -79,7 +91,7 @@ public class DetailFragmentTest extends ActivityInstrumentationTestCase2<DetailA
      * not returning back to the beginning.
      */
     public void testVideoResume() {
-        VideoView videoView = (VideoView) getActivity().findViewById(Integer.parseInt("1"));
+        VideoView videoView = (VideoView) getActivity().findViewById(Integer.parseInt(0+""+0));
         getInstrumentation().waitForIdleSync();
 
         TouchUtils.clickView(this, videoView);
@@ -97,7 +109,7 @@ public class DetailFragmentTest extends ActivityInstrumentationTestCase2<DetailA
      * it left off before the rotation occurred rather than start again from the beginning.
      */
     public void testVideoResumeOnRotation() {
-        VideoView videoView = (VideoView) getActivity().findViewById(Integer.parseInt("1"));
+        VideoView videoView = (VideoView) getActivity().findViewById(Integer.parseInt(0+""+0));
         TouchUtils.clickView(this, videoView);
         try {
             Thread.sleep(300);
@@ -109,6 +121,36 @@ public class DetailFragmentTest extends ActivityInstrumentationTestCase2<DetailA
         getInstrumentation().waitForIdleSync();
         getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         assertTrue(videoView.getCurrentPosition() > 0);
+    }
+
+    public void testDynamicContent() {
+
+        Cursor contentCursor = PrototypeData.getContentCursor(0);
+        contentCursor.moveToFirst();
+
+        for(int i = 0; i < contentCursor.getCount(); ++i) {
+
+            LinearLayout itemLayout = (LinearLayout) getActivity().findViewById(i + 100);
+            getInstrumentation().waitForIdleSync();
+            TextView videoTitle = (TextView) itemLayout.findViewById(R.id.title);
+            TextView videoDescription = (TextView) itemLayout.findViewById(R.id.description);
+
+            if(i == 0) {
+                getInstrumentation().waitForIdleSync();
+                assertNotNull(itemLayout.findViewById(Integer.parseInt(0+""+0)));
+            }
+            else {
+                assertNotNull(itemLayout.findViewById(R.id.image));
+            }
+
+            assertNotNull(videoTitle);
+            assertNotNull(videoDescription);
+
+            assertEquals(videoTitle.getText(), contentCursor.getString(PrototypeData.DATA_TITLE));
+            assertEquals(videoDescription.getText().toString(), contentCursor.getString(PrototypeData.DATA_DESCRIPTION));
+            contentCursor.moveToNext();
+        }
+
     }
 
 }

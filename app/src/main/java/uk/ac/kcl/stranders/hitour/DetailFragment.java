@@ -162,6 +162,7 @@ public class DetailFragment extends Fragment {
             TextView tvDescription = (TextView) layoutDetail.findViewById(R.id.description);
             tvDescription.setText(contentCursor.getString(PrototypeData.DATA_DESCRIPTION));
 
+            layoutDetail.setId(i + 100);
             container.addView(layoutDetail);
             contentCursor.moveToNext();
         }
