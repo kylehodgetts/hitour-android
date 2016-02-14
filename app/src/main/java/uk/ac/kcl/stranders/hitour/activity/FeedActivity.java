@@ -4,6 +4,7 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -50,16 +51,16 @@ public class FeedActivity extends AppCompatActivity {
         // Display list items vertically in a portrait mode and horizontally in landscape orientation.
         if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
             mLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+            if(getResources().getBoolean(R.bool.isTablet)) {
+                mLayoutManager = new GridLayoutManager(this, 2);
+            }
         } else {
             if(getResources().getBoolean(R.bool.isTablet)) {
                 mLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+                getSupportActionBar().setDisplayShowTitleEnabled(false);
             } else {
                 mLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
             }
-        }
-
-        if(getResources().getBoolean(R.bool.isTablet)) {
-            getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
 
         mFeed.setLayoutManager(mLayoutManager);

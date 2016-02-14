@@ -2,6 +2,7 @@ package uk.ac.kcl.stranders.hitour;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
@@ -57,7 +58,8 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder>  {
         v.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(!mContext.getResources().getBoolean(R.bool.isTablet)) {
+                if(!(mContext.getResources().getBoolean(R.bool.isTablet) &&
+                        mContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)) {
                     Intent intent = new Intent(mContext, DetailActivity.class)
                             .putExtra(DetailActivity.EXTRA_BUNDLE, viewHolder.getAdapterPosition());
                     mContext.startActivity(intent);
