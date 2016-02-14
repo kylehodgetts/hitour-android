@@ -12,6 +12,9 @@ import android.view.View;
 
 import com.google.zxing.integration.android.IntentIntegrator;
 
+import uk.ac.kcl.stranders.hitour.database.DBWrap;
+import uk.ac.kcl.stranders.hitour.database.schema.HiSchema;
+
 import uk.ac.kcl.stranders.hitour.FeedAdapter;
 import uk.ac.kcl.stranders.hitour.PrototypeData;
 import uk.ac.kcl.stranders.hitour.R;
@@ -32,6 +35,8 @@ public class FeedActivity extends AppCompatActivity {
      */
     private RecyclerView.LayoutManager mLayoutManager;
 
+    public static DBWrap database;
+
     /**
      * Initializes the UI and sets an adapter for the {@link FeedActivity#mFeed}
      * @param savedInstanceState {@link Bundle} with all the saved state variables.
@@ -39,6 +44,7 @@ public class FeedActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        database = new DBWrap(this, new HiSchema(1));
         setContentView(R.layout.activity_feed);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -57,6 +63,7 @@ public class FeedActivity extends AppCompatActivity {
         mFeed.setLayoutManager(mLayoutManager);
         FeedAdapter adapter = new FeedAdapter(PrototypeData.getCursor(), this);
         mFeed.setAdapter(adapter);
+
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
