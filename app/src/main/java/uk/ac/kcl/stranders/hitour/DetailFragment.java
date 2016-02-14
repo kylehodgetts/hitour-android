@@ -139,8 +139,16 @@ public class DetailFragment extends Fragment {
         return mRootView;
     }
 
+    /**
+     * Method that retrieves the dynamic content for the requested point and dynamically inflates
+     * these views onto the fragment container in the order they are received in the content cursor.
+     *
+     * @param inflater {@link LayoutInflater} to inflate the content views
+     * @param container {@link ViewGroup} to add all the inflated views for each item to
+     * @param savedInstanceState {@link Bundle} to save the current state
+     */
     private void addContent(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-
+        //TODO: Needs to change from PrototypeData to DB when available.
         for(int i = 0; i < contentCursor.getCount(); ++i) {
             LinearLayout layoutDetail = null;
             if(contentCursor.getString(PrototypeData.DATA_DESCRIPTION).contains("Image")) {

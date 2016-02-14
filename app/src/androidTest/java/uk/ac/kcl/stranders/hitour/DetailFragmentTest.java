@@ -123,6 +123,12 @@ public class DetailFragmentTest extends ActivityInstrumentationTestCase2<DetailA
         assertTrue(videoView.getCurrentPosition() > 0);
     }
 
+    /**
+     * Tests the dynamic content on the loaded Detail Fragment matches the data that is returned by
+     * the cursor containing the data for that point.
+     *
+     * This also checks the correct {@link View}'s are present for the correct item.
+     */
     public void testDynamicContent() {
 
         Cursor contentCursor = PrototypeData.getContentCursor(0);
