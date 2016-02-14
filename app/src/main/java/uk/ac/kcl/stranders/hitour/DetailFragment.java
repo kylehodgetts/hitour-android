@@ -15,10 +15,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.VideoView;
 
-import java.util.ArrayList;
-
-import uk.ac.kcl.stranders.hitour.models.Data;
-
 /**
  * Fragment that shows the content for a particular point in the tour which could consist of
  * text, images, videos or any number of combinations between them.
@@ -66,8 +62,6 @@ public class DetailFragment extends Fragment {
      * Stores the current position of the video
      */
     private int currentPosition;
-
-    private ArrayList<Data> items;
 
     /**
      * Default empty required public constructor
