@@ -89,7 +89,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder>  {
     public void onBindViewHolder(ViewHolder holder, int position) {
         mCursor.moveToPosition(position);
         holder.tvTitle.setText(mCursor.getString(PrototypeData.TITLE));
-        holder.tvDescription.setText(mCursor.getString(PrototypeData.TEXT));
+        holder.tvDescription.setText(mCursor.getString(PrototypeData.DESCRIPTION));
         int imageId = mCursor.getInt(PrototypeData.IMAGE);
         holder.ivThumbnail.setImageDrawable(ContextCompat.getDrawable(mContext, imageId));
     }
