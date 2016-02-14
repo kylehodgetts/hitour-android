@@ -5,13 +5,13 @@ import android.database.Cursor;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.TouchUtils;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.VideoView;
 
-import org.w3c.dom.Text;
+import uk.ac.kcl.stranders.hitour.activity.DetailActivity;
+import uk.ac.kcl.stranders.hitour.fragment.DetailFragment;
 
 /**
  * Front end instrumentation test for the {@link DetailFragment} ensuring that its content is correctly

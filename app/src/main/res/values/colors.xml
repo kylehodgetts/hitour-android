@@ -11,4 +11,6 @@
     <color name="colorDivider">#B6B6B6</color>
 
     <color name="colorIcons">#FFFFFF</color>
+
+    <color name="transparentHeader">#d40288D1</color>
 </resources>

@@ -1,36 +1,46 @@
-package uk.ac.kcl.stranders.hitour;
+package uk.ac.kcl.stranders.hitour.activity;
 
-import android.content.Intent;
-import android.graphics.drawable.Drawable;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
-import android.view.ActionProvider;
-import android.view.ContextMenu;
 import android.view.Menu;
-import android.view.MenuItem;
-import android.view.SubMenu;
 import android.view.View;
-import android.widget.EditText;
-import android.widget.Toast;
 
 import com.google.zxing.integration.android.IntentIntegrator;
-import com.google.zxing.integration.android.IntentResult;
 
 import uk.ac.kcl.stranders.hitour.database.DBWrap;
 import uk.ac.kcl.stranders.hitour.database.schema.HiSchema;
 
+import uk.ac.kcl.stranders.hitour.FeedAdapter;
+import uk.ac.kcl.stranders.hitour.PrototypeData;
+import uk.ac.kcl.stranders.hitour.R;
+
+/**
+ * The main activity that displays all available points for a given tour.
+ */
 public class FeedActivity extends AppCompatActivity {
 
+    /**
+     * The list of all available points.
+     */
     private RecyclerView mFeed;
+
+    /**
+     * {@link android.support.v7.widget.RecyclerView.LayoutManager used to set parameters
+     * for the {@link FeedActivity#mFeed}.
+     */
     private RecyclerView.LayoutManager mLayoutManager;
 
     public static DBWrap database;
 
+    /**
+     * Initializes the UI and sets an adapter for the {@link FeedActivity#mFeed}
+     * @param savedInstanceState {@link Bundle} with all the saved state variables.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,7 +52,13 @@ public class FeedActivity extends AppCompatActivity {
         mFeed = (RecyclerView) findViewById(R.id.rv_feed);
 
         mFeed.setHasFixedSize(true);
-        mLayoutManager = new LinearLayoutManager(this);
+
+        // Display list items vertically in a portrait mode and horizontally in landscape orientation.
+        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            mLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        } else {
+            mLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+        }
 
         mFeed.setLayoutManager(mLayoutManager);
         FeedAdapter adapter = new FeedAdapter(PrototypeData.getCursor(), this);
@@ -58,6 +74,9 @@ public class FeedActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Initializes an {@link IntentIntegrator} and launches the scanning activity.
+     */
     private void scanCode() {
         IntentIntegrator integrator = new IntentIntegrator(this);
         integrator.setCaptureActivity(ScanningActivity.class);
@@ -73,15 +92,4 @@ public class FeedActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.menu_feed, menu);
         return true;
     }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        return super.onOptionsItemSelected(item);
-    }
-
 }

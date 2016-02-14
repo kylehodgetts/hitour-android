@@ -1,4 +1,4 @@
-package uk.ac.kcl.stranders.hitour;
+package uk.ac.kcl.stranders.hitour.fragment;
 
 
 import android.database.Cursor;
@@ -6,6 +6,8 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -14,6 +16,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.VideoView;
+
+import uk.ac.kcl.stranders.hitour.PrototypeData;
+import uk.ac.kcl.stranders.hitour.R;
 
 /**
  * Fragment that shows the content for a particular point in the tour which could consist of
@@ -86,7 +91,7 @@ public class DetailFragment extends Fragment {
 
     /**
      * Set's up the {@link Fragment}'s data ready for it's views to be created
-     * @param savedInstanceState
+     * @param savedInstanceState {@link Bundle} with all the saved state variables
      */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -119,6 +124,12 @@ public class DetailFragment extends Fragment {
         // Inflate the layout for this fragment
         mRootView = inflater.inflate(R.layout.fragment_detail, container, false);
 
+        android.support.v7.widget.Toolbar toolbar = (android.support.v7.widget.Toolbar)
+                mRootView.findViewById(R.id.toolbar);
+        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayShowTitleEnabled(false);
+
         mImageView = (ImageView) mRootView.findViewById(R.id.photo);
 
         TextView titleView = (TextView) mRootView.findViewById(R.id.text_title);
@@ -131,7 +142,7 @@ public class DetailFragment extends Fragment {
             titleView.setText(mCursor.getString(PrototypeData.TITLE));
             bodyView.setText(mCursor.getString(PrototypeData.DESCRIPTION));
             int imageId = mCursor.getInt(PrototypeData.IMAGE);
-            mImageView.setImageDrawable(getActivity().getResources().getDrawable(imageId));
+            mImageView.setImageDrawable(ContextCompat.getDrawable(getActivity(), imageId));
 
             LinearLayout linearLayout = (LinearLayout) mRootView.findViewById(R.id.detail_body);
             addContent(inflater, linearLayout, savedInstanceState);
