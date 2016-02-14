@@ -146,7 +146,6 @@ public class DetailFragment extends Fragment {
     }
 
     private void addContent(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        // TODO: retrieve links from DB when available
 
         for(int i = 0; i < contentCursor.getCount(); ++i) {
             LinearLayout layoutDetail = null;
@@ -183,6 +182,8 @@ public class DetailFragment extends Fragment {
      */
     private void addVideo(final Bundle savedInstanceState, final LinearLayout linearLayout, int rank) {
         if(contentCursor.getString(PrototypeData.URL) != null) {
+            // TODO: retrieve links from DB and parse when available
+
             Uri uri = Uri.parse("android.resource://" + getActivity().getPackageName() + "/" +
                     contentCursor.getString(PrototypeData.URL));
             final VideoView videoView = (VideoView) linearLayout.findViewById(R.id.video);
@@ -223,7 +224,6 @@ public class DetailFragment extends Fragment {
                     currentPosition = 0;
                 }
             });
-
         }
     }
 
