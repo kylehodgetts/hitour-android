@@ -1,7 +1,6 @@
 package uk.ac.kcl.stranders.hitour.fragment;
 
 
-import android.content.res.Configuration;
 import android.database.Cursor;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -125,8 +124,7 @@ public class DetailFragment extends Fragment {
         // Inflate the layout for this fragment
         mRootView = inflater.inflate(R.layout.fragment_detail, container, false);
 
-        if(!(getResources().getBoolean(R.bool.isTablet) &&
-                getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)) {
+        if(!(getResources().getBoolean(R.bool.isTablet))) {
             android.support.v7.widget.Toolbar toolbar = (android.support.v7.widget.Toolbar)
                     mRootView.findViewById(R.id.toolbar);
             ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
@@ -165,7 +163,7 @@ public class DetailFragment extends Fragment {
     private void addContent(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         //TODO: Needs to change from PrototypeData to DB when available.
         for(int i = 0; i < contentCursor.getCount(); ++i) {
-            LinearLayout layoutDetail = null;
+            LinearLayout layoutDetail;
             if(contentCursor.getString(PrototypeData.DATA_DESCRIPTION).contains("Image")) {
                 layoutDetail = (LinearLayout) inflater.inflate(R.layout.image_detail, container, false);
                 ImageView imageView = (ImageView) layoutDetail.findViewById(R.id.image);

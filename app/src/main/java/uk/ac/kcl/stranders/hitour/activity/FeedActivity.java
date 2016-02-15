@@ -4,7 +4,6 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -13,12 +12,11 @@ import android.view.View;
 
 import com.google.zxing.integration.android.IntentIntegrator;
 
-import uk.ac.kcl.stranders.hitour.database.DBWrap;
-import uk.ac.kcl.stranders.hitour.database.schema.HiSchema;
-
 import uk.ac.kcl.stranders.hitour.FeedAdapter;
 import uk.ac.kcl.stranders.hitour.PrototypeData;
 import uk.ac.kcl.stranders.hitour.R;
+import uk.ac.kcl.stranders.hitour.database.DBWrap;
+import uk.ac.kcl.stranders.hitour.database.schema.HiSchema;
 
 /**
  * The main activity that displays all available points for a given tour.
@@ -56,9 +54,11 @@ public class FeedActivity extends AppCompatActivity {
 
         // Display list items vertically in a portrait mode and horizontally in landscape orientation.
         if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-            mLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
             if(getResources().getBoolean(R.bool.isTablet)) {
-                mLayoutManager = new GridLayoutManager(this, 2);
+                mLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+                getSupportActionBar().setDisplayShowTitleEnabled(false);
+            } else {
+                mLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
             }
         } else {
             if(getResources().getBoolean(R.bool.isTablet)) {
