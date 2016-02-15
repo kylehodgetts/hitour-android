@@ -1,13 +1,17 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <group android:checkableBehavior="single">
         <item
+            android:icon="@drawable/ic_action_local_hospital"
             android:tint="#757575"
-            android:title="One" />
+            android:title="Tour One"
+            android:checked="true"/>
         <item
+            android:icon="@drawable/ic_action_local_hospital"
             android:tint="#757575"
-            android:title="Two" />
+            android:title="Tour Two" />
         <item
+            android:icon="@drawable/ic_action_local_hospital"
             android:tint="#757575"
-            android:title="Three" />
+            android:title="Tour Three" />
     </group>
 </menu>

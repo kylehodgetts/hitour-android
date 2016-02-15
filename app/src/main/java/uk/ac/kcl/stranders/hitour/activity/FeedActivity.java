@@ -76,7 +76,7 @@ public class FeedActivity extends AppCompatActivity {
 
         ActionBar supportActionBar = getSupportActionBar();
         if(supportActionBar != null) {
-            supportActionBar.setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp);
+            supportActionBar.setHomeAsUpIndicator(R.drawable.ic_action_menu);
             supportActionBar.setDisplayHomeAsUpEnabled(true);
         }
 
