@@ -1,0 +1,13 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <item
+            android:tint="#757575"
+            android:title="One" />
+        <item
+            android:tint="#757575"
+            android:title="Two" />
+        <item
+            android:tint="#757575"
+            android:title="Three" />
+    </group>
+</menu>
