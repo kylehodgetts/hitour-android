@@ -39,6 +39,11 @@ public class DetailFragment extends Fragment {
     public static final String CURRENT_POSITION = "CURRENT_POSITION";
 
     /**
+     * Static {@link DetailFragment} tag used to identify a fragment.
+     */
+    public static final String FRAGMENT_TAG = "uk.ac.kcl.stranders.hitour.DetailFragment.TAG";
+
+    /**
      * Stores the integer ID of the current item selected to view
      */
     private int mItemId;

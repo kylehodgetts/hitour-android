@@ -71,7 +71,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder>  {
 
                     ((AppCompatActivity) mContext).getSupportFragmentManager()
                             .beginTransaction()
-                            .replace(R.id.point_detail_container, fragment)
+                            .replace(R.id.point_detail_container, fragment, DetailFragment.FRAGMENT_TAG)
                             .commit();
                 }
             }
