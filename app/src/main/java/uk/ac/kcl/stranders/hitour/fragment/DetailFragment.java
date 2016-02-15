@@ -25,7 +25,6 @@ import uk.ac.kcl.stranders.hitour.R;
  * text, images, videos or any number of combinations between them.
  *
  * That pulls the required data from local storage and displays in an ordered list using this fragment.
- *
  */
 public class DetailFragment extends Fragment {
 

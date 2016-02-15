@@ -57,6 +57,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder>  {
         v.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                // Start a new activity on a phone or replace a detail fragment on tablets.
                 if(!(mContext.getResources().getBoolean(R.bool.isTablet))) {
                     Intent intent = new Intent(mContext, DetailActivity.class)
                             .putExtra(DetailActivity.EXTRA_BUNDLE, viewHolder.getAdapterPosition());

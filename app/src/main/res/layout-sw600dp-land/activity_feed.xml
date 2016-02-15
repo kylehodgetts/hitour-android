@@ -8,7 +8,6 @@
 
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -69,19 +68,6 @@
             android:layout_width="164dp"
             android:layout_height="0dp"
             android:layout_centerInParent="true" />
-
-
-        <!--<fragment-->
-        <!--android:id="@+id/fragment_feed"-->
-        <!--android:layout_width="0dp"-->
-        <!--android:layout_height="match_parent"-->
-        <!--android:layout_alignEnd="@id/layout_center"-->
-        <!--android:layout_alignParentLeft="true"-->
-        <!--android:layout_alignParentStart="true"-->
-        <!--android:layout_alignRight="@id/layout_center"-->
-        <!--android:layout_below="@id/appbar"-->
-        <!--tools:layout="@android:layout/list_content" />-->
-        <!--android:name=""-->
 
         <android.support.v4.widget.Space
             android:id="@+id/pointDetailSpace"

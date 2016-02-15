@@ -1,10 +1,10 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <group android:checkableBehavior="single">
         <item
+            android:checked="true"
             android:icon="@drawable/ic_action_local_hospital"
             android:tint="#757575"
-            android:title="Tour One"
-            android:checked="true"/>
+            android:title="Tour One" />
         <item
             android:icon="@drawable/ic_action_local_hospital"
             android:tint="#757575"

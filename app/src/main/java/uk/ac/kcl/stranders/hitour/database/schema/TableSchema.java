@@ -123,7 +123,7 @@ public class TableSchema {
      * @param remlast The number of characters to be removed at the end
      * @return
      */
-    private String primaryList(String spacing,int remlast){
+    private String primaryList(String spacing, int remlast) {
         String res = "";
         for (String primaryKey : primaryKeys) {
             res += primaryKey+spacing;

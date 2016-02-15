@@ -39,8 +39,15 @@ public class FeedActivity extends AppCompatActivity {
      */
     private RecyclerView.LayoutManager mLayoutManager;
 
+    /**
+     * Stores a reference to the {@link DrawerLayout}
+     * that contains a {@link NavigationView}.
+     */
     private DrawerLayout mDrawerLayout;
 
+    /**
+     * A middle layer to interact with a local database.
+     */
     public static DBWrap database;
 
     /**
@@ -62,7 +69,8 @@ public class FeedActivity extends AppCompatActivity {
 
         mFeed.setHasFixedSize(true);
 
-        // Display list items vertically in a portrait mode and horizontally in landscape orientation.
+        // Display list items depending on the device orientation.
+        // Hide the Up button on tablets.
         if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
             if(getResources().getBoolean(R.bool.isTablet)) {
                 mLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
