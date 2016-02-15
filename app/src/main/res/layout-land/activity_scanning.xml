@@ -42,6 +42,7 @@
             android:background="@color/colorPrimaryDark"
             android:text="@string/submit"
             android:textColor="@color/colorIcons" />
+
     </LinearLayout>
 
 </LinearLayout>

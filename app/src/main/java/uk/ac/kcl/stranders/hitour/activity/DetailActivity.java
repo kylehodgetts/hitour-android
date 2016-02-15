@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.TypedValue;
@@ -13,9 +14,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
 
-import uk.ac.kcl.stranders.hitour.fragment.DetailFragment;
 import uk.ac.kcl.stranders.hitour.PrototypeData;
 import uk.ac.kcl.stranders.hitour.R;
+import uk.ac.kcl.stranders.hitour.fragment.DetailFragment;
 
 /**
  * Provides the {@link ViewPager} to swipe between instances of {@link DetailFragment}.
@@ -49,7 +50,7 @@ public class DetailActivity extends AppCompatActivity {
     private DetailPagerAdapter mPagerAdapter;
 
     /**
-     * Initializes nad populates {@link DetailActivity#mPager}.
+     * Initializes and populates {@link DetailActivity#mPager}.
      *
      * {@inheritDoc}
      */
@@ -66,7 +67,7 @@ public class DetailActivity extends AppCompatActivity {
         mPager.setAdapter(mPagerAdapter);
         mPager.setPageMargin((int) TypedValue
                 .applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1, getResources().getDisplayMetrics()));
-        mPager.setPageMarginDrawable(new ColorDrawable(getResources().getColor(R.color.colorDivider)));
+        mPager.setPageMarginDrawable(new ColorDrawable(ContextCompat.getColor(this, R.color.colorDivider)));
 
         mPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override

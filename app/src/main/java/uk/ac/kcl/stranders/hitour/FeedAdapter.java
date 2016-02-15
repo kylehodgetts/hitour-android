@@ -3,7 +3,9 @@ package uk.ac.kcl.stranders.hitour;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +15,7 @@ import android.widget.TextView;
 
 import uk.ac.kcl.stranders.hitour.activity.DetailActivity;
 import uk.ac.kcl.stranders.hitour.activity.FeedActivity;
+import uk.ac.kcl.stranders.hitour.fragment.DetailFragment;
 
 /**
  * FeedAdapter provides a binding from a points data set to views
@@ -54,9 +57,23 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder>  {
         v.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(mContext, DetailActivity.class)
-                .putExtra(DetailActivity.EXTRA_BUNDLE, viewHolder.getAdapterPosition());
-                mContext.startActivity(intent);
+                // Start a new activity on a phone or replace a detail fragment on tablets.
+                if(!(mContext.getResources().getBoolean(R.bool.isTablet))) {
+                    Intent intent = new Intent(mContext, DetailActivity.class)
+                            .putExtra(DetailActivity.EXTRA_BUNDLE, viewHolder.getAdapterPosition());
+                    mContext.startActivity(intent);
+                } else {
+                    Bundle bundle = new Bundle();
+                    bundle.putInt(DetailFragment.ARG_ITEM_ID, viewHolder.getAdapterPosition());
+
+                    DetailFragment fragment = new DetailFragment();
+                    fragment.setArguments(bundle);
+
+                    ((AppCompatActivity) mContext).getSupportFragmentManager()
+                            .beginTransaction()
+                            .replace(R.id.point_detail_container, fragment, DetailFragment.FRAGMENT_TAG)
+                            .commit();
+                }
             }
         });
         return viewHolder;

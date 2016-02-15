@@ -71,7 +71,7 @@ public class ScanningActivityTest extends ActivityInstrumentationTestCase2<Scann
 
             getInstrumentation().waitForIdleSync();
 
-            DetailActivity detailActivity = (DetailActivity) getInstrumentation().waitForMonitorWithTimeout(activityMonitor, 5000);
+            DetailActivity detailActivity = (DetailActivity) getInstrumentation().waitForMonitorWithTimeout(activityMonitor, 7000);
             assertNotNull(detailActivity);
             detailActivity.finish();
         }
