@@ -3,11 +3,16 @@ package uk.ac.kcl.stranders.hitour.activity;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.NavigationView;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 
 import com.google.zxing.integration.android.IntentIntegrator;
@@ -34,6 +39,8 @@ public class FeedActivity extends AppCompatActivity {
      */
     private RecyclerView.LayoutManager mLayoutManager;
 
+    private DrawerLayout mDrawerLayout;
+
     public static DBWrap database;
 
     /**
@@ -47,6 +54,9 @@ public class FeedActivity extends AppCompatActivity {
         setContentView(R.layout.activity_feed);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer);
 
         mFeed = (RecyclerView) findViewById(R.id.rv_feed);
 
@@ -73,6 +83,22 @@ public class FeedActivity extends AppCompatActivity {
         FeedAdapter adapter = new FeedAdapter(PrototypeData.getCursor(), this);
         mFeed.setAdapter(adapter);
 
+        ActionBar supportActionBar = getSupportActionBar();
+        if(supportActionBar != null) {
+            supportActionBar.setHomeAsUpIndicator(R.drawable.ic_action_menu);
+            supportActionBar.setDisplayHomeAsUpEnabled(true);
+        }
+
+        navigationView.setNavigationItemSelectedListener(
+                new NavigationView.OnNavigationItemSelectedListener() {
+                    @Override
+                    public boolean onNavigationItemSelected(MenuItem item) {
+                        item.setChecked(true);
+                        mDrawerLayout.closeDrawers();
+                        return true;
+                    }
+                }
+        );
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -101,4 +127,14 @@ public class FeedActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.menu_feed, menu);
         return true;
     }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if(id == android.R.id.home) {
+            mDrawerLayout.openDrawer(GravityCompat.START);
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
 }

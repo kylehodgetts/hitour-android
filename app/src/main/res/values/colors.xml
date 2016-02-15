@@ -12,5 +12,7 @@
 
     <color name="colorIcons">#FFFFFF</color>
 
+    <color name="colorDrawerText">#262626</color>
+
     <color name="transparentHeader">#d40288D1</color>
 </resources>
