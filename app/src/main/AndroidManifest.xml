@@ -35,7 +35,8 @@
         </activity>
         <activity
             android:name=".activity.ScanningActivity"
-            android:parentActivityName=".activity.FeedActivity">
+            android:parentActivityName=".activity.FeedActivity"
+            android:noHistory="true">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activity.FeedActivity" />
