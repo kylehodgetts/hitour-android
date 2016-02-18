@@ -1,5 +1,6 @@
 package uk.ac.kcl.stranders.hitour.activity;
 
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -16,12 +17,14 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 
 import uk.ac.kcl.stranders.hitour.FeedAdapter;
 import uk.ac.kcl.stranders.hitour.PrototypeData;
 import uk.ac.kcl.stranders.hitour.R;
 import uk.ac.kcl.stranders.hitour.database.DBWrap;
 import uk.ac.kcl.stranders.hitour.database.schema.HiSchema;
+import uk.ac.kcl.stranders.hitour.fragment.DetailFragment;
 
 /**
  * The main activity that displays all available points for a given tour.
@@ -115,6 +118,27 @@ public class FeedActivity extends AppCompatActivity {
                 scanCode();
             }
         });
+    }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(resultCode == RESULT_OK) {
+            if(!(getResources().getBoolean(R.bool.isTablet))) {
+                Intent intent = new Intent(this, DetailActivity.class)
+                        .putExtra(DetailActivity.EXTRA_BUNDLE, data.getExtras().getInt("pin"));
+                startActivity(intent);
+            } else {
+                Bundle bundle = new Bundle();
+                bundle.putInt(DetailFragment.ARG_ITEM_ID, data.getExtras().getInt("pin"));
+
+                DetailFragment fragment = new DetailFragment();
+                fragment.setArguments(bundle);
+
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.point_detail_container, fragment, DetailFragment.FRAGMENT_TAG)
+                        .commitAllowingStateLoss();
+            }
+        }
     }
 
     /**

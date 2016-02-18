@@ -98,11 +98,10 @@ public class ScanningActivity extends AppCompatActivity {
         EditText etCodePinEntry = (EditText) findViewById(R.id.etCodePinEntry);
         // TODO: Needs to be changed when DB ready to search QR code data with DB and display relevant DetailActivity Page
         if (etCodePinEntry.getText().toString().matches("\\d{1,9}") && PrototypeData.containsId(Integer.parseInt(etCodePinEntry.getText().toString()))) {
-            Intent intent = new Intent(ScanningActivity.this, DetailActivity.class);
-            intent.putExtra(DetailActivity.EXTRA_BUNDLE, Integer.parseInt(etCodePinEntry.getText().toString()));
-            clearInput();
-
-            startActivity(intent);
+            Intent data = new Intent();
+            data.putExtra("pin", Integer.parseInt(etCodePinEntry.getText().toString()));
+            setResult(RESULT_OK, data);
+            finish();
         }
         else {
             Log.d("FeedActivity", "Point for " + etCodePinEntry.getText() + " not found!");
