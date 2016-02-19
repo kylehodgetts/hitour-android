@@ -21,24 +21,20 @@ import com.google.zxing.integration.android.IntentIntegrator;
 
 import java.util.List;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 import uk.ac.kcl.stranders.hitour.FeedAdapter;
-import uk.ac.kcl.stranders.hitour.retrofit.HiTourApi;
 import uk.ac.kcl.stranders.hitour.PrototypeData;
 import uk.ac.kcl.stranders.hitour.R;
 import uk.ac.kcl.stranders.hitour.database.DBWrap;
 import uk.ac.kcl.stranders.hitour.database.schema.HiSchema;
 import uk.ac.kcl.stranders.hitour.fragment.DetailFragment;
+import uk.ac.kcl.stranders.hitour.model.DataType;
 import uk.ac.kcl.stranders.hitour.model.Tour;
+import uk.ac.kcl.stranders.hitour.retrofit.HiTourRetrofit;
 
 /**
  * The main activity that displays all available points for a given tour.
  */
-public class FeedActivity extends AppCompatActivity {
+public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.CallbackRetrofit {
 
     /**
      * The list of all available points.
@@ -61,6 +57,8 @@ public class FeedActivity extends AppCompatActivity {
      * A middle layer to interact with a local database.
      */
     public static DBWrap database;
+
+    private HiTourRetrofit hiTourRetrofit;
 
     /**
      * Initializes the UI and sets an adapter for the {@link FeedActivity#mFeed}
@@ -128,28 +126,9 @@ public class FeedActivity extends AppCompatActivity {
             }
         });
 
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://hitour.herokuapp.com/api/A7DE6825FD96CCC79E63C89B55F88/")
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        HiTourApi hiTourApi = retrofit.create(HiTourApi.class);
-
-        Call<List<Tour>> tours = hiTourApi.getTours();
-        List<Tour> listTours;
-
-        tours.enqueue(new Callback<List<Tour>>() {
-
-            @Override
-            public void onResponse(Call<List<Tour>> call, Response<List<Tour>> response) {
-                Log.e("Name:", response.body().get(0).getName());
-            }
-
-            @Override
-            public void onFailure(Call<List<Tour>> call, Throwable t) {
-                t.printStackTrace();
-            }
-        });
+        // Fetch data from the HiTour web API
+        hiTourRetrofit = new HiTourRetrofit(this);
+        hiTourRetrofit.fetchAll();
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -200,5 +179,13 @@ public class FeedActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+    public void onAllRequestsFinished() {
+        // TODO: populate/update the db
+        // test
+        String name = ((List<Tour>) hiTourRetrofit.getList(DataType.TOUR)).get(0).getName();
+        Log.d("NAME", name);
+    }
+
 
 }
