@@ -58,7 +58,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
      */
     public static DBWrap database;
 
-    private HiTourRetrofit hiTourRetrofit;
+    private static HiTourRetrofit hiTourRetrofit;
 
     /**
      * Initializes the UI and sets an adapter for the {@link FeedActivity#mFeed}
@@ -127,8 +127,11 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         });
 
         // Fetch data from the HiTour web API
-        hiTourRetrofit = new HiTourRetrofit(this);
-        hiTourRetrofit.fetchAll();
+        // A null check bellow prevents data from being fetched upon rotation
+        if(hiTourRetrofit == null) {
+            hiTourRetrofit = new HiTourRetrofit(this);
+            hiTourRetrofit.fetchAll();
+        }
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
