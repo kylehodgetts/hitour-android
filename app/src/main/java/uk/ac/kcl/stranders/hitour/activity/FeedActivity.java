@@ -12,19 +12,28 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
 import com.google.zxing.integration.android.IntentIntegrator;
-import com.google.zxing.integration.android.IntentResult;
 
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 import uk.ac.kcl.stranders.hitour.FeedAdapter;
+import uk.ac.kcl.stranders.hitour.HiTourApi;
 import uk.ac.kcl.stranders.hitour.PrototypeData;
 import uk.ac.kcl.stranders.hitour.R;
 import uk.ac.kcl.stranders.hitour.database.DBWrap;
 import uk.ac.kcl.stranders.hitour.database.schema.HiSchema;
 import uk.ac.kcl.stranders.hitour.fragment.DetailFragment;
+import uk.ac.kcl.stranders.hitour.model.Tour;
 
 /**
  * The main activity that displays all available points for a given tour.
@@ -116,6 +125,29 @@ public class FeedActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 scanCode();
+            }
+        });
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("https://hitour.herokuapp.com/api/A7DE6825FD96CCC79E63C89B55F88/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        HiTourApi hiTourApi = retrofit.create(HiTourApi.class);
+
+        Call<List<Tour>> tours = hiTourApi.getTours();
+        List<Tour> listTours;
+
+        tours.enqueue(new Callback<List<Tour>>() {
+
+            @Override
+            public void onResponse(Call<List<Tour>> call, Response<List<Tour>> response) {
+                Log.e("Name:", response.body().get(0).getName());
+            }
+
+            @Override
+            public void onFailure(Call<List<Tour>> call, Throwable t) {
+                t.printStackTrace();
             }
         });
     }
