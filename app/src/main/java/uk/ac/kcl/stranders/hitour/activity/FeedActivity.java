@@ -27,7 +27,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import uk.ac.kcl.stranders.hitour.FeedAdapter;
-import uk.ac.kcl.stranders.hitour.HiTourApi;
+import uk.ac.kcl.stranders.hitour.retrofit.HiTourApi;
 import uk.ac.kcl.stranders.hitour.PrototypeData;
 import uk.ac.kcl.stranders.hitour.R;
 import uk.ac.kcl.stranders.hitour.database.DBWrap;
