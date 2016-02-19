@@ -1,7 +1,5 @@
 package uk.ac.kcl.stranders.hitour.retrofit;
 
-import android.content.Context;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,14 +41,18 @@ public class HiTourRetrofit {
 
     private ArrayList<Boolean> tasksFinished = new ArrayList<>();
 
-    private Context mContext;
+    private CallbackRetrofit mCallback;
 
     public interface CallbackRetrofit {
         void onAllRequestsFinished();
     }
 
-    public HiTourRetrofit(Context context) {
-        this.mContext = context;
+    /**
+     * Sets up Retrofit.
+     * @param mCallback {@link uk.ac.kcl.stranders.hitour.retrofit.HiTourRetrofit.CallbackRetrofit}
+     */
+    public HiTourRetrofit(CallbackRetrofit mCallback) {
+        this.mCallback = mCallback;
 
         retrofit = new Retrofit.Builder()
                 .baseUrl("https://hitour.herokuapp.com/api/A7DE6825FD96CCC79E63C89B55F88/")
@@ -60,6 +62,9 @@ public class HiTourRetrofit {
         hiTourApi = retrofit.create(HiTourApi.class);
     }
 
+    /**
+     * Initializes requests to fetch all data from the web API.
+     */
     public void fetchAll() {
         listAudience = fetchData(hiTourApi.getAudiences());
         listData = fetchData(hiTourApi.getData());
@@ -70,13 +75,19 @@ public class HiTourRetrofit {
         listTourPoints = fetchData(hiTourApi.getTourPoints());
     }
 
+    /**
+     * Invoked when the request is successfully finished.
+     */
     public void onRequestFinished() {
         tasksFinished.add(true);
         if(allRequestsFinished()) {
-            ((CallbackRetrofit) mContext).onAllRequestsFinished();
+            mCallback.onAllRequestsFinished();
         }
     }
 
+    /**
+     * @return true if all requests are finished.
+     */
     public boolean allRequestsFinished() {
         return tasksFinished.size() == NUMBER_OF_REQUESTS;
     }
@@ -101,6 +112,11 @@ public class HiTourRetrofit {
         return list;
     }
 
+    /**
+     *
+     * @param dataType enum representing a data type we request
+     * @return The list of objects of a given {@link DataType}
+     */
     public List getList(DataType dataType) {
         switch(dataType) {
             case AUDIENCE: return listAudience;

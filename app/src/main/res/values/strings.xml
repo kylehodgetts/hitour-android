@@ -2,6 +2,7 @@
     <string name="app_name">hiTour</string>
     <string name="title_activity_detail">DetailActivity</string>
 
+    <string name="no_network">There is no network connection. The data could not be updated.</string>
     <string name="hint_scanning">Scan a code or type a pin</string>
     <string name="submit">Submit</string>
 </resources>

@@ -5,6 +5,7 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -24,6 +25,7 @@ import java.util.List;
 import uk.ac.kcl.stranders.hitour.FeedAdapter;
 import uk.ac.kcl.stranders.hitour.PrototypeData;
 import uk.ac.kcl.stranders.hitour.R;
+import uk.ac.kcl.stranders.hitour.Utilities;
 import uk.ac.kcl.stranders.hitour.database.DBWrap;
 import uk.ac.kcl.stranders.hitour.database.schema.HiSchema;
 import uk.ac.kcl.stranders.hitour.fragment.DetailFragment;
@@ -127,10 +129,14 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         });
 
         // Fetch data from the HiTour web API
-        // A null check bellow prevents data from being fetched upon rotation
+        // A null check bellow prevents data from being fetched again upon rotation
         if(hiTourRetrofit == null) {
-            hiTourRetrofit = new HiTourRetrofit(this);
-            hiTourRetrofit.fetchAll();
+            if(Utilities.isNetworkAvailable(this)) {
+                hiTourRetrofit = new HiTourRetrofit(this);
+                hiTourRetrofit.fetchAll();
+            } else {
+                Snackbar.make(mFeed, getString(R.string.no_network), Snackbar.LENGTH_LONG).show();
+            }
         }
     }
 
@@ -183,6 +189,9 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Invoked when the data has been successfully fetched from the web API.
+     */
     public void onAllRequestsFinished() {
         // TODO: populate/update the db
         // test
