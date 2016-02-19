@@ -5,7 +5,7 @@ import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
 
-public class Audience implements Parcelable {
+public class Point implements Parcelable {
 
     @SerializedName("id")
     private Integer id;
@@ -101,18 +101,18 @@ public class Audience implements Parcelable {
         dest.writeString(updatedAt);
     }
 
-    public static final Parcelable.Creator<Audience> CREATOR
-            = new Parcelable.Creator<Audience>() {
-        public Audience createFromParcel(Parcel in) {
-            return new Audience(in);
+    public static final Parcelable.Creator<Point> CREATOR
+            = new Parcelable.Creator<Point>() {
+        public Point createFromParcel(Parcel in) {
+            return new Point(in);
         }
 
-        public Audience[] newArray(int size) {
-            return new Audience[size];
+        public Point[] newArray(int size) {
+            return new Point[size];
         }
     };
 
-    private Audience(Parcel in) {
+    private Point(Parcel in) {
         id = in.readInt();
         name = in.readString();
         createdAt = in.readString();

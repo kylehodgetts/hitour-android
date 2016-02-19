@@ -5,12 +5,16 @@ import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
 
-public class Audience implements Parcelable {
+public class Data implements Parcelable {
 
     @SerializedName("id")
     private Integer id;
-    @SerializedName("name")
-    private String name;
+    @SerializedName("title")
+    private String title;
+    @SerializedName("description")
+    private String description;
+    @SerializedName("url")
+    private String url;
     @SerializedName("created_at")
     private String createdAt;
     @SerializedName("updated_at")
@@ -37,19 +41,55 @@ public class Audience implements Parcelable {
     /**
      *
      * @return
-     * The name
+     * The title
      */
-    public String getName() {
-        return name;
+    public String getTitle() {
+        return title;
     }
 
     /**
      *
-     * @param name
-     * The name
+     * @param title
+     * The title
      */
-    public void setName(String name) {
-        this.name = name;
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    /**
+     *
+     * @return
+     * The description
+     */
+    public String getDescription() {
+        return description;
+    }
+
+    /**
+     *
+     * @param description
+     * The description
+     */
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    /**
+     *
+     * @return
+     * The url
+     */
+    public String getUrl() {
+        return url;
+    }
+
+    /**
+     *
+     * @param url
+     * The url
+     */
+    public void setUrl(String url) {
+        this.url = url;
     }
 
     /**
@@ -96,25 +136,29 @@ public class Audience implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(id);
-        dest.writeString(name);
+        dest.writeString(title);
+        dest.writeString(description);
+        dest.writeString(url);
         dest.writeString(createdAt);
         dest.writeString(updatedAt);
     }
 
-    public static final Parcelable.Creator<Audience> CREATOR
-            = new Parcelable.Creator<Audience>() {
-        public Audience createFromParcel(Parcel in) {
-            return new Audience(in);
+    public static final Parcelable.Creator<Data> CREATOR
+            = new Parcelable.Creator<Data>() {
+        public Data createFromParcel(Parcel in) {
+            return new Data(in);
         }
 
-        public Audience[] newArray(int size) {
-            return new Audience[size];
+        public Data[] newArray(int size) {
+            return new Data[size];
         }
     };
 
-    private Audience(Parcel in) {
+    private Data(Parcel in) {
         id = in.readInt();
-        name = in.readString();
+        title = in.readString();
+        description = in.readString();
+        url = in.readString();
         createdAt = in.readString();
         updatedAt = in.readString();
     }

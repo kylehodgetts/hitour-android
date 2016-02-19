@@ -5,12 +5,16 @@ import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
 
-public class Audience implements Parcelable {
+public class TourPoints implements Parcelable {
 
     @SerializedName("id")
     private Integer id;
-    @SerializedName("name")
-    private String name;
+    @SerializedName("tour_id")
+    private Integer tourId;
+    @SerializedName("point_id")
+    private Integer pointId;
+    @SerializedName("rank")
+    private Integer rank;
     @SerializedName("created_at")
     private String createdAt;
     @SerializedName("updated_at")
@@ -37,19 +41,55 @@ public class Audience implements Parcelable {
     /**
      *
      * @return
-     * The name
+     * The tourId
      */
-    public String getName() {
-        return name;
+    public Integer getTourId() {
+        return tourId;
     }
 
     /**
      *
-     * @param name
-     * The name
+     * @param tourId
+     * The tour_id
      */
-    public void setName(String name) {
-        this.name = name;
+    public void setTourId(Integer tourId) {
+        this.tourId = tourId;
+    }
+
+    /**
+     *
+     * @return
+     * The pointId
+     */
+    public Integer getPointId() {
+        return pointId;
+    }
+
+    /**
+     *
+     * @param pointId
+     * The point_id
+     */
+    public void setPointId(Integer pointId) {
+        this.pointId = pointId;
+    }
+
+    /**
+     *
+     * @return
+     * The rank
+     */
+    public Integer getRank() {
+        return rank;
+    }
+
+    /**
+     *
+     * @param rank
+     * The rank
+     */
+    public void setRank(Integer rank) {
+        this.rank = rank;
     }
 
     /**
@@ -96,26 +136,31 @@ public class Audience implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(id);
-        dest.writeString(name);
+        dest.writeInt(tourId);
+        dest.writeInt(pointId);
+        dest.writeInt(rank);
         dest.writeString(createdAt);
         dest.writeString(updatedAt);
     }
 
-    public static final Parcelable.Creator<Audience> CREATOR
-            = new Parcelable.Creator<Audience>() {
-        public Audience createFromParcel(Parcel in) {
-            return new Audience(in);
+    public static final Parcelable.Creator<TourPoints> CREATOR
+            = new Parcelable.Creator<TourPoints>() {
+        public TourPoints createFromParcel(Parcel in) {
+            return new TourPoints(in);
         }
 
-        public Audience[] newArray(int size) {
-            return new Audience[size];
+        public TourPoints[] newArray(int size) {
+            return new TourPoints[size];
         }
     };
 
-    private Audience(Parcel in) {
+    private TourPoints(Parcel in) {
         id = in.readInt();
-        name = in.readString();
+        tourId = in.readInt();
+        pointId = in.readInt();
+        rank = in.readInt();
         createdAt = in.readString();
         updatedAt = in.readString();
     }
+
 }
