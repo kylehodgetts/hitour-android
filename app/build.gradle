@@ -17,6 +17,9 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    lintOptions {
+        abortOnError false
+    }
 }
 
 dependencies {
@@ -32,4 +35,8 @@ dependencies {
     compile 'com.google.zxing:core:3.2.0'
     compile 'com.android.support:support-v4:23.1.1'
     compile 'de.hdodenhof:circleimageview:2.0.0'
+    compile 'com.squareup.retrofit2:retrofit:2.0.0-beta4'
+    compile 'com.google.code.gson:gson:2.4'
+    compile 'com.squareup.retrofit2:converter-gson:2.0.0-beta4'
+
 }
