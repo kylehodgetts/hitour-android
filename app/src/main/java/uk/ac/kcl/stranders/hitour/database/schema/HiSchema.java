@@ -9,7 +9,7 @@ import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.*;
 public class HiSchema extends DatabaseSchema {
 
     /**
-     * Constructor for the database schema, gives the database a name and current verison
+     * Constructor for the database schema, gives the database a name and current version
      *
      * @param version      The version of the database
      */
@@ -28,11 +28,9 @@ public class HiSchema extends DatabaseSchema {
         session.addValue(TOUR_ID, DataType.Text);
         addTable(session);
 
-
         TableSchema audience = new TableSchema(AUDIENCE_ID,AUDIENCE_TABLE);
         audience.addValue(NAME, DataType.Text);
         addTable(audience);
-
 
         TableSchema point = new TableSchema(POINT_ID,POINT_TABLE);
         point.addValue(NAME, DataType.Text);
@@ -45,7 +43,7 @@ public class HiSchema extends DatabaseSchema {
         addTable(data);
 
         TableSchema pointTour = new TableSchema(TOUR_ID, POINT_TOUR_TABLE);
-        pointTour.addPrimaryKey(TOUR_ID);
+        pointTour.addPrimaryKey(POINT_ID);
         pointTour.addValue(RANK, DataType.Text);
         addTable(pointTour);
 
@@ -57,7 +55,6 @@ public class HiSchema extends DatabaseSchema {
         pointData.addPrimaryKey(DATA_ID);
         pointData.addValue(RANK, DataType.Text);
         addTable(pointData);
-
 
     }
 }

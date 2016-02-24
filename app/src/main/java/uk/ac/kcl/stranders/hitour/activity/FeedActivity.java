@@ -20,17 +20,26 @@ import android.view.View;
 
 import com.google.zxing.integration.android.IntentIntegrator;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import uk.ac.kcl.stranders.hitour.FeedAdapter;
 import uk.ac.kcl.stranders.hitour.PrototypeData;
 import uk.ac.kcl.stranders.hitour.R;
 import uk.ac.kcl.stranders.hitour.Utilities;
 import uk.ac.kcl.stranders.hitour.database.DBWrap;
+import uk.ac.kcl.stranders.hitour.database.NotInSchemaException;
 import uk.ac.kcl.stranders.hitour.database.schema.HiSchema;
 import uk.ac.kcl.stranders.hitour.fragment.DetailFragment;
+import uk.ac.kcl.stranders.hitour.model.Audience;
+import uk.ac.kcl.stranders.hitour.model.Data;
+import uk.ac.kcl.stranders.hitour.model.DataAudience;
 import uk.ac.kcl.stranders.hitour.model.DataType;
+import uk.ac.kcl.stranders.hitour.model.Point;
+import uk.ac.kcl.stranders.hitour.model.PointData;
 import uk.ac.kcl.stranders.hitour.model.Tour;
+import uk.ac.kcl.stranders.hitour.model.TourPoints;
 import uk.ac.kcl.stranders.hitour.retrofit.HiTourRetrofit;
 
 /**
@@ -194,9 +203,99 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
      */
     public void onAllRequestsFinished() {
         // TODO: populate/update the db
-        // test
-        String name = ((List<Tour>) hiTourRetrofit.getList(DataType.TOUR)).get(0).getName();
-        Log.d("NAME", name);
+        List<Audience> listAudience = hiTourRetrofit.getList(DataType.AUDIENCE);
+        for(Audience audience : listAudience) {
+            Map<String,String> columnsMap = new HashMap<>();
+            columnsMap.put("NAME",audience.getName());
+            Map<String,String> primaryKeysMap = new HashMap<>();
+            primaryKeysMap.put("AUDIENCE_ID", audience.getId().toString());
+            try {
+                database.insert(columnsMap,primaryKeysMap,"AUDIENCE");
+            } catch(NotInSchemaException e) {
+                Log.e("DATABASE_FAIL",Log.getStackTraceString(e));
+            }
+        }
+        List<Data> listData = hiTourRetrofit.getList(DataType.DATA);
+        for(Data data : listData) {
+            Map<String,String> columnsMap = new HashMap<>();
+            columnsMap.put("URL",data.getUrl());
+            columnsMap.put("DESCRIPTION",data.getDescription());
+            columnsMap.put("TITLE",data.getTitle());
+            Map<String,String> primaryKeysMap = new HashMap<>();
+            primaryKeysMap.put("DATA_ID",data.getId().toString());
+            try {
+                database.insert(columnsMap, primaryKeysMap, "DATA");
+            } catch(NotInSchemaException e) {
+                Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
+            }
+        }
+        List<DataAudience> listDataAudience = hiTourRetrofit.getList(DataType.DATA_AUDIENCE);
+        for(DataAudience dataAudience : listDataAudience) {
+            Map<String,String> columnsMap = new HashMap<>();
+            Map<String,String> primaryKeysMap = new HashMap<>();
+            primaryKeysMap.put("DATA_ID",dataAudience.getDatumId().toString());
+            primaryKeysMap.put("AUDIENCE_ID",dataAudience.getAudienceId().toString());
+            try {
+                database.insert(columnsMap,primaryKeysMap,"AUDIENCE_DATA");
+            } catch(NotInSchemaException e) {
+                Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
+            }
+        }
+        List<Point> listPoint  = hiTourRetrofit.getList(DataType.POINT);
+        for(Point point : listPoint) {
+            Map<String,String> columnsMap = new HashMap<>();
+            columnsMap.put("NAME",point.getName());
+            Map<String,String> primaryKeysMap = new HashMap<>();
+            primaryKeysMap.put("POINT_ID",point.getId().toString());
+            try {
+                database.insert(columnsMap,primaryKeysMap,"POINT");
+            } catch(NotInSchemaException e) {
+                Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
+            }
+        }
+        List<PointData> listPointData  = hiTourRetrofit.getList(DataType.POINT_DATA);
+        for(PointData pointData : listPointData) {
+            Map<String,String> columnsMap = new HashMap<>();
+            try {
+                columnsMap.put("RANK", pointData.getRank().toString());
+            } catch(NullPointerException e) {
+                columnsMap.put("RANK",null);
+            }
+            Map<String,String> primaryKeysMap = new HashMap<>();
+            primaryKeysMap.put("POINT_ID",pointData.getPointId().toString());
+            primaryKeysMap.put("DATA_ID",pointData.getDatumId().toString());
+            try {
+                database.insert(columnsMap,primaryKeysMap,"POINT_DATA");
+            } catch(NotInSchemaException e) {
+                Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
+            }
+        }
+        List<Tour> listTour = hiTourRetrofit.getList(DataType.TOUR);
+        for(Tour tour : listTour) {
+            Map<String,String> columnsMap = new HashMap<>();
+            columnsMap.put("NAME",tour.getName());
+            columnsMap.put("AUDIENCE_ID",tour.getAudienceId().toString());
+            Map<String,String> primaryKeysMap = new HashMap<>();
+            primaryKeysMap.put("TOUR_ID",tour.getId().toString());
+            try {
+                database.insert(columnsMap,primaryKeysMap,"TOUR");
+            } catch(NotInSchemaException e) {
+                Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
+            }
+        }
+        List<TourPoints> listTourPoints = hiTourRetrofit.getList(DataType.TOUR_POINTS);
+        for(TourPoints tourPoint : listTourPoints) {
+            Map<String,String> columnsMap = new HashMap<>();
+            columnsMap.put("RANK",tourPoint.getRank().toString());
+            Map<String,String> primaryKeysMap = new HashMap<>();
+            primaryKeysMap.put("TOUR_ID",tourPoint.getTourId().toString());
+            primaryKeysMap.put("POINT_ID",tourPoint.getPointId().toString());
+            try {
+                database.insert(columnsMap,primaryKeysMap,"POINT_TOUR");
+            } catch(NotInSchemaException e) {
+                Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
+            }
+        }
     }
 
 
