@@ -2,6 +2,7 @@ package uk.ac.kcl.stranders.hitour.activity;
 
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -25,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 
 import uk.ac.kcl.stranders.hitour.FeedAdapter;
-import uk.ac.kcl.stranders.hitour.PrototypeData;
 import uk.ac.kcl.stranders.hitour.R;
 import uk.ac.kcl.stranders.hitour.Utilities;
 import uk.ac.kcl.stranders.hitour.database.DBWrap;
@@ -69,6 +69,8 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
      */
     public static DBWrap database;
 
+    private Menu mMenu;
+
     private static HiTourRetrofit hiTourRetrofit;
 
     /**
@@ -109,8 +111,17 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         }
 
         mFeed.setLayoutManager(mLayoutManager);
-        FeedAdapter adapter = new FeedAdapter(PrototypeData.getCursor(), this);
-        mFeed.setAdapter(adapter);
+
+        try {
+            Cursor menuCursor = database.getAll("TOUR");
+            menuCursor.moveToFirst();
+            populateFeedAdapter(menuCursor.getString(0));
+        } catch (NotInSchemaException e) {
+            Log.e("DATABASE_FAIL",Log.getStackTraceString(e));
+        }
+
+        mMenu = navigationView.getMenu();
+        updateMenu();
 
         ActionBar supportActionBar = getSupportActionBar();
         if(supportActionBar != null) {
@@ -122,6 +133,16 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
                 new NavigationView.OnNavigationItemSelectedListener() {
                     @Override
                     public boolean onNavigationItemSelected(MenuItem item) {
+                        try {
+                            Cursor menuCursor = database.getAll("TOUR");
+                            if(menuCursor.getCount() > 0) {
+                                menuCursor.moveToFirst();
+                                menuCursor.move(item.getItemId());
+                                populateFeedAdapter(menuCursor.getString(0));
+                            }
+                        } catch (NotInSchemaException e) {
+                            Log.e("DATABASE_FAIL",Log.getStackTraceString(e));
+                        }
                         item.setChecked(true);
                         mDrawerLayout.closeDrawers();
                         return true;
@@ -198,7 +219,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         return super.onOptionsItemSelected(item);
     }
 
-    /**
+     /**
      * Invoked when the data has been successfully fetched from the web API.
      */
     public void onAllRequestsFinished() {
@@ -210,7 +231,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
             Map<String,String> primaryKeysMap = new HashMap<>();
             primaryKeysMap.put("AUDIENCE_ID", audience.getId().toString());
             try {
-                database.insert(columnsMap,primaryKeysMap,"AUDIENCE");
+                database.insert(columnsMap, primaryKeysMap, "AUDIENCE");
             } catch(NotInSchemaException e) {
                 Log.e("DATABASE_FAIL",Log.getStackTraceString(e));
             }
@@ -236,7 +257,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
             primaryKeysMap.put("DATA_ID",dataAudience.getDatumId().toString());
             primaryKeysMap.put("AUDIENCE_ID",dataAudience.getAudienceId().toString());
             try {
-                database.insert(columnsMap,primaryKeysMap,"AUDIENCE_DATA");
+                database.insert(columnsMap, primaryKeysMap, "AUDIENCE_DATA");
             } catch(NotInSchemaException e) {
                 Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
             }
@@ -248,7 +269,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
             Map<String,String> primaryKeysMap = new HashMap<>();
             primaryKeysMap.put("POINT_ID",point.getId().toString());
             try {
-                database.insert(columnsMap,primaryKeysMap,"POINT");
+                database.insert(columnsMap, primaryKeysMap, "POINT");
             } catch(NotInSchemaException e) {
                 Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
             }
@@ -265,7 +286,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
             primaryKeysMap.put("POINT_ID",pointData.getPointId().toString());
             primaryKeysMap.put("DATA_ID",pointData.getDatumId().toString());
             try {
-                database.insert(columnsMap,primaryKeysMap,"POINT_DATA");
+                database.insert(columnsMap, primaryKeysMap, "POINT_DATA");
             } catch(NotInSchemaException e) {
                 Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
             }
@@ -278,7 +299,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
             Map<String,String> primaryKeysMap = new HashMap<>();
             primaryKeysMap.put("TOUR_ID",tour.getId().toString());
             try {
-                database.insert(columnsMap,primaryKeysMap,"TOUR");
+                database.insert(columnsMap, primaryKeysMap, "TOUR");
             } catch(NotInSchemaException e) {
                 Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
             }
@@ -291,12 +312,48 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
             primaryKeysMap.put("TOUR_ID",tourPoint.getTourId().toString());
             primaryKeysMap.put("POINT_ID",tourPoint.getPointId().toString());
             try {
-                database.insert(columnsMap,primaryKeysMap,"POINT_TOUR");
+                database.insert(columnsMap, primaryKeysMap, "POINT_TOUR");
             } catch(NotInSchemaException e) {
                 Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
             }
         }
+        updateMenu();
+        try {
+            Cursor menuCursor = database.getAll("TOUR");
+            menuCursor.moveToFirst();
+            populateFeedAdapter(menuCursor.getString(0));
+        } catch (NotInSchemaException e) {
+            Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
+        }
+    }
+    /**
+     * Invoked to fill drawer with list of tours saved on the device's database.
+     */
+    private void updateMenu() {
+        mMenu.clear();
+        try {
+            Cursor menuCursor = database.getAll("TOUR");
+            menuCursor.moveToFirst();
+            for(int i = 0; i < menuCursor.getCount(); i++) {
+                mMenu.add(0, i, Menu.NONE, menuCursor.getString(2)).setIcon(R.drawable.ic_action_local_hospital);
+                menuCursor.move(1);
+            }
+        } catch(NotInSchemaException e) {
+            Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
+        }
     }
 
+    private void populateFeedAdapter(String tourId) {
+        Map<String,String> partialPrimaryMap = new HashMap<>();
+        partialPrimaryMap.put("TOUR_ID", tourId);
+        try {
+            Cursor feedCursor = database.getWholeByPrimaryPartial("POINT_TOUR", partialPrimaryMap);
+            Log.i("HELP",feedCursor.getCount() + "");
+            FeedAdapter adapter = new FeedAdapter(feedCursor, this);
+            mFeed.setAdapter(adapter);
+        } catch (NotInSchemaException e) {
+            Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
+        }
+    }
 
 }

@@ -4,17 +4,21 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import uk.ac.kcl.stranders.hitour.activity.DetailActivity;
 import uk.ac.kcl.stranders.hitour.activity.FeedActivity;
+import uk.ac.kcl.stranders.hitour.database.NotInSchemaException;
 import uk.ac.kcl.stranders.hitour.fragment.DetailFragment;
 
 /**
@@ -57,22 +61,32 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder>  {
         v.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // Start a new activity on a phone or replace a detail fragment on tablets.
-                if(!(mContext.getResources().getBoolean(R.bool.isTablet))) {
-                    Intent intent = new Intent(mContext, DetailActivity.class)
-                            .putExtra(DetailActivity.EXTRA_BUNDLE, viewHolder.getAdapterPosition());
-                    mContext.startActivity(intent);
-                } else {
-                    Bundle bundle = new Bundle();
-                    bundle.putInt(DetailFragment.ARG_ITEM_ID, viewHolder.getAdapterPosition());
+                try {
+                    mCursor.moveToPosition(viewHolder.getAdapterPosition());
+                    Map<String, String> primaryMap = new HashMap<>();
+                    primaryMap.put("POINT_ID", mCursor.getString(2));
+                    Cursor pointCursor = FeedActivity.database.getWholeByPrimary("POINT", primaryMap);
+                    pointCursor.moveToFirst();
+                    String pointId = pointCursor.getString(0);
+                    // Start a new activity on a phone or replace a detail fragment on tablets.
+                    if (!(mContext.getResources().getBoolean(R.bool.isTablet))) {
+                        Intent intent = new Intent(mContext, DetailActivity.class)
+                                .putExtra(DetailActivity.EXTRA_BUNDLE, pointId);
+                        mContext.startActivity(intent);
+                    } else {
+                        Bundle bundle = new Bundle();
+                        bundle.putString(DetailFragment.ARG_ITEM_ID, pointId);
 
-                    DetailFragment fragment = new DetailFragment();
-                    fragment.setArguments(bundle);
+                        DetailFragment fragment = new DetailFragment();
+                        fragment.setArguments(bundle);
 
-                    ((AppCompatActivity) mContext).getSupportFragmentManager()
-                            .beginTransaction()
-                            .replace(R.id.point_detail_container, fragment, DetailFragment.FRAGMENT_TAG)
-                            .commit();
+                        ((AppCompatActivity) mContext).getSupportFragmentManager()
+                                .beginTransaction()
+                                .replace(R.id.point_detail_container, fragment, DetailFragment.FRAGMENT_TAG)
+                                .commit();
+                    }
+                } catch (NotInSchemaException e) {
+                    Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
                 }
             }
         });
@@ -87,10 +101,18 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder>  {
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         mCursor.moveToPosition(position);
-        holder.tvTitle.setText(mCursor.getString(PrototypeData.TITLE));
-        holder.tvDescription.setText(mCursor.getString(PrototypeData.DESCRIPTION));
-        int imageId = mCursor.getInt(PrototypeData.IMAGE);
-        holder.ivThumbnail.setImageDrawable(ContextCompat.getDrawable(mContext, imageId));
+        try {
+            Map<String,String> primaryMap = new HashMap<>();
+            primaryMap.put("POINT_ID", mCursor.getString(2));
+            Cursor pointCursor = FeedActivity.database.getWholeByPrimary("POINT",primaryMap);
+            pointCursor.moveToFirst();
+            holder.tvTitle.setText(pointCursor.getString(1));
+//        holder.tvDescription.setText(mCursor.getString(PrototypeData.DESCRIPTION));
+//        int imageId = mCursor.getInt(PrototypeData.IMAGE);
+//        holder.ivThumbnail.setImageDrawable(ContextCompat.getDrawable(mContext, imageId));
+        } catch (NotInSchemaException e) {
+            Log.e("DATABASE_FAIL",Log.getStackTraceString(e));
+        }
     }
 
     /**
