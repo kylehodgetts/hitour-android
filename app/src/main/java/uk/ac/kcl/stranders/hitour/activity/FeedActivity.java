@@ -20,7 +20,16 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.google.zxing.integration.android.IntentIntegrator;
+import com.squareup.okhttp.Callback;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -69,6 +78,8 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
      */
     public static DBWrap database;
 
+    public static String currentTourId;
+
     private Menu mMenu;
 
     private static HiTourRetrofit hiTourRetrofit;
@@ -114,8 +125,10 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
 
         try {
             Cursor menuCursor = database.getAll("TOUR");
-            menuCursor.moveToFirst();
-            populateFeedAdapter(menuCursor.getString(0));
+            if(menuCursor.getCount() > 0) {
+                menuCursor.moveToFirst();
+                populateFeedAdapter(menuCursor.getString(0));
+            }
         } catch (NotInSchemaException e) {
             Log.e("DATABASE_FAIL",Log.getStackTraceString(e));
         }
@@ -249,6 +262,12 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
             } catch(NotInSchemaException e) {
                 Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
             }
+            try {
+                DownloadToStorage downloadToStorage = new DownloadToStorage(data.getUrl());
+                downloadToStorage.run();
+            } catch(Exception e) {
+                Log.e("STORAGE_FAIL", Log.getStackTraceString(e));
+            }
         }
         List<DataAudience> listDataAudience = hiTourRetrofit.getList(DataType.DATA_AUDIENCE);
         for(DataAudience dataAudience : listDataAudience) {
@@ -348,12 +367,70 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         partialPrimaryMap.put("TOUR_ID", tourId);
         try {
             Cursor feedCursor = database.getWholeByPrimaryPartial("POINT_TOUR", partialPrimaryMap);
-            Log.i("HELP",feedCursor.getCount() + "");
             FeedAdapter adapter = new FeedAdapter(feedCursor, this);
             mFeed.setAdapter(adapter);
+            currentTourId = tourId;
         } catch (NotInSchemaException e) {
             Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
         }
+    }
+
+    private class DownloadToStorage {
+
+        private final OkHttpClient client = new OkHttpClient();
+        private String url;
+
+        private DownloadToStorage(String url) {
+            this.url = url;
+        }
+
+        public void run() throws Exception {
+            Request request = new Request.Builder()
+                    .url(url)
+                    .build();
+
+            client.newCall(request).enqueue(new Callback() {
+
+                @Override public void onFailure(Request request, IOException throwable) {
+                    throwable.printStackTrace();
+                }
+
+                @Override public void onResponse(Response response) throws IOException {
+                    if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+
+                    InputStream inputStream = response.body().byteStream();
+
+                    String specificStorageAddress = url.substring(0,url.lastIndexOf("/"));
+                    specificStorageAddress = specificStorageAddress.replace(":","");
+                    specificStorageAddress = specificStorageAddress.replace("?","");
+                    String localStorageAddress = FeedActivity.this.getFilesDir().toString();
+                    File path = new File(localStorageAddress + specificStorageAddress);
+                    if(!path.exists()) {
+                        path.mkdirs();
+                    }
+
+                    String fileName = url.substring(url.lastIndexOf("/"));
+                    File file = new File(path, fileName);
+
+                    BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream, 1024 * 5);
+                    FileOutputStream fileOutputStream = new FileOutputStream(file);
+                    byte[] buffer = new byte[5 * 1024];
+
+                    int len;
+                    while ((len = bufferedInputStream.read(buffer)) != -1)
+                    {
+                        fileOutputStream.write(buffer,0,len);
+                    }
+
+                    fileOutputStream.flush();
+                    fileOutputStream.close();
+                    inputStream.close();
+
+                    Log.i("INFO", "donwloadToStorage successful");
+                }
+            });
+        }
+
     }
 
 }

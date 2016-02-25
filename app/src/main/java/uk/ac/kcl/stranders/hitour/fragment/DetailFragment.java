@@ -6,8 +6,8 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -17,8 +17,13 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.VideoView;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import uk.ac.kcl.stranders.hitour.PrototypeData;
 import uk.ac.kcl.stranders.hitour.R;
+import uk.ac.kcl.stranders.hitour.activity.FeedActivity;
+import uk.ac.kcl.stranders.hitour.database.NotInSchemaException;
 
 /**
  * Fragment that shows the content for a particular point in the tour which could consist of
@@ -101,14 +106,26 @@ public class DetailFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mCursor = PrototypeData.getCursor();
+        Map<String,String> partialPrimaryMapTour = new HashMap<>();
+        partialPrimaryMapTour.put("TOUR_ID", FeedActivity.currentTourId);
+        try {
+            mCursor = FeedActivity.database.getWholeByPrimaryPartial("POINT_TOUR", partialPrimaryMapTour);
+        } catch (NotInSchemaException e) {
+            Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
+        }
 
         if (getArguments().containsKey(ARG_ITEM_ID)) {
             mItemId = getArguments().getInt(ARG_ITEM_ID);
             mCursor.moveToPosition(mItemId);
 
-            contentCursor = PrototypeData.getContentCursor(mItemId);
-            contentCursor.moveToFirst();
+            try {
+                Map<String, String> partialPrimaryMapPoint = new HashMap<>();
+                partialPrimaryMapPoint.put("POINT_ID", mCursor.getString(0));
+                contentCursor = FeedActivity.database.getWholeByPrimaryPartial("POINT_DATA", partialPrimaryMapPoint);
+                contentCursor.moveToFirst();
+            } catch (Exception e) {
+                Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
+            }
         }
 
     }
@@ -145,10 +162,10 @@ public class DetailFragment extends Fragment {
             mRootView.setAlpha(0);
             mRootView.setVisibility(View.VISIBLE);
             mRootView.animate().alpha(1);
-            titleView.setText(mCursor.getString(PrototypeData.TITLE));
-            bodyView.setText(mCursor.getString(PrototypeData.DESCRIPTION));
-            int imageId = mCursor.getInt(PrototypeData.IMAGE);
-            mImageView.setImageDrawable(ContextCompat.getDrawable(getActivity(), imageId));
+            titleView.setText(mCursor.getString(2));
+//            bodyView.setText(mCursor.getString(PrototypeData.DESCRIPTION));
+//            int imageId = mCursor.getInt(PrototypeData.IMAGE);
+//            mImageView.setImageDrawable(ContextCompat.getDrawable(getActivity(), imageId));
 
             LinearLayout linearLayout = (LinearLayout) mRootView.findViewById(R.id.detail_body);
             addContent(inflater, linearLayout, savedInstanceState);
@@ -166,30 +183,38 @@ public class DetailFragment extends Fragment {
      */
     private void addContent(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         //TODO: Needs to change from PrototypeData to DB when available.
-        for(int i = 0; i < contentCursor.getCount(); ++i) {
+        for (int i = 0; i < contentCursor.getCount(); ++i) {
             LinearLayout layoutDetail;
-            if(contentCursor.getString(PrototypeData.DATA_DESCRIPTION).contains("Image")) {
-                layoutDetail = (LinearLayout) inflater.inflate(R.layout.image_detail, container, false);
-                ImageView imageView = (ImageView) layoutDetail.findViewById(R.id.image);
-                imageView.setImageResource(contentCursor.getInt(PrototypeData.URL));
-            }
-            else if(contentCursor.getString(PrototypeData.DATA_DESCRIPTION).contains("Video")) {
-                layoutDetail = (LinearLayout) inflater.inflate(R.layout.video_detail, container, false);
-                addVideo(savedInstanceState, layoutDetail, i);
-            }
-            else {
-                layoutDetail = (LinearLayout) inflater.inflate(R.layout.text_detail, container, false);
-                TextView tvText = (TextView) layoutDetail.findViewById(R.id.text);
-                tvText.setText(contentCursor.getString(PrototypeData.URL));
-            }
-            TextView tvTitle = (TextView) layoutDetail.findViewById(R.id.title);
-            tvTitle.setText(contentCursor.getString(PrototypeData.DATA_TITLE));
-            TextView tvDescription = (TextView) layoutDetail.findViewById(R.id.description);
-            tvDescription.setText(contentCursor.getString(PrototypeData.DATA_DESCRIPTION));
+            Map<String, String> pointMap = new HashMap<>();
+            pointMap.put("DATA_ID", contentCursor.getString(0));
+            try {
+                Cursor dataCursor = FeedActivity.database.getWholeByPrimary("DATA", pointMap);
+                dataCursor.moveToFirst();
+                String fileExtension = getFileExtension(dataCursor.getString(3));
+                if (fileExtension.matches("jpg|jpeg|png")) {
+                    layoutDetail = (LinearLayout) inflater.inflate(R.layout.image_detail, container, false);
+                    ImageView imageView = (ImageView) layoutDetail.findViewById(R.id.image);
+                    imageView.setImageResource(contentCursor.getInt(PrototypeData.URL));
+                } else if (fileExtension.matches("mp4")) {
+                    layoutDetail = (LinearLayout) inflater.inflate(R.layout.video_detail, container, false);
+                    addVideo(savedInstanceState, layoutDetail, i);
+                } else {
+                    layoutDetail = (LinearLayout) inflater.inflate(R.layout.text_detail, container, false);
+                    TextView tvText = (TextView) layoutDetail.findViewById(R.id.text);
+                    tvText.setText(dataCursor.getString(2));
+                }
+                TextView tvTitle = (TextView) layoutDetail.findViewById(R.id.title);
+                tvTitle.setText(contentCursor.getString(PrototypeData.DATA_TITLE));
+                TextView tvDescription = (TextView) layoutDetail.findViewById(R.id.description);
+                tvDescription.setText(contentCursor.getString(PrototypeData.DATA_DESCRIPTION));
 
-            layoutDetail.setId(i + 100);
-            container.addView(layoutDetail);
-            contentCursor.moveToNext();
+                layoutDetail.setId(i + 100);
+                container.addView(layoutDetail);
+                contentCursor.moveToNext();
+            } catch (NotInSchemaException e) {
+                Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
+            }
+
         }
     }
 
@@ -282,6 +307,12 @@ public class DetailFragment extends Fragment {
         if(currentVideo != null) {
             currentPosition = currentVideo.getCurrentPosition();
         }
+    }
+
+    private String getFileExtension(String url) {
+        String extension = url.substring(url.lastIndexOf(".")+1);
+        extension = extension.toLowerCase();
+        return extension;
     }
 
 }

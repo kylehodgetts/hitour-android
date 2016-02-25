@@ -61,32 +61,22 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder>  {
         v.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                try {
-                    mCursor.moveToPosition(viewHolder.getAdapterPosition());
-                    Map<String, String> primaryMap = new HashMap<>();
-                    primaryMap.put("POINT_ID", mCursor.getString(2));
-                    Cursor pointCursor = FeedActivity.database.getWholeByPrimary("POINT", primaryMap);
-                    pointCursor.moveToFirst();
-                    String pointId = pointCursor.getString(0);
-                    // Start a new activity on a phone or replace a detail fragment on tablets.
-                    if (!(mContext.getResources().getBoolean(R.bool.isTablet))) {
-                        Intent intent = new Intent(mContext, DetailActivity.class)
-                                .putExtra(DetailActivity.EXTRA_BUNDLE, pointId);
-                        mContext.startActivity(intent);
-                    } else {
-                        Bundle bundle = new Bundle();
-                        bundle.putString(DetailFragment.ARG_ITEM_ID, pointId);
+                // Start a new activity on a phone or replace a detail fragment on tablets.
+                if (!(mContext.getResources().getBoolean(R.bool.isTablet))) {
+                    Intent intent = new Intent(mContext, DetailActivity.class)
+                            .putExtra(DetailActivity.EXTRA_BUNDLE, viewHolder.getAdapterPosition());
+                    mContext.startActivity(intent);
+                } else {
+                    Bundle bundle = new Bundle();
+                    bundle.putInt(DetailFragment.ARG_ITEM_ID, viewHolder.getAdapterPosition());
 
-                        DetailFragment fragment = new DetailFragment();
-                        fragment.setArguments(bundle);
+                    DetailFragment fragment = new DetailFragment();
+                    fragment.setArguments(bundle);
 
-                        ((AppCompatActivity) mContext).getSupportFragmentManager()
-                                .beginTransaction()
-                                .replace(R.id.point_detail_container, fragment, DetailFragment.FRAGMENT_TAG)
-                                .commit();
-                    }
-                } catch (NotInSchemaException e) {
-                    Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
+                    ((AppCompatActivity) mContext).getSupportFragmentManager()
+                            .beginTransaction()
+                            .replace(R.id.point_detail_container, fragment, DetailFragment.FRAGMENT_TAG)
+                            .commit();
                 }
             }
         });
