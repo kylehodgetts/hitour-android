@@ -1,5 +1,6 @@
 package uk.ac.kcl.stranders.hitour.activity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.Cursor;
@@ -26,7 +27,6 @@ import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 
 import java.io.BufferedInputStream;
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -399,21 +399,16 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
                     if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
 
                     InputStream inputStream = response.body().byteStream();
-
-                    String specificStorageAddress = url.substring(0,url.lastIndexOf("/"));
-                    specificStorageAddress = specificStorageAddress.replace(":","");
-                    specificStorageAddress = specificStorageAddress.replace("?","");
-                    String localStorageAddress = FeedActivity.this.getFilesDir().toString();
-                    File path = new File(localStorageAddress + specificStorageAddress);
-                    if(!path.exists()) {
-                        path.mkdirs();
-                    }
-
-                    String fileName = url.substring(url.lastIndexOf("/"));
-                    File file = new File(path, fileName);
+                    url = url.replace("/","");
+                    url = url.replace(":","");
+                    String filename = url.substring(0,url.lastIndexOf("."));
+                    String extension = url.substring(url.lastIndexOf("."));
+                    filename = filename.replace(".","");
+                    url = filename + extension;
+                    Log.i("INFO", url);
 
                     BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream, 1024 * 5);
-                    FileOutputStream fileOutputStream = new FileOutputStream(file);
+                    FileOutputStream fileOutputStream = openFileOutput(url, Context.MODE_WORLD_READABLE);
                     byte[] buffer = new byte[5 * 1024];
 
                     int len;
@@ -425,8 +420,6 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
                     fileOutputStream.flush();
                     fileOutputStream.close();
                     inputStream.close();
-
-                    Log.i("INFO", "donwloadToStorage successful");
                 }
             });
         }

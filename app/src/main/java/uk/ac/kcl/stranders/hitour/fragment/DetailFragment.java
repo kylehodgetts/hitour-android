@@ -2,6 +2,8 @@ package uk.ac.kcl.stranders.hitour.fragment;
 
 
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
@@ -190,18 +192,28 @@ public class DetailFragment extends Fragment {
             try {
                 Cursor dataCursor = FeedActivity.database.getWholeByPrimary("DATA", pointMap);
                 dataCursor.moveToFirst();
+                String url = dataCursor.getString(3);
+                url = url.replace("/","");
+                url = url.replace(":","");
+                String filename = url.substring(0,url.lastIndexOf("."));
+                String extension = url.substring(url.lastIndexOf("."));
+                filename = filename.replace(".","");
+                url = filename + extension;
+                String localFilesAddress = getContext().getFilesDir().toString();
+                url = localFilesAddress + "/" + url;
                 String fileExtension = getFileExtension(dataCursor.getString(3));
                 if (fileExtension.matches("jpg|jpeg|png")) {
                     layoutDetail = (LinearLayout) inflater.inflate(R.layout.image_detail, container, false);
                     ImageView imageView = (ImageView) layoutDetail.findViewById(R.id.image);
-                    imageView.setImageResource(contentCursor.getInt(PrototypeData.URL));
+                    Bitmap bitmap = BitmapFactory.decodeFile(url);
+                    imageView.setImageBitmap(bitmap);
                 } else if (fileExtension.matches("mp4")) {
                     layoutDetail = (LinearLayout) inflater.inflate(R.layout.video_detail, container, false);
-                    addVideo(savedInstanceState, layoutDetail, i);
+                    addVideo(savedInstanceState, layoutDetail, i, url);
                 } else {
                     layoutDetail = (LinearLayout) inflater.inflate(R.layout.text_detail, container, false);
                     TextView tvText = (TextView) layoutDetail.findViewById(R.id.text);
-                    tvText.setText(dataCursor.getString(2));
+                    tvText.setText(dataCursor.getString(1));
                 }
                 TextView tvTitle = (TextView) layoutDetail.findViewById(R.id.title);
                 tvTitle.setText(contentCursor.getString(PrototypeData.DATA_TITLE));
@@ -225,15 +237,16 @@ public class DetailFragment extends Fragment {
      *
      * @param savedInstanceState {@link Bundle} that contains any previous position to be restored such as rotation.
      */
-    private void addVideo(final Bundle savedInstanceState, final LinearLayout linearLayout, int rank) {
-        if(contentCursor.getString(PrototypeData.URL) != null) {
+    private void addVideo(final Bundle savedInstanceState, final LinearLayout linearLayout, int rank, String url) {
+
+        if (url != null) {
             // TODO: retrieve links from DB and parse when available
 
-            Uri uri = Uri.parse("android.resource://" + getActivity().getPackageName() + "/" +
-                    contentCursor.getString(PrototypeData.URL));
             final VideoView videoView = (VideoView) linearLayout.findViewById(R.id.video);
             videoView.setId(Integer.parseInt(mItemId + rank + ""));
+            Uri uri = Uri.parse(url);
             videoView.setVideoURI(uri);
+            videoView.seekTo(100);
             videoView.setLayoutParams(new LinearLayout.LayoutParams(1000, 1000));
             videoView.setBackgroundResource(android.R.color.transparent);
             videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
