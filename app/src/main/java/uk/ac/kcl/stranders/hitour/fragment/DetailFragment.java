@@ -19,10 +19,13 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.VideoView;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import uk.ac.kcl.stranders.hitour.PrototypeData;
 import uk.ac.kcl.stranders.hitour.R;
 import uk.ac.kcl.stranders.hitour.activity.FeedActivity;
 import uk.ac.kcl.stranders.hitour.database.NotInSchemaException;
@@ -68,7 +71,7 @@ public class DetailFragment extends Fragment {
     private VideoView currentVideo;
 
     /**
-     * Stores the cursor to navigate the around the prototype data
+     * Stores the cursor to navigate the points of current tour
      */
     private Cursor mCursor;
 
@@ -122,7 +125,7 @@ public class DetailFragment extends Fragment {
 
             try {
                 Map<String, String> partialPrimaryMapPoint = new HashMap<>();
-                partialPrimaryMapPoint.put("POINT_ID", mCursor.getString(0));
+                partialPrimaryMapPoint.put("POINT_ID", mCursor.getString(1));
                 contentCursor = FeedActivity.database.getWholeByPrimaryPartial("POINT_DATA", partialPrimaryMapPoint);
                 contentCursor.moveToFirst();
             } catch (Exception e) {
@@ -158,13 +161,20 @@ public class DetailFragment extends Fragment {
         mImageView = (ImageView) mRootView.findViewById(R.id.photo);
 
         TextView titleView = (TextView) mRootView.findViewById(R.id.text_title);
-        TextView bodyView = (TextView) mRootView.findViewById(R.id.text_body);
 
         if (mCursor != null && contentCursor != null) {
             mRootView.setAlpha(0);
             mRootView.setVisibility(View.VISIBLE);
             mRootView.animate().alpha(1);
-            titleView.setText(mCursor.getString(2));
+            try {
+                Map<String,String> primaryMap = new HashMap<>();
+                primaryMap.put("POINT_ID", mCursor.getString(2));
+                Cursor pointCursor = FeedActivity.database.getWholeByPrimary("POINT",primaryMap);
+                pointCursor.moveToFirst();
+                titleView.setText(pointCursor.getString(1));
+            } catch (NotInSchemaException e) {
+                Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
+            }
 //            bodyView.setText(mCursor.getString(PrototypeData.DESCRIPTION));
 //            int imageId = mCursor.getInt(PrototypeData.IMAGE);
 //            mImageView.setImageDrawable(ContextCompat.getDrawable(getActivity(), imageId));
@@ -186,19 +196,15 @@ public class DetailFragment extends Fragment {
     private void addContent(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         //TODO: Needs to change from PrototypeData to DB when available.
         for (int i = 0; i < contentCursor.getCount(); ++i) {
+            contentCursor.moveToPosition(i);
             LinearLayout layoutDetail;
             Map<String, String> pointMap = new HashMap<>();
-            pointMap.put("DATA_ID", contentCursor.getString(0));
+            pointMap.put("DATA_ID", contentCursor.getString(1));
             try {
                 Cursor dataCursor = FeedActivity.database.getWholeByPrimary("DATA", pointMap);
                 dataCursor.moveToFirst();
                 String url = dataCursor.getString(3);
-                url = url.replace("/","");
-                url = url.replace(":","");
-                String filename = url.substring(0,url.lastIndexOf("."));
-                String extension = url.substring(url.lastIndexOf("."));
-                filename = filename.replace(".","");
-                url = filename + extension;
+                url = FeedActivity.createFilename(url);
                 String localFilesAddress = getContext().getFilesDir().toString();
                 url = localFilesAddress + "/" + url;
                 String fileExtension = getFileExtension(dataCursor.getString(3));
@@ -213,16 +219,27 @@ public class DetailFragment extends Fragment {
                 } else {
                     layoutDetail = (LinearLayout) inflater.inflate(R.layout.text_detail, container, false);
                     TextView tvText = (TextView) layoutDetail.findViewById(R.id.text);
-                    tvText.setText(dataCursor.getString(1));
+                    StringBuilder text = new StringBuilder();
+                    try {
+                        File file = new File(url);
+                        BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
+                        String line;
+                        while((line = bufferedReader.readLine()) != null) {
+                            text.append(line);
+                            text.append('\n');
+                        }
+                    } catch(IOException e) {
+                        Log.e("FILE_NOT_FOUND", Log.getStackTraceString(e));
+                    }
+                    tvText.setText(text);
                 }
                 TextView tvTitle = (TextView) layoutDetail.findViewById(R.id.title);
-                tvTitle.setText(contentCursor.getString(PrototypeData.DATA_TITLE));
+                tvTitle.setText(dataCursor.getString(1));
                 TextView tvDescription = (TextView) layoutDetail.findViewById(R.id.description);
-                tvDescription.setText(contentCursor.getString(PrototypeData.DATA_DESCRIPTION));
+                tvDescription.setText(dataCursor.getString(2));
+                container.addView(layoutDetail);
 
                 layoutDetail.setId(i + 100);
-                container.addView(layoutDetail);
-                contentCursor.moveToNext();
             } catch (NotInSchemaException e) {
                 Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
             }

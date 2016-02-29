@@ -26,19 +26,7 @@
             android:layout_marginTop="16dp"
             android:lineSpacingMultiplier="0.9"
             android:textColor="@color/colorPrimaryText"
-            android:textSize="24sp" />
-
-        <TextView
-            android:id="@+id/text_body"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:layout_marginEnd="@dimen/text_margin"
-            android:layout_marginLeft="32dp"
-            android:layout_marginRight="@dimen/text_margin"
-            android:layout_marginStart="32dp"
-            android:layout_marginTop="16dp"
-            android:textColor="@color/colorSecondaryText" />
+            android:textSize="36sp" />
 
     </LinearLayout>
 

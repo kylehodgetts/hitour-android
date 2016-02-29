@@ -27,6 +27,7 @@ import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -263,8 +264,13 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
                 Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
             }
             try {
-                DownloadToStorage downloadToStorage = new DownloadToStorage(data.getUrl());
-                downloadToStorage.run();
+                String filename = createFilename(data.getUrl());
+                String localPath = this.getFilesDir().toString();
+                File tempFile = new File(localPath + "/" + filename);
+                if(!tempFile.exists()) {
+                    DownloadToStorage downloadToStorage = new DownloadToStorage(data.getUrl());
+                    downloadToStorage.run();
+                }
             } catch(Exception e) {
                 Log.e("STORAGE_FAIL", Log.getStackTraceString(e));
             }
@@ -399,13 +405,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
                     if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
 
                     InputStream inputStream = response.body().byteStream();
-                    url = url.replace("/","");
-                    url = url.replace(":","");
-                    String filename = url.substring(0,url.lastIndexOf("."));
-                    String extension = url.substring(url.lastIndexOf("."));
-                    filename = filename.replace(".","");
-                    url = filename + extension;
-                    Log.i("INFO", url);
+                    url = createFilename(url);
 
                     BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream, 1024 * 5);
                     FileOutputStream fileOutputStream = openFileOutput(url, Context.MODE_WORLD_READABLE);
@@ -424,6 +424,16 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
             });
         }
 
+    }
+
+    public static String createFilename(String url) {
+        url = url.replace("/","");
+        url = url.replace(":","");
+        String filename = url.substring(0,url.lastIndexOf("."));
+        String extension = url.substring(url.lastIndexOf("."));
+        filename = filename.replace(".","");
+        url = filename + extension;
+        return url;
     }
 
 }
