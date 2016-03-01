@@ -3,6 +3,8 @@ package uk.ac.kcl.stranders.hitour;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
@@ -97,9 +99,15 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder>  {
             Cursor pointCursor = FeedActivity.database.getWholeByPrimary("POINT",primaryMap);
             pointCursor.moveToFirst();
             holder.tvTitle.setText(pointCursor.getString(1));
-//        holder.tvDescription.setText(mCursor.getString(PrototypeData.DESCRIPTION));
-//        int imageId = mCursor.getInt(PrototypeData.IMAGE);
-//        holder.ivThumbnail.setImageDrawable(ContextCompat.getDrawable(mContext, imageId));
+            holder.tvDescription.setText(pointCursor.getString(2));
+
+            String url = pointCursor.getString(3);
+            url = FeedActivity.createFilename(url);
+            String localFilesAddress = mContext.getFilesDir().toString();
+            url = localFilesAddress + "/" + url;
+            Bitmap bitmap = BitmapFactory.decodeFile(url);
+            holder.ivThumbnail.setImageBitmap(bitmap);
+
         } catch (NotInSchemaException e) {
             Log.e("DATABASE_FAIL",Log.getStackTraceString(e));
         }

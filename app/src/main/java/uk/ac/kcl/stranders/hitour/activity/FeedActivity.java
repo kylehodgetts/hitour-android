@@ -293,7 +293,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         for(Point point : listPoint) {
             Map<String,String> columnsMap = new HashMap<>();
             columnsMap.put("NAME",point.getName());
-            columnsMap.put("URL", point.getName());
+            columnsMap.put("URL", point.getUrl());
             columnsMap.put("DESCRIPTION", point.getDescription());
             Map<String,String> primaryKeysMap = new HashMap<>();
             primaryKeysMap.put("POINT_ID",point.getId().toString());

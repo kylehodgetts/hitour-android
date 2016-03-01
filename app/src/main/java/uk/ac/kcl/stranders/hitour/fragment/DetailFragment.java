@@ -158,9 +158,10 @@ public class DetailFragment extends Fragment {
             ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
 
+        TextView titleView = (TextView) mRootView.findViewById(R.id.text_title);
+        TextView bodyView = (TextView) mRootView.findViewById(R.id.text_body);
         mImageView = (ImageView) mRootView.findViewById(R.id.photo);
 
-        TextView titleView = (TextView) mRootView.findViewById(R.id.text_title);
 
         if (mCursor != null && contentCursor != null) {
             mRootView.setAlpha(0);
@@ -172,12 +173,16 @@ public class DetailFragment extends Fragment {
                 Cursor pointCursor = FeedActivity.database.getWholeByPrimary("POINT",primaryMap);
                 pointCursor.moveToFirst();
                 titleView.setText(pointCursor.getString(1));
+                bodyView.setText(pointCursor.getString(2));
+                String url = pointCursor.getString(3);
+                url = FeedActivity.createFilename(url);
+                String localFilesAddress = getContext().getFilesDir().toString();
+                url = localFilesAddress + "/" + url;
+                Bitmap bitmap = BitmapFactory.decodeFile(url);
+                mImageView.setImageBitmap(bitmap);
             } catch (NotInSchemaException e) {
                 Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
             }
-//            bodyView.setText(mCursor.getString(PrototypeData.DESCRIPTION));
-//            int imageId = mCursor.getInt(PrototypeData.IMAGE);
-//            mImageView.setImageDrawable(ContextCompat.getDrawable(getActivity(), imageId));
 
             LinearLayout linearLayout = (LinearLayout) mRootView.findViewById(R.id.detail_body);
             addContent(inflater, linearLayout, savedInstanceState);
