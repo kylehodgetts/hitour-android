@@ -152,7 +152,10 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
                             if(menuCursor.getCount() > 0) {
                                 menuCursor.moveToFirst();
                                 menuCursor.move(item.getItemId());
-                                populateFeedAdapter(menuCursor.getString(0));
+                                if(!menuCursor.getString(0).equals(FeedActivity.this.currentTourId)) {
+                                    populateFeedAdapter(menuCursor.getString(0));
+                                    Log.i("INFO", menuCursor.getString(0));
+                                }
                             }
                         } catch (NotInSchemaException e) {
                             Log.e("DATABASE_FAIL",Log.getStackTraceString(e));
@@ -237,7 +240,6 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
      * Invoked when the data has been successfully fetched from the web API.
      */
     public void onAllRequestsFinished() {
-        // TODO: populate/update the db
         List<Audience> listAudience = hiTourRetrofit.getList(DataType.AUDIENCE);
         for(Audience audience : listAudience) {
             Map<String,String> columnsMap = new HashMap<>();
@@ -291,12 +293,25 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         for(Point point : listPoint) {
             Map<String,String> columnsMap = new HashMap<>();
             columnsMap.put("NAME",point.getName());
+            columnsMap.put("URL", point.getName());
+            columnsMap.put("DESCRIPTION", point.getDescription());
             Map<String,String> primaryKeysMap = new HashMap<>();
             primaryKeysMap.put("POINT_ID",point.getId().toString());
             try {
                 database.insert(columnsMap, primaryKeysMap, "POINT");
             } catch(NotInSchemaException e) {
                 Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
+            }
+            try {
+                String filename = createFilename(point.getUrl());
+                String localPath = this.getFilesDir().toString();
+                File tempFile = new File(localPath + "/" + filename);
+                if(!tempFile.exists()) {
+                    DownloadToStorage downloadToStorage = new DownloadToStorage(point.getUrl());
+                    downloadToStorage.run();
+                }
+            } catch(Exception e) {
+                Log.e("STORAGE_FAIL", Log.getStackTraceString(e));
             }
         }
         List<PointData> listPointData  = hiTourRetrofit.getList(DataType.POINT_DATA);
@@ -351,6 +366,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
             Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
         }
     }
+
     /**
      * Invoked to fill drawer with list of tours saved on the device's database.
      */

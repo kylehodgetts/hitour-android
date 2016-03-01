@@ -34,6 +34,8 @@ public class HiSchema extends DatabaseSchema {
 
         TableSchema point = new TableSchema(POINT_ID,POINT_TABLE);
         point.addValue(NAME, DataType.Text);
+        point.addValue(URL, DataType.Text);
+        point.addValue(DESCRIPTION, DataType.Text);
         addTable(point);
 
         TableSchema data = new TableSchema(DATA_ID,DATA_TABLE);

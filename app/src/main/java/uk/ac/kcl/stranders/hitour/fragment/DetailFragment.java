@@ -194,7 +194,6 @@ public class DetailFragment extends Fragment {
      * @param savedInstanceState {@link Bundle} to save the current state
      */
     private void addContent(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        //TODO: Needs to change from PrototypeData to DB when available.
         for (int i = 0; i < contentCursor.getCount(); ++i) {
             contentCursor.moveToPosition(i);
             LinearLayout layoutDetail;
@@ -208,6 +207,8 @@ public class DetailFragment extends Fragment {
                 String localFilesAddress = getContext().getFilesDir().toString();
                 url = localFilesAddress + "/" + url;
                 String fileExtension = getFileExtension(dataCursor.getString(3));
+
+                StringBuilder text = new StringBuilder();
                 if (fileExtension.matches("jpg|jpeg|png")) {
                     layoutDetail = (LinearLayout) inflater.inflate(R.layout.image_detail, container, false);
                     ImageView imageView = (ImageView) layoutDetail.findViewById(R.id.image);
@@ -218,11 +219,10 @@ public class DetailFragment extends Fragment {
                     addVideo(savedInstanceState, layoutDetail, i, url);
                 } else {
                     layoutDetail = (LinearLayout) inflater.inflate(R.layout.text_detail, container, false);
-                    TextView tvText = (TextView) layoutDetail.findViewById(R.id.text);
-                    StringBuilder text = new StringBuilder();
                     try {
                         File file = new File(url);
                         BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
+                        text.append("\n\n");
                         String line;
                         while((line = bufferedReader.readLine()) != null) {
                             text.append(line);
@@ -231,12 +231,11 @@ public class DetailFragment extends Fragment {
                     } catch(IOException e) {
                         Log.e("FILE_NOT_FOUND", Log.getStackTraceString(e));
                     }
-                    tvText.setText(text);
                 }
                 TextView tvTitle = (TextView) layoutDetail.findViewById(R.id.title);
                 tvTitle.setText(dataCursor.getString(1));
                 TextView tvDescription = (TextView) layoutDetail.findViewById(R.id.description);
-                tvDescription.setText(dataCursor.getString(2));
+                tvDescription.setText(dataCursor.getString(2) + text);
                 container.addView(layoutDetail);
 
                 layoutDetail.setId(i + 100);
