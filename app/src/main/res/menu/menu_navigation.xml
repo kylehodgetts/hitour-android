@@ -13,5 +13,10 @@
             android:icon="@drawable/ic_action_local_hospital"
             android:tint="#757575"
             android:title="Tour Three" />
+        <item
+            android:icon="@drawable/ic_action_local_hospital"
+            android:tint="#757575"
+            android:title="About"
+            android:actionLayout="@layout/app_info_fragment"/>
     </group>
 </menu>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string name="about_app_title">About This App</string>
+	<string name="about_app_content">
+  		<![CDATA[
+        v1.0 (build )<br />
+ 		Copyright \u00a9 2016 hiTour.<br />
+
+		<br />
+
+ 		<em>v2.0.1</em><br />
+		Initial release of v2, fully re-built with many improvements, including more efficient network usage and an updated design.<br />
+
+		<br />
+
+		<strong>Libraries</strong><br />
+
+		<br />
+
+		The Unitu Android app uses the following 3rd party libraries, resources and tools:<br />
+		- Android Volley<br />
+		- Font Awesome<br />
+		- Intercom<br />
+		- Joda Time<br />
+		- Retrolambda
+
+  		]]>
+ 	</string>
+
+</resources>
