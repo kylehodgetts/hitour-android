@@ -1,12 +1,17 @@
 package uk.ac.kcl.stranders.hitour.activity;
 
+import android.app.FragmentTransaction;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.LayoutInflaterCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -14,6 +19,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -28,6 +34,7 @@ import uk.ac.kcl.stranders.hitour.R;
 import uk.ac.kcl.stranders.hitour.Utilities;
 import uk.ac.kcl.stranders.hitour.database.DBWrap;
 import uk.ac.kcl.stranders.hitour.database.schema.HiSchema;
+import uk.ac.kcl.stranders.hitour.fragment.AppInfoFragment;
 import uk.ac.kcl.stranders.hitour.fragment.DetailFragment;
 import uk.ac.kcl.stranders.hitour.model.DataType;
 import uk.ac.kcl.stranders.hitour.model.Tour;
@@ -67,14 +74,14 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
      * @param savedInstanceState {@link Bundle} with all the saved state variables.
      */
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         database = new DBWrap(this, new HiSchema(1));
         setContentView(R.layout.activity_feed);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        final NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer);
 
         mFeed = (RecyclerView) findViewById(R.id.rv_feed);
@@ -114,6 +121,19 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
                     @Override
                     public boolean onNavigationItemSelected(MenuItem item) {
                         item.setChecked(true);
+
+                        Log.d("_____THIS_____", "Starting new fragment");
+                        Fragment myfragment;
+                        myfragment = new AppInfoFragment();
+
+                        getSupportFragmentManager().beginTransaction()
+                                .replace(R.id.pager, myfragment, AppInfoFragment.FRAGMENT_TAG)
+                                .commitAllowingStateLoss();
+
+
+                        Log.d("_____THIS_____", "I decided to ignore you");
+
+
                         mDrawerLayout.closeDrawers();
                         return true;
                     }

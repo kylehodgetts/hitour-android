@@ -1,5 +1,4 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-      xmlns:hitour="http://schemas.android.com/apk/res-auto">
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
     <group android:checkableBehavior="single">
         <item
             android:checked="true"
@@ -14,13 +13,11 @@
             android:icon="@drawable/ic_action_local_hospital"
             android:tint="#757575"
             android:title="Tour Three" />
-        <item
-            android:icon="@drawable/ic_action_local_hospital"
-            android:id="@+id/about_app"
-            android:tint="#757575"
-            android:title="About"
-            hitour:showAsAction="always"
-            android:visible="true"
-            android:actionLayout="@layout/app_info_fragment"/>
     </group>
+
+    <item
+        android:id="@+id/app_info_item"
+        android:icon="@drawable/ic_action_local_hospital"
+        android:tint="#757575"
+        android:title="About"/>
 </menu>

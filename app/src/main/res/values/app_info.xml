@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+	<dimen name="app_info_padding">12dp</dimen>
+
+
 	<string name="about_app_title">About This App</string>
 	<string name="about_app_content">
   		<![CDATA[

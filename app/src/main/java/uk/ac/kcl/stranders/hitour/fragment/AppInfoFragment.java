@@ -33,42 +33,17 @@ public class AppInfoFragment extends Fragment {
      */
     private TextView mTextView;
 
-    private MenuInflater mInflater;
-    /**
-     * Default empty required public constructor
-     */
-    public AppInfoFragment() {
-        // Required empty public constructor
-    }
-
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        Log.d("___LOG____", "Attempting to open About section");
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-    }
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         mRootView = inflater.inflate(R.layout.app_info_fragment, container, false);
 
-        // Collect view components
+        // collect view components
         mTextView = (TextView) mRootView.findViewById(R.id.app_info_content);
 
-        // Set HTML text
+        // set HTML text
         mTextView.setText(Html.fromHtml(getString(R.string.about_app_content)));
-
+        Log.d("____THIS____", "In the fragment");
         return mRootView;
-    }
-
-    public Integer getIntArgument(String key) {
-        return getArguments() == null ? null : getArguments().getInt(key);
     }
 }
