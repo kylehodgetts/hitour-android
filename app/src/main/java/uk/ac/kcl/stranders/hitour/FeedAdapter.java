@@ -95,7 +95,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder>  {
         mCursor.moveToPosition(position);
         try {
             Map<String,String> primaryMap = new HashMap<>();
-            primaryMap.put("POINT_ID", mCursor.getString(2));
+            primaryMap.put("POINT_ID", mCursor.getString(1));
             Cursor pointCursor = FeedActivity.database.getWholeByPrimary("POINT",primaryMap);
             pointCursor.moveToFirst();
             holder.tvTitle.setText(pointCursor.getString(1));
