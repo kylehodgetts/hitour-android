@@ -376,8 +376,12 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
             Cursor menuCursor = database.getAll("TOUR");
             menuCursor.moveToFirst();
             for(int i = 0; i < menuCursor.getCount(); i++) {
+                menuCursor.moveToPosition(i);
                 mMenu.add(0, i, Menu.NONE, menuCursor.getString(2)).setIcon(R.drawable.ic_action_local_hospital);
-                menuCursor.move(1);
+            }
+            mMenu.setGroupCheckable(0, true, true);
+            if(mMenu.size() > 0) {
+                mMenu.getItem(0).setChecked(true);
             }
         } catch(NotInSchemaException e) {
             Log.e("DATABASE_FAIL", Log.getStackTraceString(e));

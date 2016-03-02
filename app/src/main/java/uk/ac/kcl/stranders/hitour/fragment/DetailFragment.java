@@ -162,7 +162,6 @@ public class DetailFragment extends Fragment {
         TextView bodyView = (TextView) mRootView.findViewById(R.id.text_body);
         mImageView = (ImageView) mRootView.findViewById(R.id.photo);
 
-
         if (mCursor != null && contentCursor != null) {
             mRootView.setAlpha(0);
             mRootView.setVisibility(View.VISIBLE);
