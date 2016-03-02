@@ -8,8 +8,8 @@
 
 		<br />
 
- 		<em>v2.0.1</em><br />
-		Initial release of v2, fully re-built with many improvements, including more efficient network usage and an updated design.<br />
+ 		<em>v1.0</em><br />
+		Initial release of v1.0, fully built from scratch.<br />
 
 		<br />
 
@@ -17,12 +17,18 @@
 
 		<br />
 
-		The Unitu Android app uses the following 3rd party libraries, resources and tools:<br />
-		- Android Volley<br />
-		- Font Awesome<br />
-		- Intercom<br />
-		- Joda Time<br />
-		- Retrolambda
+		The hiTour Android app uses the following 3rd party libraries, resources and tools:<br />
+		- AppCompat<br />
+		- Design<br />
+		- Pallete<br />
+		- ReciclerView<br />
+		- CardView<br />
+		- Zxing Android Embedded<br />
+		- Zxing<br />
+		- CircleImageView<br />
+		- Retrofit<br />
+		- Gson<br />
+		- Converter Gson
 
   		]]>
  	</string>
