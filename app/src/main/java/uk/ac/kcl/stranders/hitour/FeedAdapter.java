@@ -23,6 +23,11 @@ import uk.ac.kcl.stranders.hitour.activity.FeedActivity;
 import uk.ac.kcl.stranders.hitour.database.NotInSchemaException;
 import uk.ac.kcl.stranders.hitour.fragment.DetailFragment;
 
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_COLUMN_DESCRIPTION;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_COLUMN_NAME;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_COLUMN_URL;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_TOUR_COLUMN_POINT_ID;
+
 /**
  * FeedAdapter provides a binding from a points data set to views
  * that are displayed within a {@link FeedActivity#mFeed}.
@@ -32,7 +37,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder>  {
     /**
      * Stores the cursor that provides access to the feed data.
      */
-    private Cursor mCursor;
+    private Cursor pointTourCursor;
 
     /**
      * Stores the context of the application.
@@ -46,7 +51,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder>  {
      * @param context {@link Context}
      */
     public FeedAdapter(Cursor cursor, Context context) {
-        mCursor = cursor;
+        pointTourCursor = cursor;
         mContext = context;
     }
 
@@ -92,16 +97,16 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder>  {
      */
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        mCursor.moveToPosition(position);
+        pointTourCursor.moveToPosition(position);
         try {
             Map<String,String> primaryMap = new HashMap<>();
-            primaryMap.put("POINT_ID", mCursor.getString(1));
+            primaryMap.put("POINT_ID", pointTourCursor.getString(POINT_TOUR_COLUMN_POINT_ID));
             Cursor pointCursor = FeedActivity.database.getWholeByPrimary("POINT",primaryMap);
             pointCursor.moveToFirst();
-            holder.tvTitle.setText(pointCursor.getString(1));
-            holder.tvDescription.setText(pointCursor.getString(2));
+            holder.tvTitle.setText(pointCursor.getString(POINT_COLUMN_NAME));
+            holder.tvDescription.setText(pointCursor.getString(POINT_COLUMN_DESCRIPTION));
 
-            String url = pointCursor.getString(3);
+            String url = pointCursor.getString(POINT_COLUMN_URL);
             url = FeedActivity.createFilename(url);
             String localFilesAddress = mContext.getFilesDir().toString();
             url = localFilesAddress + "/" + url;
@@ -118,7 +123,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder>  {
      */
     @Override
     public int getItemCount() {
-        return mCursor.getCount();
+        return pointTourCursor.getCount();
     }
 
     /**

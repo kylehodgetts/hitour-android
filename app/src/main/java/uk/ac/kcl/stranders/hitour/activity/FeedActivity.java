@@ -52,6 +52,9 @@ import uk.ac.kcl.stranders.hitour.model.Tour;
 import uk.ac.kcl.stranders.hitour.model.TourPoints;
 import uk.ac.kcl.stranders.hitour.retrofit.HiTourRetrofit;
 
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TOUR_COLUMN_NAME;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TOUR_COLUMN_TOUR_ID;
+
 /**
  * The main activity that displays all available points for a given tour.
  */
@@ -125,10 +128,10 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         mFeed.setLayoutManager(mLayoutManager);
 
         try {
-            Cursor menuCursor = database.getAll("TOUR");
-            if(menuCursor.getCount() > 0) {
-                menuCursor.moveToFirst();
-                populateFeedAdapter(menuCursor.getString(0));
+            Cursor tourCursor = database.getAll("TOUR");
+            if(tourCursor.getCount() > 0) {
+                tourCursor.moveToFirst();
+                populateFeedAdapter(tourCursor.getString(TOUR_COLUMN_TOUR_ID));
             }
         } catch (NotInSchemaException e) {
             Log.e("DATABASE_FAIL",Log.getStackTraceString(e));
@@ -148,13 +151,12 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
                     @Override
                     public boolean onNavigationItemSelected(MenuItem item) {
                         try {
-                            Cursor menuCursor = database.getAll("TOUR");
-                            if(menuCursor.getCount() > 0) {
-                                menuCursor.moveToFirst();
-                                menuCursor.move(item.getItemId());
-                                if(!menuCursor.getString(0).equals(FeedActivity.this.currentTourId)) {
-                                    populateFeedAdapter(menuCursor.getString(0));
-                                    Log.i("INFO", menuCursor.getString(0));
+                            Cursor tourCursor = database.getAll("TOUR");
+                            if(tourCursor.getCount() > 0) {
+                                tourCursor.moveToFirst();
+                                tourCursor.move(item.getItemId());
+                                if(!tourCursor.getString(TOUR_COLUMN_TOUR_ID).equals(FeedActivity.this.currentTourId)) {
+                                    populateFeedAdapter(tourCursor.getString(TOUR_COLUMN_TOUR_ID));
                                 }
                             }
                         } catch (NotInSchemaException e) {
@@ -359,9 +361,9 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         }
         updateMenu();
         try {
-            Cursor menuCursor = database.getAll("TOUR");
-            menuCursor.moveToFirst();
-            populateFeedAdapter(menuCursor.getString(0));
+            Cursor tourCursor = database.getAll("TOUR");
+            tourCursor.moveToFirst();
+            populateFeedAdapter(tourCursor.getString(TOUR_COLUMN_TOUR_ID));
         } catch (NotInSchemaException e) {
             Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
         }
@@ -373,11 +375,11 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
     private void updateMenu() {
         mMenu.clear();
         try {
-            Cursor menuCursor = database.getAll("TOUR");
-            menuCursor.moveToFirst();
-            for(int i = 0; i < menuCursor.getCount(); i++) {
-                menuCursor.moveToPosition(i);
-                mMenu.add(0, i, Menu.NONE, menuCursor.getString(2)).setIcon(R.drawable.ic_action_local_hospital);
+            Cursor tourCursor = database.getAll("TOUR");
+            tourCursor.moveToFirst();
+            for(int i = 0; i < tourCursor.getCount(); i++) {
+                tourCursor.moveToPosition(i);
+                mMenu.add(0, i, Menu.NONE, tourCursor.getString(TOUR_COLUMN_NAME)).setIcon(R.drawable.ic_action_local_hospital);
             }
             mMenu.setGroupCheckable(0, true, true);
             if(mMenu.size() > 0) {

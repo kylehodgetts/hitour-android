@@ -32,6 +32,7 @@ public class DatabaseConstants {
     public static final String POINT_DATA_TABLE = "POINT_DATA";
 
     public static final int TOUR_COLUMN_TOUR_ID = 0;
+    public static final int TOUR_COLUMN_NAME = 2;
 
     public static final int DATA_COLUMN_NAME = 1;
     public static final int DATA_COLUMN_DESCRIPTION = 2;
@@ -43,7 +44,7 @@ public class DatabaseConstants {
 
     public static final int POINT_TOUR_COLUMN_POINT_ID = 1;
 
-    public static final int POINT_DATA_COLUMN_POINT_ID = 1;
+    public static final int POINT_DATA_COLUMN_DATA_ID = 1;
 
 
 
