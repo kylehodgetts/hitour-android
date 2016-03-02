@@ -1,6 +1,5 @@
 package uk.ac.kcl.stranders.hitour.fragment;
 
-
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -132,7 +131,6 @@ public class DetailFragment extends Fragment {
                 Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
             }
         }
-
     }
 
     /**
@@ -168,7 +166,7 @@ public class DetailFragment extends Fragment {
             mRootView.animate().alpha(1);
             try {
                 Map<String,String> primaryMap = new HashMap<>();
-                primaryMap.put("POINT_ID", mCursor.getString(2));
+                primaryMap.put("POINT_ID", mCursor.getString(1));
                 Cursor pointCursor = FeedActivity.database.getWholeByPrimary("POINT",primaryMap);
                 pointCursor.moveToFirst();
                 titleView.setText(pointCursor.getString(1));
@@ -260,8 +258,6 @@ public class DetailFragment extends Fragment {
     private void addVideo(final Bundle savedInstanceState, final LinearLayout linearLayout, int rank, String url) {
 
         if (url != null) {
-            // TODO: retrieve links from DB and parse when available
-
             final VideoView videoView = (VideoView) linearLayout.findViewById(R.id.video);
             videoView.setId(Integer.parseInt(mItemId + rank + ""));
             Uri uri = Uri.parse(url);
