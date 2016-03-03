@@ -9,13 +9,17 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
 
-import uk.ac.kcl.stranders.hitour.PrototypeData;
+import java.util.HashMap;
+import java.util.Map;
+
 import uk.ac.kcl.stranders.hitour.R;
+import uk.ac.kcl.stranders.hitour.database.NotInSchemaException;
 import uk.ac.kcl.stranders.hitour.fragment.DetailFragment;
 
 /**
@@ -59,7 +63,13 @@ public class DetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
 
-        mCursor = PrototypeData.getCursor();
+        Map<String,String> partialPrimaryMap = new HashMap<>();
+        partialPrimaryMap.put("TOUR_ID", FeedActivity.currentTourId);
+        try {
+            mCursor = FeedActivity.database.getWholeByPrimaryPartial("POINT_TOUR", partialPrimaryMap);
+        } catch (NotInSchemaException e) {
+            Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
+        }
 
         mPagerAdapter = new DetailPagerAdapter(getSupportFragmentManager());
         mPager = (ViewPager) findViewById(R.id.pager);
@@ -131,7 +141,7 @@ public class DetailActivity extends AppCompatActivity {
         @Override
         public Fragment getItem(int position) {
             mCursor.moveToPosition(position);
-            return DetailFragment.newInstance(mCursor.getInt(PrototypeData._ID));
+            return DetailFragment.newInstance(position);
         }
 
         @Override

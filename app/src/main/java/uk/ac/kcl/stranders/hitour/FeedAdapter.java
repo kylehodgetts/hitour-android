@@ -3,19 +3,30 @@ package uk.ac.kcl.stranders.hitour;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import uk.ac.kcl.stranders.hitour.activity.DetailActivity;
 import uk.ac.kcl.stranders.hitour.activity.FeedActivity;
+import uk.ac.kcl.stranders.hitour.database.NotInSchemaException;
 import uk.ac.kcl.stranders.hitour.fragment.DetailFragment;
+
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_COLUMN_DESCRIPTION;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_COLUMN_NAME;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_COLUMN_URL;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_TOUR_COLUMN_POINT_ID;
 
 /**
  * FeedAdapter provides a binding from a points data set to views
@@ -26,7 +37,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder>  {
     /**
      * Stores the cursor that provides access to the feed data.
      */
-    private Cursor mCursor;
+    private Cursor pointTourCursor;
 
     /**
      * Stores the context of the application.
@@ -40,7 +51,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder>  {
      * @param context {@link Context}
      */
     public FeedAdapter(Cursor cursor, Context context) {
-        mCursor = cursor;
+        pointTourCursor = cursor;
         mContext = context;
     }
 
@@ -58,7 +69,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder>  {
             @Override
             public void onClick(View view) {
                 // Start a new activity on a phone or replace a detail fragment on tablets.
-                if(!(mContext.getResources().getBoolean(R.bool.isTablet))) {
+                if (!(mContext.getResources().getBoolean(R.bool.isTablet))) {
                     Intent intent = new Intent(mContext, DetailActivity.class)
                             .putExtra(DetailActivity.EXTRA_BUNDLE, viewHolder.getAdapterPosition());
                     mContext.startActivity(intent);
@@ -86,11 +97,25 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder>  {
      */
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        mCursor.moveToPosition(position);
-        holder.tvTitle.setText(mCursor.getString(PrototypeData.TITLE));
-        holder.tvDescription.setText(mCursor.getString(PrototypeData.DESCRIPTION));
-        int imageId = mCursor.getInt(PrototypeData.IMAGE);
-        holder.ivThumbnail.setImageDrawable(ContextCompat.getDrawable(mContext, imageId));
+        pointTourCursor.moveToPosition(position);
+        try {
+            Map<String,String> primaryMap = new HashMap<>();
+            primaryMap.put("POINT_ID", pointTourCursor.getString(POINT_TOUR_COLUMN_POINT_ID));
+            Cursor pointCursor = FeedActivity.database.getWholeByPrimary("POINT",primaryMap);
+            pointCursor.moveToFirst();
+            holder.tvTitle.setText(pointCursor.getString(POINT_COLUMN_NAME));
+            holder.tvDescription.setText(pointCursor.getString(POINT_COLUMN_DESCRIPTION));
+
+            String url = pointCursor.getString(POINT_COLUMN_URL);
+            url = FeedActivity.createFilename(url);
+            String localFilesAddress = mContext.getFilesDir().toString();
+            url = localFilesAddress + "/" + url;
+            Bitmap bitmap = BitmapFactory.decodeFile(url);
+            holder.ivThumbnail.setImageBitmap(bitmap);
+
+        } catch (NotInSchemaException e) {
+            Log.e("DATABASE_FAIL",Log.getStackTraceString(e));
+        }
     }
 
     /**
@@ -98,7 +123,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder>  {
      */
     @Override
     public int getItemCount() {
-        return mCursor.getCount();
+        return pointTourCursor.getCount();
     }
 
     /**

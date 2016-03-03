@@ -15,6 +15,10 @@ public class Point implements Parcelable {
     private String createdAt;
     @SerializedName("updated_at")
     private String updatedAt;
+    @SerializedName("url")
+    private String url;
+    @SerializedName("description")
+    private String description;
 
     /**
      *
@@ -88,6 +92,42 @@ public class Point implements Parcelable {
         this.updatedAt = updatedAt;
     }
 
+    /**
+     *
+     * @return
+     * The url
+     */
+    public String getUrl() {
+        return url;
+    }
+
+    /**
+     *
+     * @param url
+     * The url
+     */
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    /**
+     *
+     * @return
+     * The description
+     */
+    public String getDescription() {
+        return description;
+    }
+
+    /**
+     *
+     * @param description
+     * The description
+     */
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -99,6 +139,8 @@ public class Point implements Parcelable {
         dest.writeString(name);
         dest.writeString(createdAt);
         dest.writeString(updatedAt);
+        dest.writeString(url);
+        dest.writeString(description);
     }
 
     public static final Parcelable.Creator<Point> CREATOR
@@ -117,5 +159,7 @@ public class Point implements Parcelable {
         name = in.readString();
         createdAt = in.readString();
         updatedAt = in.readString();
+        url = in.readString();
+        description = in.readString();
     }
 }

@@ -18,7 +18,6 @@ import com.journeyapps.barcodescanner.CompoundBarcodeView;
 
 import java.util.List;
 
-import uk.ac.kcl.stranders.hitour.PrototypeData;
 import uk.ac.kcl.stranders.hitour.R;
 
 /**
@@ -97,7 +96,8 @@ public class ScanningActivity extends AppCompatActivity {
     public void submit() {
         EditText etCodePinEntry = (EditText) findViewById(R.id.etCodePinEntry);
         // TODO: Needs to be changed when DB ready to search QR code data with DB and display relevant DetailActivity Page
-        if (etCodePinEntry.getText().toString().matches("\\d{1,9}") && PrototypeData.containsId(Integer.parseInt(etCodePinEntry.getText().toString()))) {
+        if (etCodePinEntry.getText().toString().matches("\\d{1,9}")) {
+            // TODO: check whether the pin exists
             Intent data = new Intent();
             data.putExtra("pin", Integer.parseInt(etCodePinEntry.getText().toString()));
             setResult(RESULT_OK, data);
