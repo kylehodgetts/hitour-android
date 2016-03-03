@@ -1,7 +1,9 @@
 package uk.ac.kcl.stranders.hitour.activity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -17,6 +19,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 
 import com.google.zxing.integration.android.IntentIntegrator;
 
@@ -75,6 +78,18 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         setSupportActionBar(toolbar);
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+
+        TextView toolbarTitle = (TextView) findViewById(R.id.textView);
+        if(getApplication().getAssets() == null){
+            Log.d("____JDSKDS_____", "WHYYYYYY");
+        } else {
+            Log.d("____JDSKDS_____", "" + getApplication().getAssets());
+
+        }
+        Context context = this;
+//        Typeface face = Typeface.createFromAsset(context.getAssets(),"fonts/ubuntumonor.ttf");
+//        toolbarTitle.setTypeface(face);
+
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer);
 
         mFeed = (RecyclerView) findViewById(R.id.rv_feed);
