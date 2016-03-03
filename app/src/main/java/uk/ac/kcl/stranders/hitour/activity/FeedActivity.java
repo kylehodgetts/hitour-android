@@ -1,18 +1,14 @@
 package uk.ac.kcl.stranders.hitour.activity;
 
-import android.app.FragmentTransaction;
-import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
-import android.support.v4.view.LayoutInflaterCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -20,7 +16,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -73,6 +68,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
 
     /**
      * Initializes the UI and sets an adapter for the {@link FeedActivity#mFeed}
+     *
      * @param savedInstanceState {@link Bundle} with all the saved state variables.
      */
     @Override
@@ -83,6 +79,10 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+//        TextView toolbarTitle = (TextView) findViewById(R.id.textView);
+//        Typeface face = Typeface.createFromAsset(getAssets(),"/fonts/ubuntumonor.ttf");
+//        toolbarTitle.setTypeface(face);
+
         final NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer);
 
@@ -92,15 +92,15 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
 
         // Display list items depending on the device orientation.
         // Hide the Up button on tablets.
-        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-            if(getResources().getBoolean(R.bool.isTablet)) {
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            if (getResources().getBoolean(R.bool.isTablet)) {
                 mLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
                 getSupportActionBar().setDisplayShowTitleEnabled(false);
             } else {
                 mLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
             }
         } else {
-            if(getResources().getBoolean(R.bool.isTablet)) {
+            if (getResources().getBoolean(R.bool.isTablet)) {
                 mLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
                 getSupportActionBar().setDisplayShowTitleEnabled(false);
             } else {
@@ -113,7 +113,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         mFeed.setAdapter(adapter);
 
         ActionBar supportActionBar = getSupportActionBar();
-        if(supportActionBar != null) {
+        if (supportActionBar != null) {
             supportActionBar.setHomeAsUpIndicator(R.drawable.ic_action_menu);
             supportActionBar.setDisplayHomeAsUpEnabled(true);
         }
@@ -124,23 +124,18 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
                     public boolean onNavigationItemSelected(MenuItem item) {
                         item.setChecked(true);
                         mDrawerLayout.closeDrawers();
+
+                        // If the "about" section is clicked, the DialogFragment shows up
+                        if (item.getItemId() == R.id.app_info_item) {
+                            FragmentManager fm = getSupportFragmentManager();
+                            AppInfoFragment appInfoFragment = new AppInfoFragment();
+                            appInfoFragment.show(fm, "app_info_fragment");
+                        }
                         return true;
                     }
                 }
         );
 
-        // If the "about" section is clicked, the DialogFragment shows up
-        final TextView aboutText = (TextView) findViewById(R.id.app_info_item);
-        aboutText.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mDrawerLayout.closeDrawers();
-
-                FragmentManager fm = getSupportFragmentManager();
-                AppInfoFragment appInfoFragment = new AppInfoFragment();
-                appInfoFragment.show(fm, "app_info_fragment");
-            }
-        });
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -152,8 +147,8 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
 
         // Fetch data from the HiTour web API
         // A null check bellow prevents data from being fetched again upon rotation
-        if(hiTourRetrofit == null) {
-            if(Utilities.isNetworkAvailable(this)) {
+        if (hiTourRetrofit == null) {
+            if (Utilities.isNetworkAvailable(this)) {
                 hiTourRetrofit = new HiTourRetrofit(this);
                 hiTourRetrofit.fetchAll();
             } else {
@@ -163,8 +158,8 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(resultCode == RESULT_OK) {
-            if(!(getResources().getBoolean(R.bool.isTablet))) {
+        if (resultCode == RESULT_OK) {
+            if (!(getResources().getBoolean(R.bool.isTablet))) {
                 Intent intent = new Intent(this, DetailActivity.class)
                         .putExtra(DetailActivity.EXTRA_BUNDLE, data.getExtras().getInt("pin"));
                 startActivity(intent);
@@ -205,7 +200,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if(id == android.R.id.home) {
+        if (id == android.R.id.home) {
             mDrawerLayout.openDrawer(GravityCompat.START);
         }
         return super.onOptionsItemSelected(item);

@@ -13,5 +13,15 @@
             android:icon="@drawable/ic_action_local_hospital"
             android:tint="#757575"
             android:title="Tour Three"/>
+
+    </group>
+
+    <group android:id="@+id/end_padder">
+        <item
+            android:id="@+id/app_info_item"
+            android:icon="@drawable/ic_action_local_hospital"
+            android:tint="#757575"
+            android:checkable="false"
+            android:title="@string/about"/>
     </group>
 </menu>

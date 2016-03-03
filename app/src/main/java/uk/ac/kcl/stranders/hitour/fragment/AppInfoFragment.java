@@ -3,10 +3,12 @@ package uk.ac.kcl.stranders.hitour.fragment;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import uk.ac.kcl.stranders.hitour.R;
@@ -44,7 +46,7 @@ public class AppInfoFragment extends DialogFragment {
 
         // Set HTML text
         mTextView.setText(Html.fromHtml(getString(R.string.about_app_content)));
-        Log.d("____THIS____", "In the fragment");
+        mTextView.setMovementMethod(LinkMovementMethod.getInstance());
 
         getDialog().setTitle("About hiTour");
 
