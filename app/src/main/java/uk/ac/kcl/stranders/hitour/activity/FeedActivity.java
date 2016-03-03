@@ -4,6 +4,7 @@ import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -23,6 +24,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 
 import com.google.zxing.integration.android.IntentIntegrator;
 
@@ -121,24 +123,24 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
                     @Override
                     public boolean onNavigationItemSelected(MenuItem item) {
                         item.setChecked(true);
-
-                        Log.d("_____THIS_____", "Starting new fragment");
-                        Fragment myfragment;
-                        myfragment = new AppInfoFragment();
-
-                        getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.pager, myfragment, AppInfoFragment.FRAGMENT_TAG)
-                                .commitAllowingStateLoss();
-
-
-                        Log.d("_____THIS_____", "I decided to ignore you");
-
-
                         mDrawerLayout.closeDrawers();
                         return true;
                     }
                 }
         );
+
+        // If the "about" section is clicked, the DialogFragment shows up
+        final TextView aboutText = (TextView) findViewById(R.id.app_info_item);
+        aboutText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mDrawerLayout.closeDrawers();
+
+                FragmentManager fm = getSupportFragmentManager();
+                AppInfoFragment appInfoFragment = new AppInfoFragment();
+                appInfoFragment.show(fm, "app_info_fragment");
+            }
+        });
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {

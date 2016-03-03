@@ -1,49 +1,53 @@
 package uk.ac.kcl.stranders.hitour.fragment;
 
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
+import android.support.v4.app.DialogFragment;
 import android.text.Html;
 import android.util.Log;
-import android.view.ContextMenu;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import uk.ac.kcl.stranders.hitour.R;
 
-public class AppInfoFragment extends Fragment {
-
-    /**
-     * Static {@link DetailFragment} tag used to identify a fragment.
-     */
-    public static final String FRAGMENT_TAG = "uk.ac.kcl.stranders.hitour.AppInfoFragment.TAG";
-
-    /**
-     * Stores the root view where the fragment is inflated to
-     */
-    private View mRootView;
+/**
+ * DialogFragment that shows the application information from any activity
+ */
+public class AppInfoFragment extends DialogFragment {
 
     /**
      * Stores the main text view shown on the section
      */
     private TextView mTextView;
 
-    @Nullable
+    /**
+     * Empty constructor required
+     */
+    public AppInfoFragment(){
+
+    }
+
+    /**
+     * Creates and inflates the fragment layout in a DialogFragment format
+     * @param inflater {@link LayoutInflater}
+     * @param container {@link ViewGroup} of where the views are to be created from
+     * @param savedInstanceState {@link Bundle} with all the saved state variables
+     * @return {@link View} DialogFragment containing all of its views
+     */
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        mRootView = inflater.inflate(R.layout.app_info_fragment, container, false);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.app_info_fragment, container, false);
 
-        // collect view components
-        mTextView = (TextView) mRootView.findViewById(R.id.app_info_content);
+        // Collect view components
+        mTextView = (TextView) view.findViewById(R.id.app_info_content);
 
-        // set HTML text
+        // Set HTML text
         mTextView.setText(Html.fromHtml(getString(R.string.about_app_content)));
         Log.d("____THIS____", "In the fragment");
-        return mRootView;
+
+        getDialog().setTitle("About hiTour");
+
+        return view;
     }
 }

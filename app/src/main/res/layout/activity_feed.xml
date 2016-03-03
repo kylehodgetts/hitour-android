@@ -41,13 +41,30 @@
     <android.support.design.widget.NavigationView
         android:id="@+id/nav_view"
         android:layout_width="280dp"
-        android:layout_height="match_parent"
+        android:layout_height="fill_parent"
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
         app:headerLayout="@layout/navheader"
         app:itemTextColor="@color/colorDrawerText"
         app:menu="@menu/menu_navigation" >
 
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="bottom">
+            <TextView
+                android:id="@+id/app_info_item"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:layout_alignParentBottom="true"
+                android:fitsSystemWindows="true"
+                android:gravity="start"
+                android:text="@string/about"
+                android:padding="@dimen/app_info_padding"
+                android:clickable="true"/>
+
+        </RelativeLayout>
     </android.support.design.widget.NavigationView>
 
 </android.support.v4.widget.DrawerLayout>

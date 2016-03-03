@@ -4,20 +4,14 @@
             android:checked="true"
             android:icon="@drawable/ic_action_local_hospital"
             android:tint="#757575"
-            android:title="Tour One" />
+            android:title="Tour One"/>
         <item
             android:icon="@drawable/ic_action_local_hospital"
             android:tint="#757575"
-            android:title="Tour Two" />
+            android:title="Tour Two"/>
         <item
             android:icon="@drawable/ic_action_local_hospital"
             android:tint="#757575"
-            android:title="Tour Three" />
+            android:title="Tour Three"/>
     </group>
-
-    <item
-        android:id="@+id/app_info_item"
-        android:icon="@drawable/ic_action_local_hospital"
-        android:tint="#757575"
-        android:title="About"/>
 </menu>

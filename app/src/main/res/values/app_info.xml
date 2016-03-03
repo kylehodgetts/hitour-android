@@ -7,13 +7,13 @@
 	<string name="about_app_title">About This App</string>
 	<string name="about_app_content">
   		<![CDATA[
-        v1.0 (build )<br />
+        v1.1.0 (build 23.0.2)<br />
  		Copyright \u00a9 2016 hiTour.<br />
 
 		<br />
 
- 		<em>v1.0</em><br />
-		Initial release of v1.0, fully built from scratch.<br />
+ 		<em>v1.1.0</em><br />
+		Initial release of v1.1.0, fully built from scratch.<br />
 
 		<br />
 
@@ -22,11 +22,8 @@
 		<br />
 
 		The hiTour Android app uses the following 3rd party libraries, resources and tools:<br />
-		- AppCompat<br />
 		- Design<br />
 		- Pallete<br />
-		- ReciclerView<br />
-		- CardView<br />
 		- Zxing Android Embedded<br />
 		- Zxing<br />
 		- CircleImageView<br />
