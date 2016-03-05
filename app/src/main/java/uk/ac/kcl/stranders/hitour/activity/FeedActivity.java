@@ -191,21 +191,26 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(resultCode == RESULT_OK) {
-            if(!(getResources().getBoolean(R.bool.isTablet))) {
-                Intent intent = new Intent(this, DetailActivity.class)
-                        .putExtra(DetailActivity.EXTRA_BUNDLE, data.getExtras().getInt("pin"));
-                startActivity(intent);
+            if(data.getExtras().getString("mode").equals("point")) {
+                // Instructions for when a point is entered
+                if (!(getResources().getBoolean(R.bool.isTablet))) {
+                    Intent intent = new Intent(this, DetailActivity.class)
+                            .putExtra(DetailActivity.EXTRA_BUNDLE, data.getExtras().getInt("pin"));
+                    startActivity(intent);
+                } else {
+                    Bundle bundle = new Bundle();
+                    bundle.putInt(DetailFragment.ARG_ITEM_ID, data.getExtras().getInt("pin"));
+
+                    DetailFragment fragment = new DetailFragment();
+                    fragment.setArguments(bundle);
+
+                    getSupportFragmentManager()
+                            .beginTransaction()
+                            .replace(R.id.point_detail_container, fragment, DetailFragment.FRAGMENT_TAG)
+                            .commitAllowingStateLoss();
+                }
             } else {
-                Bundle bundle = new Bundle();
-                bundle.putInt(DetailFragment.ARG_ITEM_ID, data.getExtras().getInt("pin"));
-
-                DetailFragment fragment = new DetailFragment();
-                fragment.setArguments(bundle);
-
-                getSupportFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.point_detail_container, fragment, DetailFragment.FRAGMENT_TAG)
-                        .commitAllowingStateLoss();
+                //Instructions for when a tour is entered
             }
         }
     }
