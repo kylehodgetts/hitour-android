@@ -64,6 +64,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder>  {
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_feed, parent, false);
         final ViewHolder viewHolder = new ViewHolder(v);
+        v.setContentDescription(v.getResources().getString(R.string.content_description_item_feed)+" "+viewHolder.tvTitle);
 
         v.setOnClickListener(new View.OnClickListener() {
             @Override

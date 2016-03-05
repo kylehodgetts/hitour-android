@@ -152,15 +152,15 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
                     public boolean onNavigationItemSelected(MenuItem item) {
                         try {
                             Cursor tourCursor = database.getAll("TOUR");
-                            if(tourCursor.getCount() > 0) {
+                            if (tourCursor.getCount() > 0) {
                                 tourCursor.moveToFirst();
                                 tourCursor.move(item.getItemId());
-                                if(!tourCursor.getString(TOUR_COLUMN_TOUR_ID).equals(FeedActivity.this.currentTourId)) {
+                                if (!tourCursor.getString(TOUR_COLUMN_TOUR_ID).equals(FeedActivity.this.currentTourId)) {
                                     populateFeedAdapter(tourCursor.getString(TOUR_COLUMN_TOUR_ID));
                                 }
                             }
                         } catch (NotInSchemaException e) {
-                            Log.e("DATABASE_FAIL",Log.getStackTraceString(e));
+                            Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
                         }
                         item.setChecked(true);
                         mDrawerLayout.closeDrawers();
@@ -170,6 +170,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         );
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setContentDescription(fab.getResources().getString(R.string.content_description_launch_scanner));
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -380,6 +381,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
             for(int i = 0; i < tourCursor.getCount(); i++) {
                 tourCursor.moveToPosition(i);
                 mMenu.add(0, i, Menu.NONE, tourCursor.getString(TOUR_COLUMN_NAME)).setIcon(R.drawable.ic_action_local_hospital);
+                mMenu.getItem(i).getActionView().setContentDescription(mMenu.getItem(i).getActionView().getResources().getString(R.string.content_description_tour_selection)+""+mMenu.getItem(i).getTitle());
             }
             mMenu.setGroupCheckable(0, true, true);
             if(mMenu.size() > 0) {

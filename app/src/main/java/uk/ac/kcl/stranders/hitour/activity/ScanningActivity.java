@@ -78,6 +78,7 @@ public class ScanningActivity extends AppCompatActivity {
         etCodePinEntry = (EditText) findViewById(R.id.etCodePinEntry);
 
         Button btnSubmit = (Button) findViewById(R.id.btnSubmit);
+        btnSubmit.setContentDescription(btnSubmit.getResources().getString(R.string.content_description_submits));
         btnSubmit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
