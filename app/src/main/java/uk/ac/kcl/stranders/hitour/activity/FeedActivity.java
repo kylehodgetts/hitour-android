@@ -381,7 +381,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
             for(int i = 0; i < tourCursor.getCount(); i++) {
                 tourCursor.moveToPosition(i);
                 mMenu.add(0, i, Menu.NONE, tourCursor.getString(TOUR_COLUMN_NAME)).setIcon(R.drawable.ic_action_local_hospital);
-                mMenu.getItem(i).getActionView().setContentDescription(mMenu.getItem(i).getActionView().getResources().getString(R.string.content_description_tour_selection)+""+mMenu.getItem(i).getTitle());
+                mMenu.getItem(i).getActionView().setContentDescription(mMenu.getItem(i).getActionView().getResources().getString(R.string.content_description_tour_selection, mMenu.getItem(i).getTitle()));
             }
             mMenu.setGroupCheckable(0, true, true);
             if(mMenu.size() > 0) {
