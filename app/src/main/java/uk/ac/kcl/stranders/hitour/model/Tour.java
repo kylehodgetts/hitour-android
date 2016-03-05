@@ -5,6 +5,9 @@ import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Tour implements Parcelable {
 
     @SerializedName("id")
@@ -17,6 +20,8 @@ public class Tour implements Parcelable {
     private String name;
     @SerializedName("audience_id")
     private Integer audienceId;
+    @SerializedName("points")
+    private List<Point> points;
 
     /**
      *
@@ -108,6 +113,24 @@ public class Tour implements Parcelable {
         this.audienceId = audienceId;
     }
 
+    /**
+     *
+     * @return
+     * The list of points
+     */
+    public List<Point> getPoints() {
+        return points;
+    }
+
+    /**
+     *
+     * @param points
+     * The list of points
+     */
+    public void setPoints(List<Point> points) {
+        this.points = points;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -120,6 +143,7 @@ public class Tour implements Parcelable {
         dest.writeString(updatedAt);
         dest.writeString(name);
         dest.writeInt(audienceId);
+        dest.writeList(points);
     }
 
     public static final Parcelable.Creator<Tour> CREATOR
@@ -139,5 +163,7 @@ public class Tour implements Parcelable {
         updatedAt = in.readString();
         name = in.readString();
         audienceId = in.readInt();
+        points = new ArrayList<Point>();
+        in.readList(points, Point.class.getClassLoader());
     }
 }

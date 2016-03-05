@@ -5,6 +5,9 @@ import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Data implements Parcelable {
 
     @SerializedName("id")
@@ -19,6 +22,10 @@ public class Data implements Parcelable {
     private String createdAt;
     @SerializedName("updated_at")
     private String updatedAt;
+    @SerializedName("audiences")
+    private List<Audience> audiences;
+    @SerializedName("rank")
+    private Integer rank;
 
     /**
      *
@@ -128,6 +135,42 @@ public class Data implements Parcelable {
         this.updatedAt = updatedAt;
     }
 
+    /**
+     *
+     * @return
+     * The list of audiences
+     */
+    public List<Audience> getAudiences() {
+        return audiences;
+    }
+
+    /**
+     *
+     * @param audiences
+     * The list of audiences
+     */
+    public void setAudiences(List<Audience> audiences) {
+        this.audiences = audiences;
+    }
+
+    /**
+     *
+     * @return
+     * The rank
+     */
+    public Integer getRank() {
+        return rank;
+    }
+
+    /**
+     *
+     * @param rank
+     * The rank
+     */
+    public void rank(Integer rank) {
+        this.rank = rank;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -141,6 +184,8 @@ public class Data implements Parcelable {
         dest.writeString(url);
         dest.writeString(createdAt);
         dest.writeString(updatedAt);
+        dest.writeList(audiences);
+        dest.writeInt(rank);
     }
 
     public static final Parcelable.Creator<Data> CREATOR
@@ -161,5 +206,8 @@ public class Data implements Parcelable {
         url = in.readString();
         createdAt = in.readString();
         updatedAt = in.readString();
+        audiences = new ArrayList<Audience>();
+        in.readList(audiences, Audience.class.getClassLoader());
+        rank = in.readInt();
     }
 }
