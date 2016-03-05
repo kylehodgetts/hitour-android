@@ -1,6 +1,5 @@
 package uk.ac.kcl.stranders.hitour.activity;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Typeface;
@@ -15,16 +14,18 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;
 
 import com.google.zxing.integration.android.IntentIntegrator;
 
 import java.util.List;
 
+import uk.ac.kcl.stranders.hitour.CustomTypefaceSpan;
 import uk.ac.kcl.stranders.hitour.FeedAdapter;
 import uk.ac.kcl.stranders.hitour.PrototypeData;
 import uk.ac.kcl.stranders.hitour.R;
@@ -79,16 +80,11 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
 
-        TextView toolbarTitle = (TextView) findViewById(R.id.textView);
-        if(getApplication().getAssets() == null){
-            Log.d("____JDSKDS_____", "WHYYYYYY");
-        } else {
-            Log.d("____JDSKDS_____", "" + getApplication().getAssets());
+        // Set font for title in action bar
+        Typeface font = Typeface.createFromAsset(this.getAssets(), "fonts/ubuntu_l.ttf");
+        SpannableString s = new SpannableString("hiTour");
+        s.setSpan(new CustomTypefaceSpan("", font), 0, s.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
-        }
-        Context context = this;
-//        Typeface face = Typeface.createFromAsset(context.getAssets(),"fonts/ubuntumonor.ttf");
-//        toolbarTitle.setTypeface(face);
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer);
 
@@ -122,6 +118,9 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         if(supportActionBar != null) {
             supportActionBar.setHomeAsUpIndicator(R.drawable.ic_action_menu);
             supportActionBar.setDisplayHomeAsUpEnabled(true);
+
+            // Set the title of the action bar as the title with the custom font
+            supportActionBar.setTitle(s);
         }
 
         navigationView.setNavigationItemSelectedListener(
