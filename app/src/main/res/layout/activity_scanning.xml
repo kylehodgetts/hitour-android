@@ -27,15 +27,44 @@
             android:hint="@string/hint_scanning"
             android:singleLine="true" />
 
-        <Button
-            android:id="@+id/btnSubmit"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="end"
             android:layout_marginTop="16dp"
-            android:background="@color/colorPrimaryDark"
-            android:text="@string/submit"
-            android:textColor="@color/colorIcons" />
+            android:orientation="horizontal" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/point"
+                android:textSize="16dp"/>
+
+            <Switch
+                android:id="@+id/mode_switch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/tour"
+                android:textSize="16dp" />
+
+            <View
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+
+            <Button
+                android:id="@+id/btnSubmit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/colorPrimaryDark"
+                android:text="@string/submit"
+                android:textColor="@color/colorIcons" />
+
+
+        </LinearLayout>
 
     </LinearLayout>
 
