@@ -1,6 +1,9 @@
 package uk.ac.kcl.stranders.hitour.activity;
 
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.SESSION_COLUMN_PASSPHRASE;
+
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
@@ -18,18 +21,15 @@ import com.journeyapps.barcodescanner.BarcodeCallback;
 import com.journeyapps.barcodescanner.BarcodeResult;
 import com.journeyapps.barcodescanner.CompoundBarcodeView;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 
 import uk.ac.kcl.stranders.hitour.R;
+import uk.ac.kcl.stranders.hitour.database.NotInSchemaException;
 
 /**
  * {@link AppCompatActivity} class that is used to retrieve input by means of scanning a QR Code or
@@ -113,10 +113,34 @@ public class ScanningActivity extends AppCompatActivity {
     public void submit() {
         EditText etCodePinEntry = (EditText) findViewById(R.id.etCodePinEntry);
         String result = etCodePinEntry.getText().toString();
+        // Check if user wants to add a tour or a point
         if(modeSwitch.isChecked()) {
-            TourSubmit tourSubmit = new TourSubmit();
-            tourSubmit.execute(result);
+            // For when the user attempts to add a tour
+            try {
+                // Checks to see if tour session is already on device
+                Cursor sessionCursor = FeedActivity.database.getAll("SESSION");
+                boolean alreadyExists = false;
+                for(int i = 0; i < sessionCursor.getCount(); i++) {
+                    sessionCursor.moveToPosition(i);
+                    if(result.equals(sessionCursor.getString(SESSION_COLUMN_PASSPHRASE))) {
+                        alreadyExists = true;
+                    }
+                }
+                if(alreadyExists) {
+                    Log.d("FeedActivity", "Tour for " + etCodePinEntry.getText() + " already exists!");
+                    Snackbar.make(barcodeScannerView, "Tour already downloaded on this device.", Snackbar.LENGTH_LONG).show();
+                    barcodeScannerView.resume();
+                    clearInput();
+                } else {
+                    // Attempts to download tour if the passphrase is valid
+                    TourSubmit tourSubmit = new TourSubmit();
+                    tourSubmit.execute(result);
+                }
+            } catch(NotInSchemaException e) {
+                Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
+            }
         } else {
+            // For when the user attempts to add a point
             // TODO: Needs to be changed when DB ready to search QR code data with DB and display relevant DetailActivity Page
             if (result.matches("\\d{1,9}")) {
                 // TODO: check whether the pin exists

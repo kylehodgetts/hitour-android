@@ -45,6 +45,8 @@ public class DatabaseConstants {
 
     public static final int POINT_DATA_COLUMN_DATA_ID = 1;
 
+    public static final int SESSION_COLUMN_PASSPHRASE = 3;
+
     public static final int TOUR_COLUMN_TOUR_ID = 0;
     public static final int TOUR_COLUMN_AUDIENCE_ID = 1;
     public static final int TOUR_COLUMN_NAME = 2;

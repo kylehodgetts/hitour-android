@@ -178,16 +178,6 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
             }
         });
 
-        // Fetch data from the HiTour web API
-        // A null check bellow prevents data from being fetched again upon rotation
-        if(hiTourRetrofit == null) {
-            if(Utilities.isNetworkAvailable(this)) {
-                hiTourRetrofit = new HiTourRetrofit(this, "Unguessable983");
-                hiTourRetrofit.fetchTour();
-            } else {
-                Snackbar.make(mFeed, getString(R.string.no_network), Snackbar.LENGTH_LONG).show();
-            }
-        }
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -211,7 +201,13 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
                             .commitAllowingStateLoss();
                 }
             } else {
-                //Instructions for when a tour is entered
+                // Instructions for when a tour is entered
+                if(Utilities.isNetworkAvailable(this)) {
+                    hiTourRetrofit = new HiTourRetrofit(this, data.getExtras().getString("pin"));
+                    hiTourRetrofit.fetchTour();
+                } else {
+                    Snackbar.make(mFeed, getString(R.string.no_network), Snackbar.LENGTH_LONG).show();
+                }
             }
         }
     }
