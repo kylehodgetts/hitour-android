@@ -87,6 +87,7 @@ public class ScanningActivity extends AppCompatActivity {
         etCodePinEntry = (EditText) findViewById(R.id.etCodePinEntry);
 
         Button btnSubmit = (Button) findViewById(R.id.btnSubmit);
+        btnSubmit.setContentDescription(btnSubmit.getResources().getString(R.string.content_description_submits));
         btnSubmit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -114,7 +115,8 @@ public class ScanningActivity extends AppCompatActivity {
     public void submit() {
         EditText etCodePinEntry = (EditText) findViewById(R.id.etCodePinEntry);
         // TODO: Needs to be changed when DB ready to search QR code data with DB and display relevant DetailActivity Page
-        if (etCodePinEntry.getText().toString().matches("\\d{1,9}") && PrototypeData.containsId(Integer.parseInt(etCodePinEntry.getText().toString()))) {
+        if (etCodePinEntry.getText().toString().matches("\\d{1,9}")) {
+            // TODO: check whether the pin exists
             Intent data = new Intent();
             data.putExtra("pin", Integer.parseInt(etCodePinEntry.getText().toString()));
             setResult(RESULT_OK, data);

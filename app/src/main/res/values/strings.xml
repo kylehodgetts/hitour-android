@@ -5,4 +5,10 @@
     <string name="no_network">There is no network connection. The data could not be updated.</string>
     <string name="hint_scanning">Scan a code or type a pin</string>
     <string name="submit">Submit</string>
+
+    <string name="content_description_submits">Submit</string>
+    <string name="content_description_item_feed">Item Feed %1$s</string>
+    <string name="content_description_launch_scanner">Launch Scanner</string>
+    <string name="content_description_tour_selection">Tour Selection %1$s</string>
+
 </resources>

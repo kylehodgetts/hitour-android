@@ -1,8 +1,10 @@
 package uk.ac.kcl.stranders.hitour.activity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Typeface;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -23,20 +25,40 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.google.zxing.integration.android.IntentIntegrator;
+import com.squareup.okhttp.Callback;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import uk.ac.kcl.stranders.hitour.CustomTypefaceSpan;
 import uk.ac.kcl.stranders.hitour.FeedAdapter;
-import uk.ac.kcl.stranders.hitour.PrototypeData;
 import uk.ac.kcl.stranders.hitour.R;
 import uk.ac.kcl.stranders.hitour.Utilities;
 import uk.ac.kcl.stranders.hitour.database.DBWrap;
+import uk.ac.kcl.stranders.hitour.database.NotInSchemaException;
 import uk.ac.kcl.stranders.hitour.database.schema.HiSchema;
 import uk.ac.kcl.stranders.hitour.fragment.DetailFragment;
+import uk.ac.kcl.stranders.hitour.model.Audience;
+import uk.ac.kcl.stranders.hitour.model.Data;
+import uk.ac.kcl.stranders.hitour.model.DataAudience;
 import uk.ac.kcl.stranders.hitour.model.DataType;
+import uk.ac.kcl.stranders.hitour.model.Point;
+import uk.ac.kcl.stranders.hitour.model.PointData;
 import uk.ac.kcl.stranders.hitour.model.Tour;
+import uk.ac.kcl.stranders.hitour.model.TourPoints;
 import uk.ac.kcl.stranders.hitour.retrofit.HiTourRetrofit;
+
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TOUR_COLUMN_NAME;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TOUR_COLUMN_TOUR_ID;
 
 /**
  * The main activity that displays all available points for a given tour.
@@ -64,6 +86,10 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
      * A middle layer to interact with a local database.
      */
     public static DBWrap database;
+
+    public static String currentTourId;
+
+    private Menu mMenu;
 
     private static HiTourRetrofit hiTourRetrofit;
 
@@ -108,8 +134,19 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         }
 
         mFeed.setLayoutManager(mLayoutManager);
-        FeedAdapter adapter = new FeedAdapter(PrototypeData.getCursor(), this);
-        mFeed.setAdapter(adapter);
+
+        try {
+            Cursor tourCursor = database.getAll("TOUR");
+            if(tourCursor.getCount() > 0) {
+                tourCursor.moveToFirst();
+                populateFeedAdapter(tourCursor.getString(TOUR_COLUMN_TOUR_ID));
+            }
+        } catch (NotInSchemaException e) {
+            Log.e("DATABASE_FAIL",Log.getStackTraceString(e));
+        }
+
+        mMenu = navigationView.getMenu();
+        updateMenu();
 
         ActionBar supportActionBar = getSupportActionBar();
         if(supportActionBar != null) {
@@ -121,6 +158,18 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
                 new NavigationView.OnNavigationItemSelectedListener() {
                     @Override
                     public boolean onNavigationItemSelected(MenuItem item) {
+                        try {
+                            Cursor tourCursor = database.getAll("TOUR");
+                            if (tourCursor.getCount() > 0) {
+                                tourCursor.moveToFirst();
+                                tourCursor.move(item.getItemId());
+                                if (!tourCursor.getString(TOUR_COLUMN_TOUR_ID).equals(FeedActivity.this.currentTourId)) {
+                                    populateFeedAdapter(tourCursor.getString(TOUR_COLUMN_TOUR_ID));
+                                }
+                            }
+                        } catch (NotInSchemaException e) {
+                            Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
+                        }
                         item.setChecked(true);
                         mDrawerLayout.closeDrawers();
                         return true;
@@ -129,6 +178,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         );
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setContentDescription(fab.getResources().getString(R.string.content_description_launch_scanner));
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -197,10 +247,135 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         return super.onOptionsItemSelected(item);
     }
 
-    /**
+     /**
      * Invoked when the data has been successfully fetched from the web API.
      */
     public void onAllRequestsFinished() {
+        List<Audience> listAudience = hiTourRetrofit.getList(DataType.AUDIENCE);
+        for(Audience audience : listAudience) {
+            Map<String,String> columnsMap = new HashMap<>();
+            columnsMap.put("NAME",audience.getName());
+            Map<String,String> primaryKeysMap = new HashMap<>();
+            primaryKeysMap.put("AUDIENCE_ID", audience.getId().toString());
+            try {
+                database.insert(columnsMap, primaryKeysMap, "AUDIENCE");
+            } catch(NotInSchemaException e) {
+                Log.e("DATABASE_FAIL",Log.getStackTraceString(e));
+            }
+        }
+        List<Data> listData = hiTourRetrofit.getList(DataType.DATA);
+        for(Data data : listData) {
+            Map<String,String> columnsMap = new HashMap<>();
+            columnsMap.put("URL",data.getUrl());
+            columnsMap.put("DESCRIPTION",data.getDescription());
+            columnsMap.put("TITLE",data.getTitle());
+            Map<String,String> primaryKeysMap = new HashMap<>();
+            primaryKeysMap.put("DATA_ID",data.getId().toString());
+            try {
+                database.insert(columnsMap, primaryKeysMap, "DATA");
+            } catch(NotInSchemaException e) {
+                Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
+            }
+            try {
+                String filename = createFilename(data.getUrl());
+                String localPath = this.getFilesDir().toString();
+                File tempFile = new File(localPath + "/" + filename);
+                if(!tempFile.exists()) {
+                    DownloadToStorage downloadToStorage = new DownloadToStorage(data.getUrl());
+                    downloadToStorage.run();
+                }
+            } catch(Exception e) {
+                Log.e("STORAGE_FAIL", Log.getStackTraceString(e));
+            }
+        }
+        List<DataAudience> listDataAudience = hiTourRetrofit.getList(DataType.DATA_AUDIENCE);
+        for(DataAudience dataAudience : listDataAudience) {
+            Map<String,String> columnsMap = new HashMap<>();
+            Map<String,String> primaryKeysMap = new HashMap<>();
+            primaryKeysMap.put("DATA_ID",dataAudience.getDatumId().toString());
+            primaryKeysMap.put("AUDIENCE_ID",dataAudience.getAudienceId().toString());
+            try {
+                database.insert(columnsMap, primaryKeysMap, "AUDIENCE_DATA");
+            } catch(NotInSchemaException e) {
+                Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
+            }
+        }
+        List<Point> listPoint  = hiTourRetrofit.getList(DataType.POINT);
+        for(Point point : listPoint) {
+            Map<String,String> columnsMap = new HashMap<>();
+            columnsMap.put("NAME",point.getName());
+            columnsMap.put("URL", point.getUrl());
+            columnsMap.put("DESCRIPTION", point.getDescription());
+            Map<String,String> primaryKeysMap = new HashMap<>();
+            primaryKeysMap.put("POINT_ID",point.getId().toString());
+            try {
+                database.insert(columnsMap, primaryKeysMap, "POINT");
+            } catch(NotInSchemaException e) {
+                Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
+            }
+            try {
+                String filename = createFilename(point.getUrl());
+                String localPath = this.getFilesDir().toString();
+                File tempFile = new File(localPath + "/" + filename);
+                if(!tempFile.exists()) {
+                    DownloadToStorage downloadToStorage = new DownloadToStorage(point.getUrl());
+                    downloadToStorage.run();
+                }
+            } catch(Exception e) {
+                Log.e("STORAGE_FAIL", Log.getStackTraceString(e));
+            }
+        }
+        List<PointData> listPointData  = hiTourRetrofit.getList(DataType.POINT_DATA);
+        for(PointData pointData : listPointData) {
+            Map<String,String> columnsMap = new HashMap<>();
+            try {
+                columnsMap.put("RANK", pointData.getRank().toString());
+            } catch(NullPointerException e) {
+                columnsMap.put("RANK",null);
+            }
+            Map<String,String> primaryKeysMap = new HashMap<>();
+            primaryKeysMap.put("POINT_ID",pointData.getPointId().toString());
+            primaryKeysMap.put("DATA_ID",pointData.getDatumId().toString());
+            try {
+                database.insert(columnsMap, primaryKeysMap, "POINT_DATA");
+            } catch(NotInSchemaException e) {
+                Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
+            }
+        }
+        List<Tour> listTour = hiTourRetrofit.getList(DataType.TOUR);
+        for(Tour tour : listTour) {
+            Map<String,String> columnsMap = new HashMap<>();
+            columnsMap.put("NAME",tour.getName());
+            columnsMap.put("AUDIENCE_ID",tour.getAudienceId().toString());
+            Map<String,String> primaryKeysMap = new HashMap<>();
+            primaryKeysMap.put("TOUR_ID",tour.getId().toString());
+            try {
+                database.insert(columnsMap, primaryKeysMap, "TOUR");
+            } catch(NotInSchemaException e) {
+                Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
+            }
+        }
+        List<TourPoints> listTourPoints = hiTourRetrofit.getList(DataType.TOUR_POINTS);
+        for(TourPoints tourPoint : listTourPoints) {
+            Map<String,String> columnsMap = new HashMap<>();
+            columnsMap.put("RANK",tourPoint.getRank().toString());
+            Map<String,String> primaryKeysMap = new HashMap<>();
+            primaryKeysMap.put("TOUR_ID",tourPoint.getTourId().toString());
+            primaryKeysMap.put("POINT_ID",tourPoint.getPointId().toString());
+            try {
+                database.insert(columnsMap, primaryKeysMap, "POINT_TOUR");
+            } catch(NotInSchemaException e) {
+                Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
+            }
+        }
+        updateMenu();
+        try {
+            Cursor tourCursor = database.getAll("TOUR");
+            tourCursor.moveToFirst();
+            populateFeedAdapter(tourCursor.getString(TOUR_COLUMN_TOUR_ID));
+        } catch (NotInSchemaException e) {
+            Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
+        }
         // TODO: populate/update the db
         // test
         String name = ((List<Tour>) hiTourRetrofit.getList(DataType.TOUR)).get(0).getName();
@@ -227,5 +402,94 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         }
     }
 
+    /**
+     * Invoked to fill drawer with list of tours saved on the device's database.
+     */
+    private void updateMenu() {
+        mMenu.clear();
+        try {
+            Cursor tourCursor = database.getAll("TOUR");
+            tourCursor.moveToFirst();
+            for(int i = 0; i < tourCursor.getCount(); i++) {
+                tourCursor.moveToPosition(i);
+                mMenu.add(0, i, Menu.NONE, tourCursor.getString(TOUR_COLUMN_NAME)).setIcon(R.drawable.ic_action_local_hospital);
+                mMenu.getItem(i).getActionView().setContentDescription(mMenu.getItem(i).getActionView().getResources().getString(R.string.content_description_tour_selection, mMenu.getItem(i).getTitle()));
+            }
+            mMenu.setGroupCheckable(0, true, true);
+            if(mMenu.size() > 0) {
+                mMenu.getItem(0).setChecked(true);
+            }
+        } catch(NotInSchemaException e) {
+            Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
+        }
+    }
+
+    private void populateFeedAdapter(String tourId) {
+        Map<String,String> partialPrimaryMap = new HashMap<>();
+        partialPrimaryMap.put("TOUR_ID", tourId);
+        try {
+            Cursor feedCursor = database.getWholeByPrimaryPartial("POINT_TOUR", partialPrimaryMap);
+            FeedAdapter adapter = new FeedAdapter(feedCursor, this);
+            mFeed.setAdapter(adapter);
+            currentTourId = tourId;
+        } catch (NotInSchemaException e) {
+            Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
+        }
+    }
+
+    private class DownloadToStorage {
+
+        private final OkHttpClient client = new OkHttpClient();
+        private String url;
+
+        private DownloadToStorage(String url) {
+            this.url = url;
+        }
+
+        public void run() throws Exception {
+            Request request = new Request.Builder()
+                    .url(url)
+                    .build();
+
+            client.newCall(request).enqueue(new Callback() {
+
+                @Override public void onFailure(Request request, IOException throwable) {
+                    throwable.printStackTrace();
+                }
+
+                @Override public void onResponse(Response response) throws IOException {
+                    if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+
+                    InputStream inputStream = response.body().byteStream();
+                    url = createFilename(url);
+
+                    BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream, 1024 * 5);
+                    FileOutputStream fileOutputStream = openFileOutput(url, Context.MODE_WORLD_READABLE);
+                    byte[] buffer = new byte[5 * 1024];
+
+                    int len;
+                    while ((len = bufferedInputStream.read(buffer)) != -1)
+                    {
+                        fileOutputStream.write(buffer,0,len);
+                    }
+
+                    fileOutputStream.flush();
+                    fileOutputStream.close();
+                    inputStream.close();
+                }
+            });
+        }
+
+    }
+
+    public static String createFilename(String url) {
+        url = url.replace("/","");
+        url = url.replace(":","");
+        String filename = url.substring(0,url.lastIndexOf("."));
+        String extension = url.substring(url.lastIndexOf("."));
+        filename = filename.replace(".","");
+        url = filename + extension;
+        return url;
+    }
 
 }

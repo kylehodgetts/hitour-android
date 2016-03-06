@@ -40,7 +40,6 @@ public class DetailFragmentTest extends ActivityInstrumentationTestCase2<DetailA
      */
     public void testFragmentViewsExist() {
         TextView titleView = (TextView) getActivity().findViewById(R.id.text_title);
-        TextView bodyView = (TextView) getActivity().findViewById(R.id.text_body);
         ImageView imageView = (ImageView) getActivity().findViewById(R.id.photo);
 
         VideoView videoView = (VideoView) getActivity().findViewById(Integer.parseInt(0+""+0));
@@ -48,7 +47,6 @@ public class DetailFragmentTest extends ActivityInstrumentationTestCase2<DetailA
         TextView videoDescription = (TextView) getActivity().findViewById(R.id.description);
 
         assertNotNull(titleView);
-        assertNotNull(bodyView);
         assertNotNull(imageView);
         assertNotNull(videoView);
         assertNotNull(videoTitle);
