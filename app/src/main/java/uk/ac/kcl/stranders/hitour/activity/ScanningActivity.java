@@ -106,7 +106,7 @@ public class ScanningActivity extends AppCompatActivity {
         }
         else {
             Log.d("FeedActivity", "Point for " + etCodePinEntry.getText() + " not found!");
-            Snackbar.make(barcodeScannerView, "Point Not Found, Please try again.", Snackbar.LENGTH_LONG).show();
+            Snackbar.make(barcodeScannerView, getResources().getString(R.string.snake_bar_message_alert_scanner_view), Snackbar.LENGTH_LONG).show();
             barcodeScannerView.resume();
             clearInput();
         }

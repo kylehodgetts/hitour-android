@@ -31,6 +31,7 @@
         android:layout_height="wrap_content"
         android:layout_alignTop="@id/profile_picture"
         android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         android:layout_toRightOf="@id/profile_picture"
         android:text="Tour Date: 15/02/2016"
