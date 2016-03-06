@@ -3,6 +3,7 @@ package uk.ac.kcl.stranders.hitour.activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Typeface;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -15,10 +16,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.squareup.okhttp.Callback;
@@ -35,6 +39,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import uk.ac.kcl.stranders.hitour.CustomTypefaceSpan;
 import uk.ac.kcl.stranders.hitour.FeedAdapter;
 import uk.ac.kcl.stranders.hitour.R;
 import uk.ac.kcl.stranders.hitour.Utilities;
@@ -100,7 +105,10 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        setTitleFont();
+
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer);
 
         mFeed = (RecyclerView) findViewById(R.id.rv_feed);
@@ -367,6 +375,26 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
             populateFeedAdapter(tourCursor.getString(TOUR_COLUMN_TOUR_ID));
         } catch (NotInSchemaException e) {
             Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
+        }
+    }
+
+    /**
+     * Changes a font of the app title.
+     */
+    public void setTitleFont() {
+        Typeface font = Typeface.createFromAsset(this.getAssets(), "fonts/ubuntu_l.ttf");
+
+        // Set font for title in action bar on a phone.
+        ActionBar supportActionBar = getSupportActionBar();
+        if(supportActionBar != null && !getResources().getBoolean(R.bool.isTablet)) {
+            // Set the title of the action bar as the title with the custom font on a phone.
+            SpannableString s = new SpannableString(getString(R.string.app_name));
+            s.setSpan(new CustomTypefaceSpan("", font), 0, s.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            supportActionBar.setTitle(s);
+        } else {
+            // Set a typeface for the app title on a tablet.
+            TextView tvTitle = (TextView) findViewById(R.id.tv_app_title);
+            if(tvTitle != null) { tvTitle.setTypeface(font); }
         }
     }
 
