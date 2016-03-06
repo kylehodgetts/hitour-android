@@ -422,7 +422,8 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
             for(i = 0; i < tourCursor.getCount(); i++) {
                 tourCursor.moveToPosition(i);
                 mMenu.add(0, i, Menu.NONE, tourCursor.getString(TOUR_COLUMN_NAME)).setIcon(R.drawable.ic_action_local_hospital);
-                mMenu.getItem(i).getActionView().setContentDescription(mMenu.getItem(i).getActionView().getResources().getString(R.string.content_description_tour_selection, mMenu.getItem(i).getTitle()));
+                // TODO: Fix content description
+//                mMenu.getItem(i).getActionView().setContentDescription(getString(R.string.content_description_tour_selection, mMenu.getItem(i).getTitle()));
             }
             mMenu.setGroupCheckable(0, true, true);
             if(mMenu.size() > 0) {
@@ -433,6 +434,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         }
         mMenu.addSubMenu("s");
         mMenu.add(R.id.end_padder, R.id.app_info_item, Menu.NONE, getString(R.string.about)).setIcon(R.drawable.ic_action_local_hospital);
+//        mMenu.getItem(i).getActionView().setContentDescription(getString(R.string.content_description_tour_selection, mMenu.getItem(i).getTitle()));
     }
 
     private void populateFeedAdapter(String tourId) {
