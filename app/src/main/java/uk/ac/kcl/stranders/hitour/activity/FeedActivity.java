@@ -3,9 +3,8 @@ package uk.ac.kcl.stranders.hitour.activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.graphics.Typeface;
-import android.graphics.Typeface;
 import android.database.Cursor;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -108,6 +107,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         setContentView(R.layout.activity_feed);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        setTitleFont();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer);
@@ -159,27 +159,30 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
                 new NavigationView.OnNavigationItemSelectedListener() {
                     @Override
                     public boolean onNavigationItemSelected(MenuItem item) {
-                        try {
-                            Cursor tourCursor = database.getAll("TOUR");
-                            if (tourCursor.getCount() > 0) {
-                                tourCursor.moveToFirst();
-                                tourCursor.move(item.getItemId());
-                                if (!tourCursor.getString(TOUR_COLUMN_TOUR_ID).equals(FeedActivity.this.currentTourId)) {
-                                    populateFeedAdapter(tourCursor.getString(TOUR_COLUMN_TOUR_ID));
-                                }
-                            }
-                        } catch (NotInSchemaException e) {
-                            Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
-                        }
-                        item.setChecked(true);
-                        mDrawerLayout.closeDrawers();
+                        // TODO: Refactor this block of code
 
                         // If the "about" section is clicked, the DialogFragment shows up
                         if (item.getItemId() == R.id.app_info_item) {
                             FragmentManager fm = getSupportFragmentManager();
                             AppInfoFragment appInfoFragment = new AppInfoFragment();
                             appInfoFragment.show(fm, "app_info_fragment");
+                        } else {
+                            try {
+                                Cursor tourCursor = database.getAll("TOUR");
+                                if (tourCursor.getCount() > 0) {
+                                    tourCursor.moveToFirst();
+                                    tourCursor.move(item.getItemId());
+                                    if (!tourCursor.getString(TOUR_COLUMN_TOUR_ID).equals(FeedActivity.this.currentTourId)) {
+                                        populateFeedAdapter(tourCursor.getString(TOUR_COLUMN_TOUR_ID));
+                                    }
+                                }
+                            } catch (NotInSchemaException e) {
+                                Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
+                            }
                         }
+                        item.setChecked(true);
+                        mDrawerLayout.closeDrawers();
+
                         return true;
                     }
                 }
@@ -412,10 +415,11 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
      */
     private void updateMenu() {
         mMenu.clear();
+        int i = 0;
         try {
             Cursor tourCursor = database.getAll("TOUR");
             tourCursor.moveToFirst();
-            for(int i = 0; i < tourCursor.getCount(); i++) {
+            for(i = 0; i < tourCursor.getCount(); i++) {
                 tourCursor.moveToPosition(i);
                 mMenu.add(0, i, Menu.NONE, tourCursor.getString(TOUR_COLUMN_NAME)).setIcon(R.drawable.ic_action_local_hospital);
                 mMenu.getItem(i).getActionView().setContentDescription(mMenu.getItem(i).getActionView().getResources().getString(R.string.content_description_tour_selection, mMenu.getItem(i).getTitle()));
@@ -427,6 +431,8 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         } catch(NotInSchemaException e) {
             Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
         }
+        mMenu.addSubMenu("s");
+        mMenu.add(R.id.end_padder, R.id.app_info_item, Menu.NONE, getString(R.string.about)).setIcon(R.drawable.ic_action_local_hospital);
     }
 
     private void populateFeedAdapter(String tourId) {
@@ -490,7 +496,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
     public static String createFilename(String url) {
         url = url.replace("/","");
         url = url.replace(":","");
-        String filename = url.substring(0,url.lastIndexOf("."));
+        String filename = url.substring(0, url.lastIndexOf("."));
         String extension = url.substring(url.lastIndexOf("."));
         filename = filename.replace(".","");
         url = filename + extension;
