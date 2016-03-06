@@ -31,8 +31,10 @@
         android:layout_height="wrap_content"
         android:layout_alignTop="@id/profile_picture"
         android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         android:layout_toRightOf="@id/profile_picture"
+        android:layout_toEndOf="@id/profile_picture"
         android:text="Tour Date: 15/02/2016"
         android:textColor="#ffffff" />
 
@@ -41,6 +43,7 @@
         android:layout_height="wrap_content"
         android:layout_alignBottom="@id/profile_picture"
         android:layout_alignLeft="@id/tour_date"
+        android:layout_alignStart="@id/tour_date"
         android:layout_marginBottom="8dp"
         android:text="Expiration Date: 22/02/2016"
         android:textColor="#ffffff" />

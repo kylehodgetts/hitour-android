@@ -1,9 +1,13 @@
 package uk.ac.kcl.stranders.hitour.activity;
 
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -18,7 +22,7 @@ import com.journeyapps.barcodescanner.CompoundBarcodeView;
 
 import java.util.List;
 
-import uk.ac.kcl.stranders.hitour.PrototypeData;
+import uk.ac.kcl.stranders.hitour.CustomTypefaceSpan;
 import uk.ac.kcl.stranders.hitour.R;
 
 /**
@@ -79,12 +83,22 @@ public class ScanningActivity extends AppCompatActivity {
         etCodePinEntry = (EditText) findViewById(R.id.etCodePinEntry);
 
         Button btnSubmit = (Button) findViewById(R.id.btnSubmit);
+        btnSubmit.setContentDescription(btnSubmit.getResources().getString(R.string.content_description_submits));
         btnSubmit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 submit();
             }
         });
+
+        ActionBar actionbar = getSupportActionBar();
+
+        Typeface font = Typeface.createFromAsset(this.getAssets(), "fonts/ubuntu_l.ttf");
+        SpannableString s = new SpannableString("hiTour");
+        s.setSpan(new CustomTypefaceSpan("", font), 0, s.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        
+        actionbar.setTitle(s);
+
     }
 
     /**
@@ -97,7 +111,8 @@ public class ScanningActivity extends AppCompatActivity {
     public void submit() {
         EditText etCodePinEntry = (EditText) findViewById(R.id.etCodePinEntry);
         // TODO: Needs to be changed when DB ready to search QR code data with DB and display relevant DetailActivity Page
-        if (etCodePinEntry.getText().toString().matches("\\d{1,9}") && PrototypeData.containsId(Integer.parseInt(etCodePinEntry.getText().toString()))) {
+        if (etCodePinEntry.getText().toString().matches("\\d{1,9}")) {
+            // TODO: check whether the pin exists
             Intent data = new Intent();
             data.putExtra("pin", Integer.parseInt(etCodePinEntry.getText().toString()));
             setResult(RESULT_OK, data);
@@ -105,7 +120,7 @@ public class ScanningActivity extends AppCompatActivity {
         }
         else {
             Log.d("FeedActivity", "Point for " + etCodePinEntry.getText() + " not found!");
-            Snackbar.make(barcodeScannerView, "Point Not Found, Please try again.", Snackbar.LENGTH_LONG).show();
+            Snackbar.make(barcodeScannerView, getResources().getString(R.string.snake_bar_message_alert_scanner_view), Snackbar.LENGTH_LONG).show();
             barcodeScannerView.resume();
             clearInput();
         }
