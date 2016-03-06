@@ -93,6 +93,15 @@ public class ScanningActivity extends AppCompatActivity {
                 submit();
             }
         });
+
+        ActionBar actionbar = getSupportActionBar();
+
+        Typeface font = Typeface.createFromAsset(this.getAssets(), "fonts/ubuntu_l.ttf");
+        SpannableString s = new SpannableString("hiTour");
+        s.setSpan(new CustomTypefaceSpan("", font), 0, s.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        
+        actionbar.setTitle(s);
+
     }
 
     /**
