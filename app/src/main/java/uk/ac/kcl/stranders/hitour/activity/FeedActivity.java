@@ -376,10 +376,6 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         } catch (NotInSchemaException e) {
             Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
         }
-        // TODO: populate/update the db
-        // test
-        String name = ((List<Tour>) hiTourRetrofit.getList(DataType.TOUR)).get(0).getName();
-        Log.d("NAME", name);
     }
 
     /**
