@@ -3,12 +3,13 @@ package uk.ac.kcl.stranders.hitour.activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.graphics.Typeface;
 import android.database.Cursor;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -46,6 +47,7 @@ import uk.ac.kcl.stranders.hitour.Utilities;
 import uk.ac.kcl.stranders.hitour.database.DBWrap;
 import uk.ac.kcl.stranders.hitour.database.NotInSchemaException;
 import uk.ac.kcl.stranders.hitour.database.schema.HiSchema;
+import uk.ac.kcl.stranders.hitour.fragment.AppInfoFragment;
 import uk.ac.kcl.stranders.hitour.fragment.DetailFragment;
 import uk.ac.kcl.stranders.hitour.model.Audience;
 import uk.ac.kcl.stranders.hitour.model.Data;
@@ -95,20 +97,19 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
 
     /**
      * Initializes the UI and sets an adapter for the {@link FeedActivity#mFeed}
+     *
      * @param savedInstanceState {@link Bundle} with all the saved state variables.
      */
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         database = new DBWrap(this, new HiSchema(1));
         setContentView(R.layout.activity_feed);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
         setTitleFont();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer);
 
         mFeed = (RecyclerView) findViewById(R.id.rv_feed);
@@ -117,15 +118,15 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
 
         // Display list items depending on the device orientation.
         // Hide the Up button on tablets.
-        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-            if(getResources().getBoolean(R.bool.isTablet)) {
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            if (getResources().getBoolean(R.bool.isTablet)) {
                 mLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
                 getSupportActionBar().setDisplayShowTitleEnabled(false);
             } else {
                 mLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
             }
         } else {
-            if(getResources().getBoolean(R.bool.isTablet)) {
+            if (getResources().getBoolean(R.bool.isTablet)) {
                 mLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
                 getSupportActionBar().setDisplayShowTitleEnabled(false);
             } else {
@@ -149,7 +150,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         updateMenu();
 
         ActionBar supportActionBar = getSupportActionBar();
-        if(supportActionBar != null) {
+        if (supportActionBar != null) {
             supportActionBar.setHomeAsUpIndicator(R.drawable.ic_action_menu);
             supportActionBar.setDisplayHomeAsUpEnabled(true);
         }
@@ -158,24 +159,35 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
                 new NavigationView.OnNavigationItemSelectedListener() {
                     @Override
                     public boolean onNavigationItemSelected(MenuItem item) {
-                        try {
-                            Cursor tourCursor = database.getAll("TOUR");
-                            if (tourCursor.getCount() > 0) {
-                                tourCursor.moveToFirst();
-                                tourCursor.move(item.getItemId());
-                                if (!tourCursor.getString(TOUR_COLUMN_TOUR_ID).equals(FeedActivity.this.currentTourId)) {
-                                    populateFeedAdapter(tourCursor.getString(TOUR_COLUMN_TOUR_ID));
+                        // TODO: Refactor this block of code
+
+                        // If the "about" section is clicked, the DialogFragment shows up
+                        if (item.getItemId() == R.id.app_info_item) {
+                            FragmentManager fm = getSupportFragmentManager();
+                            AppInfoFragment appInfoFragment = new AppInfoFragment();
+                            appInfoFragment.show(fm, "app_info_fragment");
+                        } else {
+                            try {
+                                Cursor tourCursor = database.getAll("TOUR");
+                                if (tourCursor.getCount() > 0) {
+                                    tourCursor.moveToFirst();
+                                    tourCursor.move(item.getItemId());
+                                    if (!tourCursor.getString(TOUR_COLUMN_TOUR_ID).equals(FeedActivity.this.currentTourId)) {
+                                        populateFeedAdapter(tourCursor.getString(TOUR_COLUMN_TOUR_ID));
+                                    }
                                 }
+                            } catch (NotInSchemaException e) {
+                                Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
                             }
-                        } catch (NotInSchemaException e) {
-                            Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
                         }
                         item.setChecked(true);
                         mDrawerLayout.closeDrawers();
+
                         return true;
                     }
                 }
         );
+
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setContentDescription(fab.getResources().getString(R.string.content_description_launch_scanner));
@@ -188,8 +200,8 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
 
         // Fetch data from the HiTour web API
         // A null check bellow prevents data from being fetched again upon rotation
-        if(hiTourRetrofit == null) {
-            if(Utilities.isNetworkAvailable(this)) {
+        if (hiTourRetrofit == null) {
+            if (Utilities.isNetworkAvailable(this)) {
                 hiTourRetrofit = new HiTourRetrofit(this);
                 hiTourRetrofit.fetchAll();
             } else {
@@ -199,8 +211,8 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(resultCode == RESULT_OK) {
-            if(!(getResources().getBoolean(R.bool.isTablet))) {
+        if (resultCode == RESULT_OK) {
+            if (!(getResources().getBoolean(R.bool.isTablet))) {
                 Intent intent = new Intent(this, DetailActivity.class)
                         .putExtra(DetailActivity.EXTRA_BUNDLE, data.getExtras().getInt("pin"));
                 startActivity(intent);
@@ -241,13 +253,13 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if(id == android.R.id.home) {
+        if (id == android.R.id.home) {
             mDrawerLayout.openDrawer(GravityCompat.START);
         }
         return super.onOptionsItemSelected(item);
     }
 
-     /**
+    /**
      * Invoked when the data has been successfully fetched from the web API.
      */
     public void onAllRequestsFinished() {
@@ -403,13 +415,15 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
      */
     private void updateMenu() {
         mMenu.clear();
+        int i = 0;
         try {
             Cursor tourCursor = database.getAll("TOUR");
             tourCursor.moveToFirst();
-            for(int i = 0; i < tourCursor.getCount(); i++) {
+            for(i = 0; i < tourCursor.getCount(); i++) {
                 tourCursor.moveToPosition(i);
                 mMenu.add(0, i, Menu.NONE, tourCursor.getString(TOUR_COLUMN_NAME)).setIcon(R.drawable.ic_action_local_hospital);
-                mMenu.getItem(i).getActionView().setContentDescription(mMenu.getItem(i).getActionView().getResources().getString(R.string.content_description_tour_selection, mMenu.getItem(i).getTitle()));
+                // TODO: Fix content description
+//                mMenu.getItem(i).getActionView().setContentDescription(getString(R.string.content_description_tour_selection, mMenu.getItem(i).getTitle()));
             }
             mMenu.setGroupCheckable(0, true, true);
             if(mMenu.size() > 0) {
@@ -418,6 +432,9 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         } catch(NotInSchemaException e) {
             Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
         }
+        mMenu.addSubMenu("s");
+        mMenu.add(R.id.end_padder, R.id.app_info_item, Menu.NONE, getString(R.string.about)).setIcon(R.drawable.ic_action_local_hospital);
+//        mMenu.getItem(i).getActionView().setContentDescription(getString(R.string.content_description_tour_selection, mMenu.getItem(i).getTitle()));
     }
 
     private void populateFeedAdapter(String tourId) {
@@ -481,7 +498,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
     public static String createFilename(String url) {
         url = url.replace("/","");
         url = url.replace(":","");
-        String filename = url.substring(0,url.lastIndexOf("."));
+        String filename = url.substring(0, url.lastIndexOf("."));
         String extension = url.substring(url.lastIndexOf("."));
         filename = filename.replace(".","");
         url = filename + extension;
