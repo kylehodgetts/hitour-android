@@ -20,6 +20,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 
 import com.google.zxing.integration.android.IntentIntegrator;
 
@@ -207,17 +208,22 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
     }
 
     /**
-     * Changes a font of the app title on a phone. For tablets the title is set in layout files.
+     * Changes a font of the app title.
      */
     public void setTitleFont() {
+        Typeface font = Typeface.createFromAsset(this.getAssets(), "fonts/ubuntu_l.ttf");
+
+        // Set font for title in action bar on a phone.
         ActionBar supportActionBar = getSupportActionBar();
-        if(supportActionBar != null) {
-            // Set font for title in action bar
-            Typeface font = Typeface.createFromAsset(this.getAssets(), "fonts/ubuntu_l.ttf");
+        if(supportActionBar != null && !getResources().getBoolean(R.bool.isTablet)) {
+            // Set the title of the action bar as the title with the custom font on a phone.
             SpannableString s = new SpannableString("hiTour");
             s.setSpan(new CustomTypefaceSpan("", font), 0, s.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            // Set the title of the action bar as the title with the custom font
             supportActionBar.setTitle(s);
+        } else {
+            // Set a typeface for the app title on a tablet.
+            TextView tvTitle = (TextView) findViewById(R.id.tv_app_title);
+            if(tvTitle != null) { tvTitle.setTypeface(font); }
         }
     }
 
