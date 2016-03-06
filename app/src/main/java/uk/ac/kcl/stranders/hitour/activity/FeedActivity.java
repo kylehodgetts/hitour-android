@@ -78,13 +78,9 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        setTitleFont();
+
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-
-        // Set font for title in action bar
-        Typeface font = Typeface.createFromAsset(this.getAssets(), "fonts/ubuntu_l.ttf");
-        SpannableString s = new SpannableString("hiTour");
-        s.setSpan(new CustomTypefaceSpan("", font), 0, s.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer);
 
@@ -118,9 +114,6 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         if(supportActionBar != null) {
             supportActionBar.setHomeAsUpIndicator(R.drawable.ic_action_menu);
             supportActionBar.setDisplayHomeAsUpEnabled(true);
-
-            // Set the title of the action bar as the title with the custom font
-            supportActionBar.setTitle(s);
         }
 
         navigationView.setNavigationItemSelectedListener(
@@ -211,6 +204,21 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         // test
         String name = ((List<Tour>) hiTourRetrofit.getList(DataType.TOUR)).get(0).getName();
         Log.d("NAME", name);
+    }
+
+    /**
+     * Changes a font of the app title on a phone. For tablets the title is set in layout files.
+     */
+    public void setTitleFont() {
+        ActionBar supportActionBar = getSupportActionBar();
+        if(supportActionBar != null) {
+            // Set font for title in action bar
+            Typeface font = Typeface.createFromAsset(this.getAssets(), "fonts/ubuntu_l.ttf");
+            SpannableString s = new SpannableString("hiTour");
+            s.setSpan(new CustomTypefaceSpan("", font), 0, s.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            // Set the title of the action bar as the title with the custom font
+            supportActionBar.setTitle(s);
+        }
     }
 
 
