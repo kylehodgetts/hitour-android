@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">hiTour</string>
+    <string name="title_activity_detail">DetailActivity</string>
+
+    <string name="no_network">Il n'y a pas de connection au reseau. Les données non pas pu etre actualisés.</string>
+    <string name="hint_scanning">Scannée un code ou inséré un pin.</string>
+    <string name="submit">Valider</string>
+    <string name="snake_bar_message_alert_scanner_view">Point non trouvé, veillez tenter à nouveau.</string>
+
+    <string name="content_description_submits">Valider</string>
+    <string name="content_description_item_feed">Fil d'objet %1$s</string>
+    <string name="content_description_launch_scanner">Lancer le Scanner</string>
+    <string name="content_description_tour_selection">Selection du tour %1$s</string>
+
+</resources>

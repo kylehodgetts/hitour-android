@@ -18,6 +18,8 @@
         android:paddingBottom="72dp"
         android:paddingLeft="@dimen/list_side_margin"
         android:paddingRight="@dimen/list_side_margin"
+        android:paddingStart="@dimen/list_side_margin"
+        android:paddingEnd="@dimen/list_side_margin"
         android:scrollbarStyle="outsideOverlay" />
 
 </RelativeLayout>
