@@ -217,7 +217,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         ActionBar supportActionBar = getSupportActionBar();
         if(supportActionBar != null && !getResources().getBoolean(R.bool.isTablet)) {
             // Set the title of the action bar as the title with the custom font on a phone.
-            SpannableString s = new SpannableString("hiTour");
+            SpannableString s = new SpannableString(getString(R.string.app_name));
             s.setSpan(new CustomTypefaceSpan("", font), 0, s.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             supportActionBar.setTitle(s);
         } else {
