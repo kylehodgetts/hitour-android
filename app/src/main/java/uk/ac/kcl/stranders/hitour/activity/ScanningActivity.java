@@ -1,6 +1,6 @@
 package uk.ac.kcl.stranders.hitour.activity;
 
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.SESSION_COLUMN_PASSPHRASE;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.PASSPHRASE;
 
 import android.content.Intent;
 import android.database.Cursor;
@@ -21,11 +21,7 @@ import com.journeyapps.barcodescanner.BarcodeCallback;
 import com.journeyapps.barcodescanner.BarcodeResult;
 import com.journeyapps.barcodescanner.CompoundBarcodeView;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
+
 import java.util.List;
 
 import uk.ac.kcl.stranders.hitour.R;
@@ -122,7 +118,7 @@ public class ScanningActivity extends AppCompatActivity {
                 boolean alreadyExists = false;
                 for(int i = 0; i < sessionCursor.getCount(); i++) {
                     sessionCursor.moveToPosition(i);
-                    if(result.equals(sessionCursor.getString(SESSION_COLUMN_PASSPHRASE))) {
+                    if(result.equals(sessionCursor.getString(sessionCursor.getColumnIndex(PASSPHRASE)))) {
                         alreadyExists = true;
                     }
                 }
@@ -161,7 +157,7 @@ public class ScanningActivity extends AppCompatActivity {
     private class TourSubmit extends AsyncTask<String,Double,Boolean> {
         protected Boolean doInBackground(String... params) {
             Boolean exists;
-            if(sessionExists(params[0])) {
+            if(FeedActivity.sessionExists(params[0])) {
                 exists = true;
             } else {
                 exists = false;
@@ -190,25 +186,6 @@ public class ScanningActivity extends AppCompatActivity {
     private void clearInput() {
         barcodeScannerView.setStatusText("");
         etCodePinEntry.setText("");
-    }
-
-    private boolean sessionExists(String sessionCode) {
-        try {
-            InputStream inputStream = new URL("https://hitour.herokuapp.com/api/A7DE6825FD96CCC79E63C89B55F88/" + sessionCode).openStream();
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            StringBuilder text = new StringBuilder();
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                text.append(line);
-            }
-            String result = text.toString();
-            if(result.equals("Passprase Invalid"))
-                return false;
-        }
-        catch (IOException e) {
-            Log.e("IO_FAIL", Log.getStackTraceString(e));
-        }
-        return true;
     }
 
     /**

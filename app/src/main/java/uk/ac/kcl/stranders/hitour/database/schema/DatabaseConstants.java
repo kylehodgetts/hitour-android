@@ -21,7 +21,6 @@ public class DatabaseConstants {
     public static final String TITLE = "TITLE";
     public static final String RANK = "RANK";
 
-
     public static final String TOUR_TABLE = "TOUR";
     public static final String SESSION_TABLE = "SESSION";
     public static final String AUDIENCE_TABLE = "AUDIENCE";
@@ -30,25 +29,5 @@ public class DatabaseConstants {
     public static final String POINT_TOUR_TABLE = "POINT_TOUR";
     public static final String AUDIENCE_DATA_TABLE = "AUDIENCE_DATA";
     public static final String POINT_DATA_TABLE = "POINT_DATA";
-
-    public static final int AUDIENCE_DATA_COLUMN_AUDIENCE_ID = 1;
-
-    public static final int DATA_COLUMN_NAME = 1;
-    public static final int DATA_COLUMN_DESCRIPTION = 2;
-    public static final int DATA_COLUMN_URL = 3;
-
-    public static final int POINT_COLUMN_NAME = 1;
-    public static final int POINT_COLUMN_DESCRIPTION = 2;
-    public static final int POINT_COLUMN_URL = 3;
-
-    public static final int POINT_TOUR_COLUMN_POINT_ID = 1;
-
-    public static final int POINT_DATA_COLUMN_DATA_ID = 1;
-
-    public static final int SESSION_COLUMN_PASSPHRASE = 3;
-
-    public static final int TOUR_COLUMN_TOUR_ID = 0;
-    public static final int TOUR_COLUMN_AUDIENCE_ID = 1;
-    public static final int TOUR_COLUMN_NAME = 2;
 
 }

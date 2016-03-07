@@ -1,9 +1,13 @@
 package uk.ac.kcl.stranders.hitour.activity;
 
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.NAME;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.PASSPHRASE;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.Cursor;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -27,10 +31,13 @@ import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,19 +49,13 @@ import uk.ac.kcl.stranders.hitour.database.DBWrap;
 import uk.ac.kcl.stranders.hitour.database.NotInSchemaException;
 import uk.ac.kcl.stranders.hitour.database.schema.HiSchema;
 import uk.ac.kcl.stranders.hitour.fragment.DetailFragment;
-import uk.ac.kcl.stranders.hitour.model.Audience;
 import uk.ac.kcl.stranders.hitour.model.Data;
-import uk.ac.kcl.stranders.hitour.model.DataAudience;
-import uk.ac.kcl.stranders.hitour.model.DataType;
 import uk.ac.kcl.stranders.hitour.model.Point;
-import uk.ac.kcl.stranders.hitour.model.PointData;
 import uk.ac.kcl.stranders.hitour.model.Tour;
-import uk.ac.kcl.stranders.hitour.model.TourPoints;
 import uk.ac.kcl.stranders.hitour.model.TourSession;
 import uk.ac.kcl.stranders.hitour.retrofit.HiTourRetrofit;
 
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TOUR_COLUMN_NAME;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TOUR_COLUMN_TOUR_ID;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TOUR_ID;
 
 /**
  * The main activity that displays all available points for a given tour.
@@ -104,6 +105,8 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer);
 
+        checkSessionDates();
+
         mFeed = (RecyclerView) findViewById(R.id.rv_feed);
 
         mFeed.setHasFixedSize(true);
@@ -132,7 +135,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
             Cursor tourCursor = database.getAll("TOUR");
             if(tourCursor.getCount() > 0) {
                 tourCursor.moveToFirst();
-                populateFeedAdapter(tourCursor.getString(TOUR_COLUMN_TOUR_ID));
+                populateFeedAdapter(tourCursor.getString(tourCursor.getColumnIndex(TOUR_ID)));
             }
         } catch (NotInSchemaException e) {
             Log.e("DATABASE_FAIL",Log.getStackTraceString(e));
@@ -156,8 +159,8 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
                             if(tourCursor.getCount() > 0) {
                                 tourCursor.moveToFirst();
                                 tourCursor.move(item.getItemId());
-                                if(!tourCursor.getString(TOUR_COLUMN_TOUR_ID).equals(FeedActivity.this.currentTourId)) {
-                                    populateFeedAdapter(tourCursor.getString(TOUR_COLUMN_TOUR_ID));
+                                if(!tourCursor.getString(tourCursor.getColumnIndex(TOUR_ID)).equals(FeedActivity.this.currentTourId)) {
+                                    populateFeedAdapter(tourCursor.getString(tourCursor.getColumnIndex(TOUR_ID)));
                                 }
                             }
                         } catch (NotInSchemaException e) {
@@ -374,7 +377,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         try {
             Cursor tourCursor = database.getAll("TOUR");
             tourCursor.moveToFirst();
-            populateFeedAdapter(tourCursor.getString(TOUR_COLUMN_TOUR_ID));
+            populateFeedAdapter(tourCursor.getString(tourCursor.getColumnIndex(TOUR_ID)));
         } catch (NotInSchemaException e) {
             Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
         }
@@ -390,7 +393,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
             tourCursor.moveToFirst();
             for(int i = 0; i < tourCursor.getCount(); i++) {
                 tourCursor.moveToPosition(i);
-                mMenu.add(0, i, Menu.NONE, tourCursor.getString(TOUR_COLUMN_NAME)).setIcon(R.drawable.ic_action_local_hospital);
+                mMenu.add(0, i, Menu.NONE, tourCursor.getString(tourCursor.getColumnIndex(NAME))).setIcon(R.drawable.ic_action_local_hospital);
             }
             mMenu.setGroupCheckable(0, true, true);
             if(mMenu.size() > 0) {
@@ -467,6 +470,73 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         filename = filename.replace(".","");
         url = filename + extension;
         return url;
+    }
+
+    private void checkSessionDates() {
+        try {
+            Cursor sessionCursor = database.getAll("SESSION");
+            String[] passphraseArray = new String[sessionCursor.getCount()];
+            for(int i = 0; i < sessionCursor.getCount(); i++) {
+                sessionCursor.moveToPosition(i);
+                String passphrase = sessionCursor.getString(sessionCursor.getColumnIndex(PASSPHRASE));
+                passphraseArray[i] = passphrase;
+            }
+            if(Utilities.isNetworkAvailable(this)) {
+                SessionValidation sessionValidation = new SessionValidation();
+                sessionValidation.execute(passphraseArray);
+            } else {
+                //TODO: use date on phone to check if session is still valid
+            }
+        } catch (NotInSchemaException e) {
+            Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
+        }
+    }
+
+    private class SessionValidation extends AsyncTask<String[],Double,Boolean[]> {
+        private String[] passphraseArray;
+        protected Boolean[] doInBackground(String[]... params) {
+            passphraseArray = params[0];
+            Boolean[] exists = new Boolean[passphraseArray.length];
+            for(int i = 0; i < passphraseArray.length; i++) {
+                if(sessionExists(passphraseArray[i])) {
+                    exists[i] = true;
+                } else {
+                    exists[i] = false;
+                }
+            }
+            return exists;
+        }
+        protected void onPostExecute(Boolean[] result) {
+            for (int i = 0; i < result.length; i++) {
+                if (result[i] == false) {
+                    removeSession(passphraseArray[i]);
+                }
+            }
+        }
+    }
+
+    public static boolean sessionExists(String sessionCode) {
+        try {
+            InputStream inputStream = new URL("https://hitour.herokuapp.com/api/A7DE6825FD96CCC79E63C89B55F88/" + sessionCode).openStream();
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            StringBuilder text = new StringBuilder();
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                text.append(line);
+            }
+            String result = text.toString();
+            if(result.equals("Passprase Invalid"))
+                return false;
+        }
+        catch (IOException e) {
+            Log.e("IO_FAIL", Log.getStackTraceString(e));
+        }
+        return true;
+    }
+
+    private void removeSession(String passphrase) {
+        //TODO: add algorithm to remove tour session without removing any shared elements
+
     }
 
 }
