@@ -350,6 +350,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
             // Add tour points to the local database
             Map<String, String> tourPointColumnsMap = new HashMap<>();
             tourPointColumnsMap.put("RANK", point.getRank().toString());
+            tourPointColumnsMap.put("UNLOCK","0");
             Map<String, String> tourPointPrimaryKeysMap = new HashMap<>();
             tourPointPrimaryKeysMap.put("TOUR_ID", tour.getId().toString());
             tourPointPrimaryKeysMap.put("POINT_ID", point.getId().toString());

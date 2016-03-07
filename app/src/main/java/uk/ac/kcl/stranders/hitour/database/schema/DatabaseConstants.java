@@ -20,7 +20,7 @@ public class DatabaseConstants {
     public static final String DESCRIPTION = "DESCRIPTION";
     public static final String TITLE = "TITLE";
     public static final String RANK = "RANK";
-
+    public static final String UNLOCK = "UNLOCK";
 
     public static final String TOUR_TABLE = "TOUR";
     public static final String SESSION_TABLE = "SESSION";
@@ -42,6 +42,7 @@ public class DatabaseConstants {
     public static final int POINT_COLUMN_URL = 3;
 
     public static final int POINT_TOUR_COLUMN_POINT_ID = 1;
+    public static final int POINT_TOUR_COLUMN_UNLOCK = 2;
 
     public static final int POINT_DATA_COLUMN_DATA_ID = 1;
 

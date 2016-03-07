@@ -27,6 +27,8 @@ import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_COLUMN_NAME;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_COLUMN_URL;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_TOUR_COLUMN_POINT_ID;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_TOUR_COLUMN_UNLOCK;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TOUR_COLUMN_NAME;
 
 /**
  * FeedAdapter provides a binding from a points data set to views
@@ -44,6 +46,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder>  {
      */
     private Context mContext;
 
+    private int position = 0;
     /**
      * Public constructor.
      *
@@ -69,6 +72,23 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder>  {
             @Override
             public void onClick(View view) {
                 // Start a new activity on a phone or replace a detail fragment on tablets.
+
+
+                Cursor cursor = pointTourCursor;
+                cursor.moveToFirst();
+                Log.i("point", cursor.getString(POINT_COLUMN_NAME));
+                Log.i("Unlock state",cursor.getString(POINT_TOUR_COLUMN_UNLOCK));
+                while(true){
+                    cursor.moveToNext();
+                    Log.i("point", cursor.getString(POINT_COLUMN_NAME));
+                    Log.i("Unlock state",cursor.getString(POINT_TOUR_COLUMN_UNLOCK));
+                    if(cursor.isLast()){break;}
+                }
+
+                Log.i("Column Index", ""+pointTourCursor.getColumnIndex("UNLOCK"));
+                Log.i("adapter Position", ""+viewHolder.getAdapterPosition());
+                Log.i("pointId",""+viewHolder.point_id);
+
                 if (!(mContext.getResources().getBoolean(R.bool.isTablet))) {
                     Intent intent = new Intent(mContext, DetailActivity.class)
                             .putExtra(DetailActivity.EXTRA_BUNDLE, viewHolder.getAdapterPosition());
@@ -105,7 +125,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder>  {
             pointCursor.moveToFirst();
             holder.tvTitle.setText(pointCursor.getString(POINT_COLUMN_NAME));
             holder.tvDescription.setText(pointCursor.getString(POINT_COLUMN_DESCRIPTION));
-
+            holder.point_id = Integer.parseInt(pointTourCursor.getString(POINT_TOUR_COLUMN_POINT_ID));
             String url = pointCursor.getString(POINT_COLUMN_URL);
             url = FeedActivity.createFilename(url);
             String localFilesAddress = mContext.getFilesDir().toString();
@@ -134,7 +154,8 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder>  {
         public ImageView ivThumbnail;
         public TextView tvTitle;
         public TextView tvDescription;
-
+        public Integer point_id;
+//        public int databaseposition;
         /**
          * Public constructor.
          *

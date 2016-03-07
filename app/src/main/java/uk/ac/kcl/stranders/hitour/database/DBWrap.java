@@ -16,7 +16,7 @@ import uk.ac.kcl.stranders.hitour.database.schema.TableSchema;
  * A controlling abstraction on the database, handles all inputs and outputs to the database,
  * while checks with the schema whether the query is valid
  */
-public class DBWrap {
+public class  DBWrap {
 
     private DatabaseSchema schema;
     private DBHelper dbHelper;
