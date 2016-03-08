@@ -7,4 +7,12 @@
     <string name="submit">Submit</string>
     <string name="point">Point</string>
     <string name="tour">Tour</string>
+    <string name="about">About</string>
+    <string name="snake_bar_message_alert_scanner_view">Point not found, please try again.</string>
+
+    <string name="content_description_submits">Submit</string>
+    <string name="content_description_item_feed">Item Feed %1$s</string>
+    <string name="content_description_launch_scanner">Launch Scanner</string>
+    <string name="content_description_tour_selection">Tour Selection %1$s</string>
+
 </resources>

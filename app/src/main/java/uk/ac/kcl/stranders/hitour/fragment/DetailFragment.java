@@ -1,5 +1,13 @@
 package uk.ac.kcl.stranders.hitour.fragment;
 
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.AUDIENCE_ID;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.DATA_ID;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.DESCRIPTION;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.NAME;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_ID;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TITLE;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.URL;
+
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -28,17 +36,7 @@ import java.util.Map;
 import uk.ac.kcl.stranders.hitour.R;
 import uk.ac.kcl.stranders.hitour.activity.FeedActivity;
 import uk.ac.kcl.stranders.hitour.database.NotInSchemaException;
-
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.AUDIENCE_DATA_COLUMN_AUDIENCE_ID;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.DATA_COLUMN_DESCRIPTION;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.DATA_COLUMN_NAME;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.DATA_COLUMN_URL;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_COLUMN_DESCRIPTION;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_COLUMN_NAME;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_COLUMN_URL;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_DATA_COLUMN_DATA_ID;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_TOUR_COLUMN_POINT_ID;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TOUR_COLUMN_AUDIENCE_ID;
+import uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants;
 
 /**
  * Fragment that shows the content for a particular point in the tour which could consist of
@@ -135,7 +133,7 @@ public class DetailFragment extends Fragment {
 
             try {
                 Map<String, String> partialPrimaryMapPoint = new HashMap<>();
-                partialPrimaryMapPoint.put("POINT_ID", pointTourCursor.getString(POINT_TOUR_COLUMN_POINT_ID));
+                partialPrimaryMapPoint.put("POINT_ID", pointTourCursor.getString(pointTourCursor.getColumnIndex(POINT_ID)));
                 pointDataCursor = FeedActivity.database.getWholeByPrimaryPartial("POINT_DATA", partialPrimaryMapPoint);
             } catch (Exception e) {
                 Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
@@ -176,14 +174,14 @@ public class DetailFragment extends Fragment {
             mRootView.animate().alpha(1);
             try {
                 Map<String,String> primaryMap = new HashMap<>();
-                primaryMap.put("POINT_ID", pointTourCursor.getString(POINT_TOUR_COLUMN_POINT_ID));
+                primaryMap.put("POINT_ID", pointTourCursor.getString(pointTourCursor.getColumnIndex(POINT_ID)));
                 Cursor pointCursor = FeedActivity.database.getWholeByPrimary("POINT",primaryMap);
                 pointCursor.moveToFirst();
 
-                titleView.setText(pointCursor.getString(POINT_COLUMN_NAME));
-                bodyView.setText(pointCursor.getString(POINT_COLUMN_DESCRIPTION));
+                titleView.setText(pointCursor.getString(pointCursor.getColumnIndex(NAME)));
+                bodyView.setText(pointCursor.getString(pointCursor.getColumnIndex(DESCRIPTION)));
 
-                String url = pointCursor.getString(POINT_COLUMN_URL);
+                String url = pointCursor.getString(pointCursor.getColumnIndex(URL));
                 url = FeedActivity.createFilename(url);
                 String localFilesAddress = getContext().getFilesDir().toString();
                 url = localFilesAddress + "/" + url;
@@ -210,18 +208,18 @@ public class DetailFragment extends Fragment {
     private void addContent(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         for (int i = 0; i < pointDataCursor.getCount(); ++i) {
             pointDataCursor.moveToPosition(i);
-            if(checkDataAudience(pointDataCursor.getString(POINT_DATA_COLUMN_DATA_ID))) {
+            if(checkDataAudience(pointDataCursor.getString(pointDataCursor.getColumnIndex(DATA_ID)))) {
                 LinearLayout layoutDetail;
                 Map<String, String> pointMap = new HashMap<>();
-                pointMap.put("DATA_ID", pointDataCursor.getString(POINT_DATA_COLUMN_DATA_ID));
+                pointMap.put("DATA_ID", pointDataCursor.getString(pointDataCursor.getColumnIndex(DATA_ID)));
                 try {
                     Cursor dataCursor = FeedActivity.database.getWholeByPrimary("DATA", pointMap);
                     dataCursor.moveToFirst();
-                    String url = dataCursor.getString(DATA_COLUMN_URL);
+                    String url = dataCursor.getString(dataCursor.getColumnIndex(URL));
                     url = FeedActivity.createFilename(url);
                     String localFilesAddress = getContext().getFilesDir().toString();
                     url = localFilesAddress + "/" + url;
-                    String fileExtension = getFileExtension(dataCursor.getString(DATA_COLUMN_URL));
+                    String fileExtension = getFileExtension(dataCursor.getString(dataCursor.getColumnIndex(URL)));
 
                     StringBuilder text = new StringBuilder();
                     if (fileExtension.matches("jpg|jpeg|png")) {
@@ -248,9 +246,9 @@ public class DetailFragment extends Fragment {
                         }
                     }
                     TextView tvTitle = (TextView) layoutDetail.findViewById(R.id.title);
-                    tvTitle.setText(dataCursor.getString(DATA_COLUMN_NAME));
+                    tvTitle.setText(dataCursor.getString(dataCursor.getColumnIndex(TITLE)));
                     TextView tvDescription = (TextView) layoutDetail.findViewById(R.id.description);
-                    tvDescription.setText(dataCursor.getString(DATA_COLUMN_DESCRIPTION) + text);
+                    tvDescription.setText(dataCursor.getString(dataCursor.getColumnIndex(DESCRIPTION)) + text);
                     container.addView(layoutDetail);
 
                     layoutDetail.setId(i + 100);
@@ -367,10 +365,10 @@ public class DetailFragment extends Fragment {
             primaryMap.put("TOUR_ID", currentTourId);
             Cursor tourCursor = FeedActivity.database.getWholeByPrimary("TOUR", primaryMap);
             tourCursor.moveToFirst();
-            String audienceId = tourCursor.getString(TOUR_COLUMN_AUDIENCE_ID);
+            String audienceId = tourCursor.getString(tourCursor.getColumnIndex(AUDIENCE_ID));
             for(int i = 0; i < dataAudienceCursor.getCount(); i++) {
                 dataAudienceCursor.moveToPosition(i);
-                if(audienceId.equals(dataAudienceCursor.getString(AUDIENCE_DATA_COLUMN_AUDIENCE_ID))) {
+                if(audienceId.equals(dataAudienceCursor.getString(dataAudienceCursor.getColumnIndex(AUDIENCE_ID)))) {
                     return true;
                 }
             }

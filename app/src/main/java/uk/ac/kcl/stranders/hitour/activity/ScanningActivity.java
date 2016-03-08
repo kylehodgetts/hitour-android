@@ -1,13 +1,15 @@
 package uk.ac.kcl.stranders.hitour.activity;
 
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.SESSION_COLUMN_PASSPHRASE;
-
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -21,15 +23,13 @@ import com.journeyapps.barcodescanner.BarcodeCallback;
 import com.journeyapps.barcodescanner.BarcodeResult;
 import com.journeyapps.barcodescanner.CompoundBarcodeView;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
 import java.util.List;
 
+import uk.ac.kcl.stranders.hitour.CustomTypefaceSpan;
 import uk.ac.kcl.stranders.hitour.R;
 import uk.ac.kcl.stranders.hitour.database.NotInSchemaException;
+
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.PASSPHRASE;
 
 /**
  * {@link AppCompatActivity} class that is used to retrieve input by means of scanning a QR Code or
@@ -95,12 +95,22 @@ public class ScanningActivity extends AppCompatActivity {
         modeSwitch = (Switch) findViewById(R.id.mode_switch);
 
         Button btnSubmit = (Button) findViewById(R.id.btnSubmit);
+        btnSubmit.setContentDescription(btnSubmit.getResources().getString(R.string.content_description_submits));
         btnSubmit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 submit();
             }
         });
+
+        ActionBar actionbar = getSupportActionBar();
+
+        Typeface font = Typeface.createFromAsset(this.getAssets(), "fonts/ubuntu_l.ttf");
+        SpannableString s = new SpannableString("hiTour");
+        s.setSpan(new CustomTypefaceSpan("", font), 0, s.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        
+        actionbar.setTitle(s);
+
     }
 
     /**
@@ -114,19 +124,19 @@ public class ScanningActivity extends AppCompatActivity {
         EditText etCodePinEntry = (EditText) findViewById(R.id.etCodePinEntry);
         String result = etCodePinEntry.getText().toString();
         // Check if user wants to add a tour or a point
-        if(modeSwitch.isChecked()) {
+        if (modeSwitch.isChecked()) {
             // For when the user attempts to add a tour
             try {
                 // Checks to see if tour session is already on device
                 Cursor sessionCursor = FeedActivity.database.getAll("SESSION");
                 boolean alreadyExists = false;
-                for(int i = 0; i < sessionCursor.getCount(); i++) {
+                for (int i = 0; i < sessionCursor.getCount(); i++) {
                     sessionCursor.moveToPosition(i);
-                    if(result.equals(sessionCursor.getString(SESSION_COLUMN_PASSPHRASE))) {
+                    if (result.equals(sessionCursor.getString(sessionCursor.getColumnIndex(PASSPHRASE)))) {
                         alreadyExists = true;
                     }
                 }
-                if(alreadyExists) {
+                if (alreadyExists) {
                     Log.d("FeedActivity", "Tour for " + etCodePinEntry.getText() + " already exists!");
                     Snackbar.make(barcodeScannerView, "Tour already downloaded on this device.", Snackbar.LENGTH_LONG).show();
                     barcodeScannerView.resume();
@@ -136,7 +146,7 @@ public class ScanningActivity extends AppCompatActivity {
                     TourSubmit tourSubmit = new TourSubmit();
                     tourSubmit.execute(result);
                 }
-            } catch(NotInSchemaException e) {
+            } catch (NotInSchemaException e) {
                 Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
             }
         } else {
@@ -158,31 +168,32 @@ public class ScanningActivity extends AppCompatActivity {
         }
     }
 
-    private class TourSubmit extends AsyncTask<String,Double,Boolean> {
-        protected Boolean doInBackground(String... params) {
-            Boolean exists;
-            if(sessionExists(params[0])) {
-                exists = true;
-            } else {
-                exists = false;
+        private class TourSubmit extends AsyncTask<String, Double, Boolean> {
+            protected Boolean doInBackground(String... params) {
+                Boolean exists;
+                if (FeedActivity.sessionExists(params[0])) {
+                    exists = true;
+                } else {
+                    exists = false;
+                }
+                return exists;
             }
-            return exists;
-        }
-        protected void onPostExecute(Boolean result) {
-            if(result == true) {
-                Intent data = new Intent();
-                data.putExtra("mode", "tour");
-                data.putExtra("pin", etCodePinEntry.getText().toString());
-                setResult(RESULT_OK, data);
-                finish();
-            } else {
-                Log.d("FeedActivity", "Tour for " + etCodePinEntry.getText() + " not found!");
-                Snackbar.make(barcodeScannerView, "Tour not found, please try again.", Snackbar.LENGTH_LONG).show();
-                barcodeScannerView.resume();
-                clearInput();
+
+            protected void onPostExecute(Boolean result) {
+                if (result == true) {
+                    Intent data = new Intent();
+                    data.putExtra("mode", "tour");
+                    data.putExtra("pin", etCodePinEntry.getText().toString());
+                    setResult(RESULT_OK, data);
+                    finish();
+                } else {
+                    Log.d("FeedActivity", "Tour for " + etCodePinEntry.getText() + " not found!");
+                    Snackbar.make(barcodeScannerView, "Tour not found, please try again.", Snackbar.LENGTH_LONG).show();
+                    barcodeScannerView.resume();
+                    clearInput();
+                }
             }
         }
-    }
 
     /**
      * Clears input received in the {@link EditText} field and the Barcode Scanner's status bar text
@@ -190,25 +201,6 @@ public class ScanningActivity extends AppCompatActivity {
     private void clearInput() {
         barcodeScannerView.setStatusText("");
         etCodePinEntry.setText("");
-    }
-
-    private boolean sessionExists(String sessionCode) {
-        try {
-            InputStream inputStream = new URL("https://hitour.herokuapp.com/api/A7DE6825FD96CCC79E63C89B55F88/" + sessionCode).openStream();
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            StringBuilder text = new StringBuilder();
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                text.append(line);
-            }
-            String result = text.toString();
-            if(result.equals("Passprase Invalid"))
-                return false;
-        }
-        catch (IOException e) {
-            Log.e("IO_FAIL", Log.getStackTraceString(e));
-        }
-        return true;
     }
 
     /**
