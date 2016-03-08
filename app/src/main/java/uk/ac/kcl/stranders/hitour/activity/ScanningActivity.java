@@ -1,10 +1,8 @@
 package uk.ac.kcl.stranders.hitour.activity;
 
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.PASSPHRASE;
-
 import android.content.Intent;
-import android.graphics.Typeface;
 import android.database.Cursor;
+import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
@@ -25,12 +23,13 @@ import com.journeyapps.barcodescanner.BarcodeCallback;
 import com.journeyapps.barcodescanner.BarcodeResult;
 import com.journeyapps.barcodescanner.CompoundBarcodeView;
 
-
 import java.util.List;
 
 import uk.ac.kcl.stranders.hitour.CustomTypefaceSpan;
 import uk.ac.kcl.stranders.hitour.R;
 import uk.ac.kcl.stranders.hitour.database.NotInSchemaException;
+
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.PASSPHRASE;
 
 /**
  * {@link AppCompatActivity} class that is used to retrieve input by means of scanning a QR Code or
@@ -125,19 +124,19 @@ public class ScanningActivity extends AppCompatActivity {
         EditText etCodePinEntry = (EditText) findViewById(R.id.etCodePinEntry);
         String result = etCodePinEntry.getText().toString();
         // Check if user wants to add a tour or a point
-        if(modeSwitch.isChecked()) {
+        if (modeSwitch.isChecked()) {
             // For when the user attempts to add a tour
             try {
                 // Checks to see if tour session is already on device
                 Cursor sessionCursor = FeedActivity.database.getAll("SESSION");
                 boolean alreadyExists = false;
-                for(int i = 0; i < sessionCursor.getCount(); i++) {
+                for (int i = 0; i < sessionCursor.getCount(); i++) {
                     sessionCursor.moveToPosition(i);
-                    if(result.equals(sessionCursor.getString(sessionCursor.getColumnIndex(PASSPHRASE)))) {
+                    if (result.equals(sessionCursor.getString(sessionCursor.getColumnIndex(PASSPHRASE)))) {
                         alreadyExists = true;
                     }
                 }
-                if(alreadyExists) {
+                if (alreadyExists) {
                     Log.d("FeedActivity", "Tour for " + etCodePinEntry.getText() + " already exists!");
                     Snackbar.make(barcodeScannerView, "Tour already downloaded on this device.", Snackbar.LENGTH_LONG).show();
                     barcodeScannerView.resume();
@@ -147,7 +146,7 @@ public class ScanningActivity extends AppCompatActivity {
                     TourSubmit tourSubmit = new TourSubmit();
                     tourSubmit.execute(result);
                 }
-            } catch(NotInSchemaException e) {
+            } catch (NotInSchemaException e) {
                 Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
             }
         } else {
@@ -167,38 +166,34 @@ public class ScanningActivity extends AppCompatActivity {
                 clearInput();
             }
         }
-        else {
-            Log.d("FeedActivity", "Point for " + etCodePinEntry.getText() + " not found!");
-            Snackbar.make(barcodeScannerView, getResources().getString(R.string.snake_bar_message_alert_scanner_view), Snackbar.LENGTH_LONG).show();
-            barcodeScannerView.resume();
-            clearInput();
     }
 
-    private class TourSubmit extends AsyncTask<String,Double,Boolean> {
-        protected Boolean doInBackground(String... params) {
-            Boolean exists;
-            if(FeedActivity.sessionExists(params[0])) {
-                exists = true;
-            } else {
-                exists = false;
+        private class TourSubmit extends AsyncTask<String, Double, Boolean> {
+            protected Boolean doInBackground(String... params) {
+                Boolean exists;
+                if (FeedActivity.sessionExists(params[0])) {
+                    exists = true;
+                } else {
+                    exists = false;
+                }
+                return exists;
             }
-            return exists;
-        }
-        protected void onPostExecute(Boolean result) {
-            if(result == true) {
-                Intent data = new Intent();
-                data.putExtra("mode", "tour");
-                data.putExtra("pin", etCodePinEntry.getText().toString());
-                setResult(RESULT_OK, data);
-                finish();
-            } else {
-                Log.d("FeedActivity", "Tour for " + etCodePinEntry.getText() + " not found!");
-                Snackbar.make(barcodeScannerView, "Tour not found, please try again.", Snackbar.LENGTH_LONG).show();
-                barcodeScannerView.resume();
-                clearInput();
+
+            protected void onPostExecute(Boolean result) {
+                if (result == true) {
+                    Intent data = new Intent();
+                    data.putExtra("mode", "tour");
+                    data.putExtra("pin", etCodePinEntry.getText().toString());
+                    setResult(RESULT_OK, data);
+                    finish();
+                } else {
+                    Log.d("FeedActivity", "Tour for " + etCodePinEntry.getText() + " not found!");
+                    Snackbar.make(barcodeScannerView, "Tour not found, please try again.", Snackbar.LENGTH_LONG).show();
+                    barcodeScannerView.resume();
+                    clearInput();
+                }
             }
         }
-    }
 
     /**
      * Clears input received in the {@link EditText} field and the Barcode Scanner's status bar text

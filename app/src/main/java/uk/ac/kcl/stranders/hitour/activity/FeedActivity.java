@@ -1,8 +1,5 @@
 package uk.ac.kcl.stranders.hitour.activity;
 
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.NAME;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.PASSPHRASE;
-
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -62,6 +59,8 @@ import uk.ac.kcl.stranders.hitour.model.Tour;
 import uk.ac.kcl.stranders.hitour.model.TourSession;
 import uk.ac.kcl.stranders.hitour.retrofit.HiTourRetrofit;
 
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.NAME;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.PASSPHRASE;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TOUR_ID;
 
 /**
