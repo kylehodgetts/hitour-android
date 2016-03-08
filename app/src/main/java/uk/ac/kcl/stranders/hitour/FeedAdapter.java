@@ -23,10 +23,10 @@ import uk.ac.kcl.stranders.hitour.activity.FeedActivity;
 import uk.ac.kcl.stranders.hitour.database.NotInSchemaException;
 import uk.ac.kcl.stranders.hitour.fragment.DetailFragment;
 
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_COLUMN_DESCRIPTION;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_COLUMN_NAME;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_COLUMN_URL;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_TOUR_COLUMN_POINT_ID;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.DESCRIPTION;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.NAME;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_ID;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.URL;
 
 /**
  * FeedAdapter provides a binding from a points data set to views
@@ -101,13 +101,13 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder>  {
         pointTourCursor.moveToPosition(position);
         try {
             Map<String,String> primaryMap = new HashMap<>();
-            primaryMap.put("POINT_ID", pointTourCursor.getString(POINT_TOUR_COLUMN_POINT_ID));
+            primaryMap.put("POINT_ID", pointTourCursor.getString(pointTourCursor.getColumnIndex(POINT_ID)));
             Cursor pointCursor = FeedActivity.database.getWholeByPrimary("POINT",primaryMap);
             pointCursor.moveToFirst();
-            holder.tvTitle.setText(pointCursor.getString(POINT_COLUMN_NAME));
-            holder.tvDescription.setText(pointCursor.getString(POINT_COLUMN_DESCRIPTION));
+            holder.tvTitle.setText(pointCursor.getString(pointCursor.getColumnIndex(NAME)));
+            holder.tvDescription.setText(pointCursor.getString(pointCursor.getColumnIndex(DESCRIPTION)));
 
-            String url = pointCursor.getString(POINT_COLUMN_URL);
+            String url = pointCursor.getString(pointCursor.getColumnIndex(URL));
             url = FeedActivity.createFilename(url);
             String localFilesAddress = mContext.getFilesDir().toString();
             url = localFilesAddress + "/" + url;

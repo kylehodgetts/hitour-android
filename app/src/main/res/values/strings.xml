@@ -5,6 +5,8 @@
     <string name="no_network">There is no network connection. The data could not be updated.</string>
     <string name="hint_scanning">Scan a code or type a pin</string>
     <string name="submit">Submit</string>
+    <string name="point">Point</string>
+    <string name="tour">Tour</string>
     <string name="about">About</string>
     <string name="snake_bar_message_alert_scanner_view">Point not found, please try again.</string>
 

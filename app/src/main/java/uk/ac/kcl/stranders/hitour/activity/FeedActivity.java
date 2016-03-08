@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Typeface;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -32,10 +33,13 @@ import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,18 +53,15 @@ import uk.ac.kcl.stranders.hitour.database.NotInSchemaException;
 import uk.ac.kcl.stranders.hitour.database.schema.HiSchema;
 import uk.ac.kcl.stranders.hitour.fragment.AppInfoFragment;
 import uk.ac.kcl.stranders.hitour.fragment.DetailFragment;
-import uk.ac.kcl.stranders.hitour.model.Audience;
 import uk.ac.kcl.stranders.hitour.model.Data;
-import uk.ac.kcl.stranders.hitour.model.DataAudience;
-import uk.ac.kcl.stranders.hitour.model.DataType;
 import uk.ac.kcl.stranders.hitour.model.Point;
-import uk.ac.kcl.stranders.hitour.model.PointData;
 import uk.ac.kcl.stranders.hitour.model.Tour;
-import uk.ac.kcl.stranders.hitour.model.TourPoints;
+import uk.ac.kcl.stranders.hitour.model.TourSession;
 import uk.ac.kcl.stranders.hitour.retrofit.HiTourRetrofit;
 
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TOUR_COLUMN_NAME;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TOUR_COLUMN_TOUR_ID;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.NAME;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.PASSPHRASE;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TOUR_ID;
 
 /**
  * The main activity that displays all available points for a given tour.
@@ -112,6 +113,8 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer);
 
+        checkSessionDates();
+
         mFeed = (RecyclerView) findViewById(R.id.rv_feed);
 
         mFeed.setHasFixedSize(true);
@@ -140,7 +143,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
             Cursor tourCursor = database.getAll("TOUR");
             if(tourCursor.getCount() > 0) {
                 tourCursor.moveToFirst();
-                populateFeedAdapter(tourCursor.getString(TOUR_COLUMN_TOUR_ID));
+                populateFeedAdapter(tourCursor.getString(tourCursor.getColumnIndex(TOUR_ID)));
             }
         } catch (NotInSchemaException e) {
             Log.e("DATABASE_FAIL",Log.getStackTraceString(e));
@@ -159,6 +162,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
                 new NavigationView.OnNavigationItemSelectedListener() {
                     @Override
                     public boolean onNavigationItemSelected(MenuItem item) {
+                           
                         // TODO: Refactor this block of code
 
                         // If the "about" section is clicked, the DialogFragment shows up
@@ -169,11 +173,11 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
                         } else {
                             try {
                                 Cursor tourCursor = database.getAll("TOUR");
-                                if (tourCursor.getCount() > 0) {
+                                if(tourCursor.getCount() > 0) {
                                     tourCursor.moveToFirst();
                                     tourCursor.move(item.getItemId());
-                                    if (!tourCursor.getString(TOUR_COLUMN_TOUR_ID).equals(FeedActivity.this.currentTourId)) {
-                                        populateFeedAdapter(tourCursor.getString(TOUR_COLUMN_TOUR_ID));
+                                    if (!tourCursor.getString(tourCursor.getColumnIndex(TOUR_ID)).equals(FeedActivity.this.currentTourId)) {
+                                        populateFeedAdapter(tourCursor.getString(tourCursor.getColumnIndex(TOUR_ID)));
                                     }
                                 }
                             } catch (NotInSchemaException e) {
@@ -198,35 +202,36 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
             }
         });
 
-        // Fetch data from the HiTour web API
-        // A null check bellow prevents data from being fetched again upon rotation
-        if (hiTourRetrofit == null) {
-            if (Utilities.isNetworkAvailable(this)) {
-                hiTourRetrofit = new HiTourRetrofit(this);
-                hiTourRetrofit.fetchAll();
-            } else {
-                Snackbar.make(mFeed, getString(R.string.no_network), Snackbar.LENGTH_LONG).show();
-            }
-        }
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode == RESULT_OK) {
-            if (!(getResources().getBoolean(R.bool.isTablet))) {
-                Intent intent = new Intent(this, DetailActivity.class)
-                        .putExtra(DetailActivity.EXTRA_BUNDLE, data.getExtras().getInt("pin"));
-                startActivity(intent);
+        if(resultCode == RESULT_OK) {
+            if(data.getExtras().getString("mode").equals("point")) {
+                // Instructions for when a point is entered
+                if (!(getResources().getBoolean(R.bool.isTablet))) {
+                    Intent intent = new Intent(this, DetailActivity.class)
+                            .putExtra(DetailActivity.EXTRA_BUNDLE, data.getExtras().getInt("pin"));
+                    startActivity(intent);
+                } else {
+                    Bundle bundle = new Bundle();
+                    bundle.putInt(DetailFragment.ARG_ITEM_ID, data.getExtras().getInt("pin"));
+
+                    DetailFragment fragment = new DetailFragment();
+                    fragment.setArguments(bundle);
+
+                    getSupportFragmentManager()
+                            .beginTransaction()
+                            .replace(R.id.point_detail_container, fragment, DetailFragment.FRAGMENT_TAG)
+                            .commitAllowingStateLoss();
+                }
             } else {
-                Bundle bundle = new Bundle();
-                bundle.putInt(DetailFragment.ARG_ITEM_ID, data.getExtras().getInt("pin"));
-
-                DetailFragment fragment = new DetailFragment();
-                fragment.setArguments(bundle);
-
-                getSupportFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.point_detail_container, fragment, DetailFragment.FRAGMENT_TAG)
-                        .commitAllowingStateLoss();
+                // Instructions for when a tour is entered
+                if(Utilities.isNetworkAvailable(this)) {
+                    hiTourRetrofit = new HiTourRetrofit(this, data.getExtras().getString("pin"));
+                    hiTourRetrofit.fetchTour();
+                } else {
+                    Snackbar.make(mFeed, getString(R.string.no_network), Snackbar.LENGTH_LONG).show();
+                }
             }
         }
     }
@@ -263,68 +268,50 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
      * Invoked when the data has been successfully fetched from the web API.
      */
     public void onAllRequestsFinished() {
-        List<Audience> listAudience = hiTourRetrofit.getList(DataType.AUDIENCE);
-        for(Audience audience : listAudience) {
-            Map<String,String> columnsMap = new HashMap<>();
-            columnsMap.put("NAME",audience.getName());
-            Map<String,String> primaryKeysMap = new HashMap<>();
-            primaryKeysMap.put("AUDIENCE_ID", audience.getId().toString());
-            try {
-                database.insert(columnsMap, primaryKeysMap, "AUDIENCE");
-            } catch(NotInSchemaException e) {
-                Log.e("DATABASE_FAIL",Log.getStackTraceString(e));
-            }
+        // Add the tour session to the local database
+        TourSession tourSession = hiTourRetrofit.getTourSession();
+        Map<String,String> tourSessionColumnsMap = new HashMap<>();
+        tourSessionColumnsMap.put("TOUR_ID", tourSession.getTourId().toString());
+        tourSessionColumnsMap.put("START_DATE", tourSession.getStartDate());
+        tourSessionColumnsMap.put("DURATION", tourSession.getDuration().toString());
+        tourSessionColumnsMap.put("PASSPHRASE", tourSession.getPassphrase());
+        Map<String,String> tourSessionPrimaryKeysMap = new HashMap<>();
+        tourSessionPrimaryKeysMap.put("SESSION_ID", tourSession.getId().toString());
+        try {
+            database.insert(tourSessionColumnsMap, tourSessionPrimaryKeysMap, "SESSION");
+        } catch (NotInSchemaException e) {
+            Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
         }
-        List<Data> listData = hiTourRetrofit.getList(DataType.DATA);
-        for(Data data : listData) {
-            Map<String,String> columnsMap = new HashMap<>();
-            columnsMap.put("URL",data.getUrl());
-            columnsMap.put("DESCRIPTION",data.getDescription());
-            columnsMap.put("TITLE",data.getTitle());
-            Map<String,String> primaryKeysMap = new HashMap<>();
-            primaryKeysMap.put("DATA_ID",data.getId().toString());
+
+        Tour tour = hiTourRetrofit.getTour();
+
+        // Add the tour to the local database
+        Map<String,String> tourColumnsMap = new HashMap<>();
+        tourColumnsMap.put("NAME", tour.getName());
+        tourColumnsMap.put("AUDIENCE_ID", tour.getAudienceId().toString());
+        Map<String, String> tourPrimaryKeysMap = new HashMap<>();
+        tourPrimaryKeysMap.put("TOUR_ID", tour.getId().toString());
+        try {
+            database.insert(tourColumnsMap, tourPrimaryKeysMap, "TOUR");
+        } catch (NotInSchemaException e) {
+            Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
+        }
+
+        // Add points to the local database
+        List<Point> points = tour.getPoints();
+        for(Point point : points) {
+            Map<String,String> pointColumnMap = new HashMap<>();
+            pointColumnMap.put("NAME", point.getName());
+            pointColumnMap.put("URL", point.getUrl());
+            pointColumnMap.put("DESCRIPTION", point.getDescription());
+            Map<String,String> pointPrimaryKeysMap = new HashMap<>();
+            pointPrimaryKeysMap.put("POINT_ID", point.getId().toString());
             try {
-                database.insert(columnsMap, primaryKeysMap, "DATA");
+                database.insert(pointColumnMap, pointPrimaryKeysMap, "POINT");
             } catch(NotInSchemaException e) {
                 Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
             }
-            try {
-                String filename = createFilename(data.getUrl());
-                String localPath = this.getFilesDir().toString();
-                File tempFile = new File(localPath + "/" + filename);
-                if(!tempFile.exists()) {
-                    DownloadToStorage downloadToStorage = new DownloadToStorage(data.getUrl());
-                    downloadToStorage.run();
-                }
-            } catch(Exception e) {
-                Log.e("STORAGE_FAIL", Log.getStackTraceString(e));
-            }
-        }
-        List<DataAudience> listDataAudience = hiTourRetrofit.getList(DataType.DATA_AUDIENCE);
-        for(DataAudience dataAudience : listDataAudience) {
-            Map<String,String> columnsMap = new HashMap<>();
-            Map<String,String> primaryKeysMap = new HashMap<>();
-            primaryKeysMap.put("DATA_ID",dataAudience.getDatumId().toString());
-            primaryKeysMap.put("AUDIENCE_ID",dataAudience.getAudienceId().toString());
-            try {
-                database.insert(columnsMap, primaryKeysMap, "AUDIENCE_DATA");
-            } catch(NotInSchemaException e) {
-                Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
-            }
-        }
-        List<Point> listPoint  = hiTourRetrofit.getList(DataType.POINT);
-        for(Point point : listPoint) {
-            Map<String,String> columnsMap = new HashMap<>();
-            columnsMap.put("NAME",point.getName());
-            columnsMap.put("URL", point.getUrl());
-            columnsMap.put("DESCRIPTION", point.getDescription());
-            Map<String,String> primaryKeysMap = new HashMap<>();
-            primaryKeysMap.put("POINT_ID",point.getId().toString());
-            try {
-                database.insert(columnsMap, primaryKeysMap, "POINT");
-            } catch(NotInSchemaException e) {
-                Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
-            }
+            // Download the header image to local storage
             try {
                 String filename = createFilename(point.getUrl());
                 String localPath = this.getFilesDir().toString();
@@ -336,55 +323,82 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
             } catch(Exception e) {
                 Log.e("STORAGE_FAIL", Log.getStackTraceString(e));
             }
-        }
-        List<PointData> listPointData  = hiTourRetrofit.getList(DataType.POINT_DATA);
-        for(PointData pointData : listPointData) {
-            Map<String,String> columnsMap = new HashMap<>();
-            try {
-                columnsMap.put("RANK", pointData.getRank().toString());
-            } catch(NullPointerException e) {
-                columnsMap.put("RANK",null);
+            // Add data to the local database
+            List<Data> data = point.getData();
+            for (Data datum : data) {
+                Map<String, String> datumColumnsMap = new HashMap<>();
+                datumColumnsMap.put("URL", datum.getUrl());
+                datumColumnsMap.put("DESCRIPTION", datum.getDescription());
+                datumColumnsMap.put("TITLE", datum.getTitle());
+                Map<String, String> datumPrimaryKeysMap = new HashMap<>();
+                datumPrimaryKeysMap.put("DATA_ID", datum.getId().toString());
+                try {
+                    database.insert(datumColumnsMap, datumPrimaryKeysMap, "DATA");
+                } catch (NotInSchemaException e) {
+                    Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
+                }
+                // Download the physical data to storage
+                try {
+                    String filename = createFilename(datum.getUrl());
+                    String localPath = this.getFilesDir().toString();
+                    File tempFile = new File(localPath + "/" + filename);
+                    if (!tempFile.exists()) {
+                        DownloadToStorage downloadToStorage = new DownloadToStorage(datum.getUrl());
+                        downloadToStorage.run();
+                    }
+                } catch (Exception e) {
+                    Log.e("STORAGE_FAIL", Log.getStackTraceString(e));
+                }
+                // Add point data to the local database
+                Map<String, String> pointDatumColumnsMap = new HashMap<>();
+                pointDatumColumnsMap.put("RANK", datum.getRank().toString());
+                Map<String, String> pointDataPrimaryKeysMap = new HashMap<>();
+                pointDataPrimaryKeysMap.put("POINT_ID", point.getId().toString());
+                pointDataPrimaryKeysMap.put("DATA_ID", datum.getId().toString());
+                try {
+                    database.insert(pointDatumColumnsMap, pointDataPrimaryKeysMap, "POINT_DATA");
+                } catch (NotInSchemaException e) {
+                    Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
+                }
+                // Add data audience to the local database
+                Map<String, String> dataAudienceColumnsMap = new HashMap<>();
+                Map<String, String> dataAudiencePrimaryKeysMap = new HashMap<>();
+                dataAudiencePrimaryKeysMap.put("DATA_ID", datum.getId().toString());
+                dataAudiencePrimaryKeysMap.put("AUDIENCE_ID", tour.getAudienceId().toString());
+                try {
+                    database.insert(dataAudienceColumnsMap, dataAudiencePrimaryKeysMap, "AUDIENCE_DATA");
+                } catch (NotInSchemaException e) {
+                    Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
+                }
             }
-            Map<String,String> primaryKeysMap = new HashMap<>();
-            primaryKeysMap.put("POINT_ID",pointData.getPointId().toString());
-            primaryKeysMap.put("DATA_ID",pointData.getDatumId().toString());
+            // Add tour points to the local database
+            Map<String, String> tourPointColumnsMap = new HashMap<>();
+            tourPointColumnsMap.put("RANK", point.getRank().toString());
+            Map<String, String> tourPointPrimaryKeysMap = new HashMap<>();
+            tourPointPrimaryKeysMap.put("TOUR_ID", tour.getId().toString());
+            tourPointPrimaryKeysMap.put("POINT_ID", point.getId().toString());
             try {
-                database.insert(columnsMap, primaryKeysMap, "POINT_DATA");
-            } catch(NotInSchemaException e) {
+                database.insert(tourPointColumnsMap, tourPointPrimaryKeysMap, "POINT_TOUR");
+            } catch (NotInSchemaException e) {
                 Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
             }
         }
-        List<Tour> listTour = hiTourRetrofit.getList(DataType.TOUR);
-        for(Tour tour : listTour) {
-            Map<String,String> columnsMap = new HashMap<>();
-            columnsMap.put("NAME",tour.getName());
-            columnsMap.put("AUDIENCE_ID",tour.getAudienceId().toString());
-            Map<String,String> primaryKeysMap = new HashMap<>();
-            primaryKeysMap.put("TOUR_ID",tour.getId().toString());
-            try {
-                database.insert(columnsMap, primaryKeysMap, "TOUR");
-            } catch(NotInSchemaException e) {
-                Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
-            }
+
+        // Add audience to the local database
+        Map<String, String> audienceColumnsMap = new HashMap<>();
+        Map<String, String> audiencePrimaryKeysMap = new HashMap<>();
+        audiencePrimaryKeysMap.put("AUDIENCE_ID", tour.getAudienceId().toString());
+        try {
+            database.insert(audienceColumnsMap, audiencePrimaryKeysMap, "AUDIENCE");
+        } catch (NotInSchemaException e) {
+            Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
         }
-        List<TourPoints> listTourPoints = hiTourRetrofit.getList(DataType.TOUR_POINTS);
-        for(TourPoints tourPoint : listTourPoints) {
-            Map<String,String> columnsMap = new HashMap<>();
-            columnsMap.put("RANK",tourPoint.getRank().toString());
-            Map<String,String> primaryKeysMap = new HashMap<>();
-            primaryKeysMap.put("TOUR_ID",tourPoint.getTourId().toString());
-            primaryKeysMap.put("POINT_ID",tourPoint.getPointId().toString());
-            try {
-                database.insert(columnsMap, primaryKeysMap, "POINT_TOUR");
-            } catch(NotInSchemaException e) {
-                Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
-            }
-        }
+
         updateMenu();
         try {
             Cursor tourCursor = database.getAll("TOUR");
             tourCursor.moveToFirst();
-            populateFeedAdapter(tourCursor.getString(TOUR_COLUMN_TOUR_ID));
+            populateFeedAdapter(tourCursor.getString(tourCursor.getColumnIndex(TOUR_ID)));
         } catch (NotInSchemaException e) {
             Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
         }
@@ -421,7 +435,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
             tourCursor.moveToFirst();
             for(i = 0; i < tourCursor.getCount(); i++) {
                 tourCursor.moveToPosition(i);
-                mMenu.add(0, i, Menu.NONE, tourCursor.getString(TOUR_COLUMN_NAME)).setIcon(R.drawable.ic_action_local_hospital);
+                mMenu.add(0, i, Menu.NONE, tourCursor.getString(tourCursor.getColumnIndex(NAME))).setIcon(R.drawable.ic_action_local_hospital);
                 // TODO: Fix content description
 //                mMenu.getItem(i).getActionView().setContentDescription(getString(R.string.content_description_tour_selection, mMenu.getItem(i).getTitle()));
             }
@@ -503,6 +517,73 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         filename = filename.replace(".","");
         url = filename + extension;
         return url;
+    }
+
+    private void checkSessionDates() {
+        try {
+            Cursor sessionCursor = database.getAll("SESSION");
+            String[] passphraseArray = new String[sessionCursor.getCount()];
+            for(int i = 0; i < sessionCursor.getCount(); i++) {
+                sessionCursor.moveToPosition(i);
+                String passphrase = sessionCursor.getString(sessionCursor.getColumnIndex(PASSPHRASE));
+                passphraseArray[i] = passphrase;
+            }
+            if(Utilities.isNetworkAvailable(this)) {
+                SessionValidation sessionValidation = new SessionValidation();
+                sessionValidation.execute(passphraseArray);
+            } else {
+                //TODO: use date on phone to check if session is still valid
+            }
+        } catch (NotInSchemaException e) {
+            Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
+        }
+    }
+
+    private class SessionValidation extends AsyncTask<String[],Double,Boolean[]> {
+        private String[] passphraseArray;
+        protected Boolean[] doInBackground(String[]... params) {
+            passphraseArray = params[0];
+            Boolean[] exists = new Boolean[passphraseArray.length];
+            for(int i = 0; i < passphraseArray.length; i++) {
+                if(sessionExists(passphraseArray[i])) {
+                    exists[i] = true;
+                } else {
+                    exists[i] = false;
+                }
+            }
+            return exists;
+        }
+        protected void onPostExecute(Boolean[] result) {
+            for (int i = 0; i < result.length; i++) {
+                if (result[i] == false) {
+                    removeSession(passphraseArray[i]);
+                }
+            }
+        }
+    }
+
+    public static boolean sessionExists(String sessionCode) {
+        try {
+            InputStream inputStream = new URL("https://hitour.herokuapp.com/api/A7DE6825FD96CCC79E63C89B55F88/" + sessionCode).openStream();
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            StringBuilder text = new StringBuilder();
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                text.append(line);
+            }
+            String result = text.toString();
+            if(result.equals("Passprase Invalid"))
+                return false;
+        }
+        catch (IOException e) {
+            Log.e("IO_FAIL", Log.getStackTraceString(e));
+        }
+        return true;
+    }
+
+    private void removeSession(String passphrase) {
+        //TODO: add algorithm to remove tour session without removing any shared elements
+
     }
 
 }

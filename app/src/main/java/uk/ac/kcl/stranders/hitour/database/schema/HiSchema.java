@@ -22,14 +22,13 @@ public class HiSchema extends DatabaseSchema {
         addTable(tour);
 
         TableSchema session = new TableSchema(SESSION_ID, SESSION_TABLE);
-        session.addValue(SESSION_CODE, DataType.Text);
+        session.addValue(PASSPHRASE, DataType.Text);
         session.addValue(START_DATE, DataType.Text);
-        session.addValue(END_DATE, DataType.Text);
+        session.addValue(DURATION, DataType.Text);
         session.addValue(TOUR_ID, DataType.Text);
         addTable(session);
 
         TableSchema audience = new TableSchema(AUDIENCE_ID,AUDIENCE_TABLE);
-        audience.addValue(NAME, DataType.Text);
         addTable(audience);
 
         TableSchema point = new TableSchema(POINT_ID,POINT_TABLE);

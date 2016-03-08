@@ -5,6 +5,9 @@ import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Point implements Parcelable {
 
     @SerializedName("id")
@@ -19,6 +22,10 @@ public class Point implements Parcelable {
     private String url;
     @SerializedName("description")
     private String description;
+    @SerializedName("data")
+    private List<Data> data;
+    @SerializedName("rank")
+    private Integer rank;
 
     /**
      *
@@ -36,6 +43,23 @@ public class Point implements Parcelable {
      */
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    /**
+     * @return
+     * The rank
+     */
+    public Integer getRank() {
+        return rank;
+    }
+
+    /**
+     *
+     * @param rank
+     * The rank
+     */
+    public void setRank(Integer rank) {
+        this.rank = rank;
     }
 
     /**
@@ -128,6 +152,24 @@ public class Point implements Parcelable {
         this.description = description;
     }
 
+    /**
+     *
+     * @return
+     * The list of data
+     */
+    public List<Data> getData() {
+        return data;
+    }
+
+    /**
+     *
+     * @param data
+     * The list of data
+     */
+    public void setData(List<Data> data) {
+        this.data = data;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -137,10 +179,12 @@ public class Point implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(id);
         dest.writeString(name);
+        dest.writeInt(rank);
         dest.writeString(createdAt);
         dest.writeString(updatedAt);
         dest.writeString(url);
         dest.writeString(description);
+        dest.writeList(data);
     }
 
     public static final Parcelable.Creator<Point> CREATOR
@@ -157,9 +201,12 @@ public class Point implements Parcelable {
     private Point(Parcel in) {
         id = in.readInt();
         name = in.readString();
+        rank = in.readInt();
         createdAt = in.readString();
         updatedAt = in.readString();
         url = in.readString();
         description = in.readString();
+        data = new ArrayList<Data>();
+        in.readList(data, Data.class.getClassLoader());
     }
 }
