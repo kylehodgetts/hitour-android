@@ -7,11 +7,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.Cursor;
+import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -19,10 +21,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.squareup.okhttp.Callback;
@@ -42,12 +47,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import uk.ac.kcl.stranders.hitour.CustomTypefaceSpan;
 import uk.ac.kcl.stranders.hitour.FeedAdapter;
 import uk.ac.kcl.stranders.hitour.R;
 import uk.ac.kcl.stranders.hitour.Utilities;
 import uk.ac.kcl.stranders.hitour.database.DBWrap;
 import uk.ac.kcl.stranders.hitour.database.NotInSchemaException;
 import uk.ac.kcl.stranders.hitour.database.schema.HiSchema;
+import uk.ac.kcl.stranders.hitour.fragment.AppInfoFragment;
 import uk.ac.kcl.stranders.hitour.fragment.DetailFragment;
 import uk.ac.kcl.stranders.hitour.model.Data;
 import uk.ac.kcl.stranders.hitour.model.Point;
@@ -92,15 +99,17 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
 
     /**
      * Initializes the UI and sets an adapter for the {@link FeedActivity#mFeed}
+     *
      * @param savedInstanceState {@link Bundle} with all the saved state variables.
      */
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         database = new DBWrap(this, new HiSchema(1));
         setContentView(R.layout.activity_feed);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        setTitleFont();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer);
@@ -113,15 +122,15 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
 
         // Display list items depending on the device orientation.
         // Hide the Up button on tablets.
-        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-            if(getResources().getBoolean(R.bool.isTablet)) {
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            if (getResources().getBoolean(R.bool.isTablet)) {
                 mLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
                 getSupportActionBar().setDisplayShowTitleEnabled(false);
             } else {
                 mLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
             }
         } else {
-            if(getResources().getBoolean(R.bool.isTablet)) {
+            if (getResources().getBoolean(R.bool.isTablet)) {
                 mLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
                 getSupportActionBar().setDisplayShowTitleEnabled(false);
             } else {
@@ -145,7 +154,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         updateMenu();
 
         ActionBar supportActionBar = getSupportActionBar();
-        if(supportActionBar != null) {
+        if (supportActionBar != null) {
             supportActionBar.setHomeAsUpIndicator(R.drawable.ic_action_menu);
             supportActionBar.setDisplayHomeAsUpEnabled(true);
         }
@@ -154,26 +163,39 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
                 new NavigationView.OnNavigationItemSelectedListener() {
                     @Override
                     public boolean onNavigationItemSelected(MenuItem item) {
-                        try {
-                            Cursor tourCursor = database.getAll("TOUR");
-                            if(tourCursor.getCount() > 0) {
-                                tourCursor.moveToFirst();
-                                tourCursor.move(item.getItemId());
-                                if(!tourCursor.getString(tourCursor.getColumnIndex(TOUR_ID)).equals(FeedActivity.this.currentTourId)) {
-                                    populateFeedAdapter(tourCursor.getString(tourCursor.getColumnIndex(TOUR_ID)));
+                           
+                        // TODO: Refactor this block of code
+
+                        // If the "about" section is clicked, the DialogFragment shows up
+                        if (item.getItemId() == R.id.app_info_item) {
+                            FragmentManager fm = getSupportFragmentManager();
+                            AppInfoFragment appInfoFragment = new AppInfoFragment();
+                            appInfoFragment.show(fm, "app_info_fragment");
+                        } else {
+                            try {
+                                Cursor tourCursor = database.getAll("TOUR");
+                                if(tourCursor.getCount() > 0) {
+                                    tourCursor.moveToFirst();
+                                    tourCursor.move(item.getItemId());
+                                    if (!tourCursor.getString(tourCursor.getColumnIndex(TOUR_ID)).equals(FeedActivity.this.currentTourId)) {
+                                        populateFeedAdapter(tourCursor.getString(tourCursor.getColumnIndex(TOUR_ID)));
+                                    }
                                 }
+                            } catch (NotInSchemaException e) {
+                                Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
                             }
-                        } catch (NotInSchemaException e) {
-                            Log.e("DATABASE_FAIL",Log.getStackTraceString(e));
                         }
                         item.setChecked(true);
                         mDrawerLayout.closeDrawers();
+
                         return true;
                     }
                 }
         );
 
+
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setContentDescription(fab.getResources().getString(R.string.content_description_launch_scanner));
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -237,13 +259,13 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if(id == android.R.id.home) {
+        if (id == android.R.id.home) {
             mDrawerLayout.openDrawer(GravityCompat.START);
         }
         return super.onOptionsItemSelected(item);
     }
 
-     /**
+    /**
      * Invoked when the data has been successfully fetched from the web API.
      */
     public void onAllRequestsFinished() {
@@ -384,16 +406,39 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
     }
 
     /**
+     * Changes a font of the app title.
+     */
+    public void setTitleFont() {
+        Typeface font = Typeface.createFromAsset(this.getAssets(), "fonts/ubuntu_l.ttf");
+
+        // Set font for title in action bar on a phone.
+        ActionBar supportActionBar = getSupportActionBar();
+        if(supportActionBar != null && !getResources().getBoolean(R.bool.isTablet)) {
+            // Set the title of the action bar as the title with the custom font on a phone.
+            SpannableString s = new SpannableString(getString(R.string.app_name));
+            s.setSpan(new CustomTypefaceSpan("", font), 0, s.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            supportActionBar.setTitle(s);
+        } else {
+            // Set a typeface for the app title on a tablet.
+            TextView tvTitle = (TextView) findViewById(R.id.tv_app_title);
+            if(tvTitle != null) { tvTitle.setTypeface(font); }
+        }
+    }
+
+    /**
      * Invoked to fill drawer with list of tours saved on the device's database.
      */
     private void updateMenu() {
         mMenu.clear();
+        int i = 0;
         try {
             Cursor tourCursor = database.getAll("TOUR");
             tourCursor.moveToFirst();
-            for(int i = 0; i < tourCursor.getCount(); i++) {
+            for(i = 0; i < tourCursor.getCount(); i++) {
                 tourCursor.moveToPosition(i);
                 mMenu.add(0, i, Menu.NONE, tourCursor.getString(tourCursor.getColumnIndex(NAME))).setIcon(R.drawable.ic_action_local_hospital);
+                // TODO: Fix content description
+//                mMenu.getItem(i).getActionView().setContentDescription(getString(R.string.content_description_tour_selection, mMenu.getItem(i).getTitle()));
             }
             mMenu.setGroupCheckable(0, true, true);
             if(mMenu.size() > 0) {
@@ -402,6 +447,9 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         } catch(NotInSchemaException e) {
             Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
         }
+        mMenu.addSubMenu("s");
+        mMenu.add(R.id.end_padder, R.id.app_info_item, Menu.NONE, getString(R.string.about)).setIcon(R.drawable.ic_action_local_hospital);
+//        mMenu.getItem(i).getActionView().setContentDescription(getString(R.string.content_description_tour_selection, mMenu.getItem(i).getTitle()));
     }
 
     private void populateFeedAdapter(String tourId) {
@@ -465,7 +513,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
     public static String createFilename(String url) {
         url = url.replace("/","");
         url = url.replace(":","");
-        String filename = url.substring(0,url.lastIndexOf("."));
+        String filename = url.substring(0, url.lastIndexOf("."));
         String extension = url.substring(url.lastIndexOf("."));
         filename = filename.replace(".","");
         url = filename + extension;

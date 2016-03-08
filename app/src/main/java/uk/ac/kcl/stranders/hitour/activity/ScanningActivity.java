@@ -3,11 +3,15 @@ package uk.ac.kcl.stranders.hitour.activity;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.PASSPHRASE;
 
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -24,6 +28,7 @@ import com.journeyapps.barcodescanner.CompoundBarcodeView;
 
 import java.util.List;
 
+import uk.ac.kcl.stranders.hitour.CustomTypefaceSpan;
 import uk.ac.kcl.stranders.hitour.R;
 import uk.ac.kcl.stranders.hitour.database.NotInSchemaException;
 
@@ -91,12 +96,22 @@ public class ScanningActivity extends AppCompatActivity {
         modeSwitch = (Switch) findViewById(R.id.mode_switch);
 
         Button btnSubmit = (Button) findViewById(R.id.btnSubmit);
+        btnSubmit.setContentDescription(btnSubmit.getResources().getString(R.string.content_description_submits));
         btnSubmit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 submit();
             }
         });
+
+        ActionBar actionbar = getSupportActionBar();
+
+        Typeface font = Typeface.createFromAsset(this.getAssets(), "fonts/ubuntu_l.ttf");
+        SpannableString s = new SpannableString("hiTour");
+        s.setSpan(new CustomTypefaceSpan("", font), 0, s.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        
+        actionbar.setTitle(s);
+
     }
 
     /**
@@ -152,6 +167,11 @@ public class ScanningActivity extends AppCompatActivity {
                 clearInput();
             }
         }
+        else {
+            Log.d("FeedActivity", "Point for " + etCodePinEntry.getText() + " not found!");
+            Snackbar.make(barcodeScannerView, getResources().getString(R.string.snake_bar_message_alert_scanner_view), Snackbar.LENGTH_LONG).show();
+            barcodeScannerView.resume();
+            clearInput();
     }
 
     private class TourSubmit extends AsyncTask<String,Double,Boolean> {
