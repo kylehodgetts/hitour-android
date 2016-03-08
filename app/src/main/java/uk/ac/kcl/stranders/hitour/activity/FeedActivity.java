@@ -184,7 +184,6 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
                                 Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
                             }
                         }
-                        item.setChecked(true);
                         mDrawerLayout.closeDrawers();
 
                         return true;
