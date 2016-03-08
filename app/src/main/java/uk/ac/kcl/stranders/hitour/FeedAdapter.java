@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -25,8 +26,9 @@ import uk.ac.kcl.stranders.hitour.fragment.DetailFragment;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.DESCRIPTION;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.NAME;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_ID;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TOUR_ID;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.UNLOCK;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.URL;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_TOUR_COLUMN_UNLOCK;
 /**
  * FeedAdapter provides a binding from a points data set to views
  * that are displayed within a {@link FeedActivity#mFeed}.
@@ -70,37 +72,35 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder>  {
             public void onClick(View view) {
                 // Start a new activity on a phone or replace a detail fragment on tablets.
 
-
-                Cursor cursor = pointTourCursor;
-                cursor.moveToFirst();
-                Log.i("point", cursor.getString(POINT_COLUMN_NAME));
-                Log.i("Unlock state",cursor.getString(POINT_TOUR_COLUMN_UNLOCK));
-                while(true){
-                    cursor.moveToNext();
-                    Log.i("point", cursor.getString(POINT_COLUMN_NAME));
-                    Log.i("Unlock state",cursor.getString(POINT_TOUR_COLUMN_UNLOCK));
-                    if(cursor.isLast()){break;}
+                Map<String, String> tourPointPrimaryKeysMap = new HashMap<>();
+                tourPointPrimaryKeysMap.put("TOUR_ID", ""+viewHolder.tour_id);
+                tourPointPrimaryKeysMap.put("POINT_ID", ""+viewHolder.point_id);
+                Cursor cursor = null;
+                boolean unlockState = false;
+                try {
+                  cursor = FeedActivity.database.getWholeByPrimaryPartial("POINT_TOUR",tourPointPrimaryKeysMap);
+                  cursor.moveToFirst();
+                 unlockState =  (0 != Integer.parseInt(cursor.getString(cursor.getColumnIndex("UNLOCK"))));
+                } catch (NotInSchemaException e) {
+                    e.printStackTrace();
                 }
+                if (unlockState) {
+                    if (!(mContext.getResources().getBoolean(R.bool.isTablet))) {
+                        Intent intent = new Intent(mContext, DetailActivity.class)
+                                .putExtra(DetailActivity.EXTRA_BUNDLE, viewHolder.getAdapterPosition());
+                        mContext.startActivity(intent);
+                    } else {
+                        Bundle bundle = new Bundle();
+                        bundle.putInt(DetailFragment.ARG_ITEM_ID, viewHolder.getAdapterPosition());
 
-                Log.i("Column Index", ""+pointTourCursor.getColumnIndex("UNLOCK"));
-                Log.i("adapter Position", ""+viewHolder.getAdapterPosition());
-                Log.i("pointId",""+viewHolder.point_id);
+                        DetailFragment fragment = new DetailFragment();
+                        fragment.setArguments(bundle);
 
-                if (!(mContext.getResources().getBoolean(R.bool.isTablet))) {
-                    Intent intent = new Intent(mContext, DetailActivity.class)
-                            .putExtra(DetailActivity.EXTRA_BUNDLE, viewHolder.getAdapterPosition());
-                    mContext.startActivity(intent);
-                } else {
-                    Bundle bundle = new Bundle();
-                    bundle.putInt(DetailFragment.ARG_ITEM_ID, viewHolder.getAdapterPosition());
-
-                    DetailFragment fragment = new DetailFragment();
-                    fragment.setArguments(bundle);
-
-                    ((AppCompatActivity) mContext).getSupportFragmentManager()
-                            .beginTransaction()
-                            .replace(R.id.point_detail_container, fragment, DetailFragment.FRAGMENT_TAG)
-                            .commit();
+                        ((AppCompatActivity) mContext).getSupportFragmentManager()
+                                .beginTransaction()
+                                .replace(R.id.point_detail_container, fragment, DetailFragment.FRAGMENT_TAG)
+                                .commit();
+                    }
                 }
             }
         });
@@ -124,7 +124,8 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder>  {
             holder.tvDescription.setText(pointCursor.getString(pointCursor.getColumnIndex(DESCRIPTION)));
 
             String url = pointCursor.getString(pointCursor.getColumnIndex(URL));
-            holder.point_id = Integer.parseInt(pointTourCursor.getString(POINT_TOUR_COLUMN_POINT_ID));
+            holder.point_id = Integer.parseInt(pointTourCursor.getString(pointTourCursor.getColumnIndex(POINT_ID)));
+            holder.tour_id = Integer.parseInt(pointTourCursor.getString(pointTourCursor.getColumnIndex(TOUR_ID)));
             url = FeedActivity.createFilename(url);
             String localFilesAddress = mContext.getFilesDir().toString();
             url = localFilesAddress + "/" + url;
@@ -153,8 +154,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder>  {
         public TextView tvTitle;
         public TextView tvDescription;
         public Integer point_id;
-        
-//        public int databaseposition;
+        public Integer tour_id;
         /**
          * Public constructor.
          *

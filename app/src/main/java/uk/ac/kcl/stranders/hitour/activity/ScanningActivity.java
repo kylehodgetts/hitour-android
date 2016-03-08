@@ -23,13 +23,19 @@ import com.journeyapps.barcodescanner.BarcodeCallback;
 import com.journeyapps.barcodescanner.BarcodeResult;
 import com.journeyapps.barcodescanner.CompoundBarcodeView;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import uk.ac.kcl.stranders.hitour.CustomTypefaceSpan;
 import uk.ac.kcl.stranders.hitour.R;
 import uk.ac.kcl.stranders.hitour.database.NotInSchemaException;
 
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.PASSPHRASE;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_TOUR_TABLE;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.RANK;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TOUR_TABLE;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.UNLOCK;
 
 /**
  * {@link AppCompatActivity} class that is used to retrieve input by means of scanning a QR Code or
@@ -157,6 +163,22 @@ public class ScanningActivity extends AppCompatActivity {
                 Intent data = new Intent();
                 data.putExtra("mode", "point");
                 data.putExtra("pin", Integer.parseInt(result));
+
+                Map<String, String> tourPointColumnsMap = new HashMap<>();
+                tourPointColumnsMap.put("UNLOCK","1");
+
+                Map<String, String> tourPointPrimaryKeysMap = new HashMap<>();
+                tourPointPrimaryKeysMap.put("TOUR_ID", ""+FeedActivity.currentTourId);
+                tourPointPrimaryKeysMap.put("POINT_ID", result);
+                try {
+                    Cursor cursorGetRank = FeedActivity.database.getWholeByPrimaryPartial(POINT_TOUR_TABLE,tourPointPrimaryKeysMap);
+                    cursorGetRank.moveToFirst();
+                    String pointRank = cursorGetRank.getString(cursorGetRank.getColumnIndex(RANK));
+                    tourPointColumnsMap.put(RANK,pointRank);
+                    FeedActivity.database.insert(tourPointColumnsMap, tourPointPrimaryKeysMap, "POINT_TOUR");
+                } catch (NotInSchemaException e) {
+                    Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
+                }
                 setResult(RESULT_OK, data);
                 finish();
             } else {
