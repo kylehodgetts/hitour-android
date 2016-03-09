@@ -1,13 +1,5 @@
 package uk.ac.kcl.stranders.hitour.fragment;
 
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.AUDIENCE_ID;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.DATA_ID;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.DESCRIPTION;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.NAME;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_ID;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TITLE;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.URL;
-
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -30,7 +22,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,6 +29,15 @@ import java.util.Map;
 import uk.ac.kcl.stranders.hitour.R;
 import uk.ac.kcl.stranders.hitour.activity.FeedActivity;
 import uk.ac.kcl.stranders.hitour.database.NotInSchemaException;
+import uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants;
+
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.AUDIENCE_ID;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.DATA_ID;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.DESCRIPTION;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.NAME;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_ID;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TITLE;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.URL;
 
 /**
  * Fragment that shows the content for a particular point in the tour which could consist of
@@ -48,7 +48,12 @@ import uk.ac.kcl.stranders.hitour.database.NotInSchemaException;
 public class DetailFragment extends Fragment {
 
     /**
-     * Static String to name to store in a bundle the item's ID
+     * Static String to name to store in a bundle the item's position in the feed addapter.
+     */
+    public static final String ARG_ITEM_POSITION = "ITEM_POSITION";
+
+    /**
+     * Static String to name to store in a bundle the item's ID.
      */
     public static final String ARG_ITEM_ID = "ITEM_ID";
 
@@ -112,7 +117,7 @@ public class DetailFragment extends Fragment {
      */
     public static DetailFragment newInstance(int itemId) {
         Bundle arguments = new Bundle();
-        arguments.putInt(ARG_ITEM_ID, itemId);
+        arguments.putInt(ARG_ITEM_POSITION, itemId);
         DetailFragment fragment = new DetailFragment();
         fragment.setArguments(arguments);
         return fragment;
@@ -134,17 +139,29 @@ public class DetailFragment extends Fragment {
             Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
         }
 
-        if (getArguments().containsKey(ARG_ITEM_ID)) {
-            mItemId = getArguments().getInt(ARG_ITEM_ID);
-            pointTourCursor.moveToPosition(mItemId);
+        int position = 0;
+        if (getArguments().containsKey(ARG_ITEM_POSITION)) {
+            position = getArguments().getInt(ARG_ITEM_POSITION);
+        } else if (getArguments().containsKey(ARG_ITEM_ID)){
+            String pin = getArguments().getString(ARG_ITEM_ID);
+            pointTourCursor.moveToPosition(0);
+            position = -1;
+            do {
+                String id = pointTourCursor.getString(pointTourCursor.getColumnIndex(DatabaseConstants.POINT_ID));
+                ++position;
+                if (id.equals(pin)) {
+                    break;
+                }
+            } while (pointTourCursor.moveToNext());
+        }
+        pointTourCursor.moveToPosition(position);
 
-            try {
-                Map<String, String> partialPrimaryMapPoint = new HashMap<>();
-                partialPrimaryMapPoint.put("POINT_ID", pointTourCursor.getString(pointTourCursor.getColumnIndex(POINT_ID)));
-                pointDataCursor = FeedActivity.database.getWholeByPrimaryPartial("POINT_DATA", partialPrimaryMapPoint);
-            } catch (Exception e) {
-                Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
-            }
+        try {
+            Map<String, String> partialPrimaryMapPoint = new HashMap<>();
+            partialPrimaryMapPoint.put("POINT_ID", pointTourCursor.getString(pointTourCursor.getColumnIndex(POINT_ID)));
+            pointDataCursor = FeedActivity.database.getWholeByPrimaryPartial("POINT_DATA", partialPrimaryMapPoint);
+        } catch (Exception e) {
+            Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
         }
     }
 
@@ -296,7 +313,7 @@ public class DetailFragment extends Fragment {
                     videoView.setLayoutParams(layoutParams);
 
                     // Resumes video in same play if device rotated or fragment is paused
-                    if(currentPositionArray != null) {
+                    if (currentPositionArray != null) {
                         long currentPosition = currentPositionArray[currentVideosArrayList.indexOf(videoView)];
                         videoView.seekTo((int) currentPosition);
                     }

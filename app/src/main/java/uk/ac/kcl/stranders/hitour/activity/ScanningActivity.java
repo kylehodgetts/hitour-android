@@ -151,12 +151,11 @@ public class ScanningActivity extends AppCompatActivity {
             }
         } else {
             // For when the user attempts to add a point
-            // TODO: Needs to be changed when DB ready to search QR code data with DB and display relevant DetailActivity Page
-            if (result.matches("\\d{1,9}")) {
-                // TODO: check whether the pin exists
+            // TODO: check whether the pin exists
+            if (true) {
                 Intent data = new Intent();
                 data.putExtra("mode", "point");
-                data.putExtra("pin", Integer.parseInt(result));
+                data.putExtra(DetailActivity.EXTRA_PIN, result);
                 setResult(RESULT_OK, data);
                 finish();
             } else {
