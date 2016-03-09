@@ -20,6 +20,7 @@ import java.util.Map;
 
 import uk.ac.kcl.stranders.hitour.R;
 import uk.ac.kcl.stranders.hitour.database.NotInSchemaException;
+import uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants;
 import uk.ac.kcl.stranders.hitour.fragment.DetailFragment;
 
 /**
@@ -28,9 +29,15 @@ import uk.ac.kcl.stranders.hitour.fragment.DetailFragment;
 public class DetailActivity extends AppCompatActivity {
 
     /**
-     * Stores the key for the data passed with an intent.
+     * Stores the key for the adapter position passed with an intent.
      */
-    public final static String EXTRA_BUNDLE = "uk.ac.kcl.stranders.hitour.DetailActivity.bundle";
+    public final static String EXTRA_ADAPTER_POSITION = "uk.ac.kcl.stranders.hitour.DetailActivity.bundle";
+
+    /**
+     * Stores the key for the pin passed with an intent.
+     */
+    public final static String EXTRA_PIN = "uk.ac.kcl.stranders.hitour.DetailActivity.pin";
+
 
     /**
      * Stores the cursor that provides access to the points data.
@@ -38,9 +45,9 @@ public class DetailActivity extends AppCompatActivity {
     private Cursor mCursor;
 
     /**
-     * Stores the initial id value of a page in {@link ViewPager}.
+     * Stores the initial position of a page in {@link ViewPager}.
      */
-    private int mStartId;
+    private int mStartPosition;
 
     /**
      * {@link ViewPager} to navigate between instances of {@link DetailFragment}.
@@ -94,12 +101,25 @@ public class DetailActivity extends AppCompatActivity {
         });
 
         if (savedInstanceState == null) {
-            if (getIntent() != null) {
-                mStartId = getIntent().getIntExtra(EXTRA_BUNDLE, 0);
+            if (getIntent() != null && getIntent().getIntExtra(EXTRA_ADAPTER_POSITION, -1) != - 1) {
+                mStartPosition = getIntent().getIntExtra(EXTRA_ADAPTER_POSITION, 0);
+            } else if (getIntent() != null && getIntent().getStringExtra(EXTRA_PIN) != null) {
+                String pointId = getIntent().getStringExtra(EXTRA_PIN);
+                mCursor.moveToPosition(0);
+                mStartPosition = -1;
+                do {
+                    String id = mCursor.getString(mCursor.getColumnIndex(DatabaseConstants.POINT_ID));
+                    ++mStartPosition;
+                    if (id.equals(pointId)) {
+                        break;
+                    }
+                } while (mCursor.moveToNext());
+            } else {
+                mStartPosition = 0;
             }
         }
 
-        mPager.setCurrentItem(mStartId, false);
+        mPager.setCurrentItem(mStartPosition, false);
     }
 
     @Override

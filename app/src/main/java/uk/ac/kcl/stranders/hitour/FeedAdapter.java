@@ -78,16 +78,16 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
         v.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // Start a new activity on a phone or replace a detail fragment on tablets if unlocked.
+                // Start a new activity on a phone or replace a detail fragment on tablets.
                 if (isUnLocked(viewHolder)) {
-
                     if (!(mContext.getResources().getBoolean(R.bool.isTablet))) {
                         Intent intent = new Intent(mContext, DetailActivity.class)
-                                .putExtra(DetailActivity.EXTRA_BUNDLE, viewHolder.getAdapterPosition());
+                                .putExtra(DetailActivity.EXTRA_ADAPTER_POSITION, viewHolder.getAdapterPosition());
                         mContext.startActivity(intent);
                     } else {
                         Bundle bundle = new Bundle();
-                        bundle.putInt(DetailFragment.ARG_ITEM_ID, viewHolder.getAdapterPosition());
+                        bundle.putInt(DetailFragment.ARG_ITEM_POSITION, viewHolder.getAdapterPosition());
+                        // Start a new activity on a phone or replace a detail fragment on tablets if unlocked.
 
                         DetailFragment fragment = new DetailFragment();
                         fragment.setArguments(bundle);

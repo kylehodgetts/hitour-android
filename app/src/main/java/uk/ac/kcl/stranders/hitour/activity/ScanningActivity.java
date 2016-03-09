@@ -28,11 +28,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
+import java.util.Map;
 
 import uk.ac.kcl.stranders.hitour.CustomTypefaceSpan;
 import uk.ac.kcl.stranders.hitour.FeedAdapter;
 import uk.ac.kcl.stranders.hitour.R;
 import uk.ac.kcl.stranders.hitour.database.NotInSchemaException;
+import uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants;
 
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.PASSPHRASE;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_ID;
@@ -67,7 +69,6 @@ public class ScanningActivity extends AppCompatActivity {
     private Switch modeSwitch;
 
 
-
     /**
      * Field to store a {@link BarcodeCallback} which handles what the barcode scanner should accept
      * and what to do when it has detected an accepting barcode type.
@@ -90,7 +91,6 @@ public class ScanningActivity extends AppCompatActivity {
 
         }
     };
-
 
     /**
      * Creates an instance of the activity by telling barcode scanner to scan using the {@link BarcodeCallback}
@@ -121,7 +121,7 @@ public class ScanningActivity extends AppCompatActivity {
         Typeface font = Typeface.createFromAsset(this.getAssets(), "fonts/ubuntu_l.ttf");
         SpannableString s = new SpannableString("hiTour");
         s.setSpan(new CustomTypefaceSpan("", font), 0, s.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-
+        
         actionbar.setTitle(s);
 
     }
@@ -163,13 +163,12 @@ public class ScanningActivity extends AppCompatActivity {
                 Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
             }
         } else {
-            // For when the user attempts to add a point
-            // TODO: Needs to be changed when DB ready to search QR code data with DB and display relevant DetailActivity Page
-            if (result.matches("\\d{1,9}")) {
-                // TODO: check whether the pin exists
+            // Calls FeedActivity#onActivityResult if the point exists.
+            // Displays a message otherwise.
+            if (pointExistsInTour(result)) {
                 Intent data = new Intent();
                 data.putExtra("mode", "point");
-                data.putExtra("pin", Integer.parseInt(result));
+                data.putExtra(DetailActivity.EXTRA_PIN, result);
 
                 //Replace unlock with a value of 1
                 Map<String, String> tourPointColumnsMap = new HashMap<>();
@@ -189,7 +188,7 @@ public class ScanningActivity extends AppCompatActivity {
                 //Notify the feedAdapter that a viewHolder's view has to update.
                 ObservableLock observableLock = new ObservableLock();
                 observableLock.addObserver(FeedActivity.getCurrentFeedAdapter());
-                observableLock.setChange(result,FeedActivity.currentTourId);
+                observableLock.setChange(result, FeedActivity.currentTourId);
                 setResult(RESULT_OK, data);
                 finish();
             } else {
@@ -199,6 +198,34 @@ public class ScanningActivity extends AppCompatActivity {
                 clearInput();
             }
         }
+    }
+
+    /***
+     * Checks in a local database whether a point exists for a selected tour.
+     *
+     * @param passphrase id of a point
+     * @return true if the point is valid for a selected tour
+     */
+    private boolean pointExistsInTour(String passphrase) {
+        if(FeedActivity.currentTourId == null) {
+            return false;
+        }
+        Map<String,String> partialPrimaryMapTour = new HashMap<>();
+        partialPrimaryMapTour.put("TOUR_ID", FeedActivity.currentTourId);
+        Cursor pointTourCursor;
+        try {
+            pointTourCursor = FeedActivity.database.getWholeByPrimaryPartial("POINT_TOUR", partialPrimaryMapTour);
+            pointTourCursor.moveToPosition(0);
+            do {
+                String id = pointTourCursor.getString(pointTourCursor.getColumnIndex(DatabaseConstants.POINT_ID));
+                if (id.equals(passphrase)) {
+                    return true;
+                }
+            } while (pointTourCursor.moveToNext());
+        } catch (NotInSchemaException e) {
+            Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
+        }
+        return false;
     }
 
         private class TourSubmit extends AsyncTask<String, Double, Boolean> {

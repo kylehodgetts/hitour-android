@@ -1,13 +1,5 @@
 package uk.ac.kcl.stranders.hitour.fragment;
 
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.AUDIENCE_ID;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.DATA_ID;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.DESCRIPTION;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.NAME;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_ID;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TITLE;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.URL;
-
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -18,18 +10,19 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.VideoView;
+
+import com.devbrackets.android.exomedia.EMVideoView;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,6 +30,14 @@ import uk.ac.kcl.stranders.hitour.R;
 import uk.ac.kcl.stranders.hitour.activity.FeedActivity;
 import uk.ac.kcl.stranders.hitour.database.NotInSchemaException;
 import uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants;
+
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.AUDIENCE_ID;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.DATA_ID;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.DESCRIPTION;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.NAME;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_ID;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TITLE;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.URL;
 
 /**
  * Fragment that shows the content for a particular point in the tour which could consist of
@@ -47,14 +48,19 @@ import uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants;
 public class DetailFragment extends Fragment {
 
     /**
-     * Static String to name to store in a bundle the item's ID
+     * Static String to name to store in a bundle the item's position in the feed addapter.
+     */
+    public static final String ARG_ITEM_POSITION = "ITEM_POSITION";
+
+    /**
+     * Static String to name to store in a bundle the item's ID.
      */
     public static final String ARG_ITEM_ID = "ITEM_ID";
 
     /**
-     * Static String name to store in a bundle the video's current position
+     * Static String name to store in a bundle the videos' current positions
      */
-    public static final String CURRENT_POSITION = "CURRENT_POSITION";
+    public static final String CURRENT_POSITION_ARRAY = "CURRENT_POSITION_ARRAY";
 
     /**
      * Static {@link DetailFragment} tag used to identify a fragment.
@@ -76,19 +82,25 @@ public class DetailFragment extends Fragment {
      */
     private ImageView mImageView;
 
-    private VideoView currentVideo;
+    /**
+     * Stores a list of all the videos for the point
+     */
+    private ArrayList<EMVideoView> currentVideosArrayList;
 
     /**
-     * Stores the cursor to navigate the points of current tour
+     * Stores the cursor to navigate the points of the current tour
      */
     private Cursor pointTourCursor;
 
+    /**
+     * Stores the cursor to navigate the data of the current point
+     */
     private Cursor pointDataCursor;
 
     /**
-     * Stores the current position of the video
+     * Stores the current position of the videos
      */
-    private int currentPosition;
+    private long[] currentPositionArray;
 
     /**
      * Default empty required public constructor
@@ -105,7 +117,7 @@ public class DetailFragment extends Fragment {
      */
     public static DetailFragment newInstance(int itemId) {
         Bundle arguments = new Bundle();
-        arguments.putInt(ARG_ITEM_ID, itemId);
+        arguments.putInt(ARG_ITEM_POSITION, itemId);
         DetailFragment fragment = new DetailFragment();
         fragment.setArguments(arguments);
         return fragment;
@@ -127,17 +139,32 @@ public class DetailFragment extends Fragment {
             Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
         }
 
-        if (getArguments().containsKey(ARG_ITEM_ID)) {
-            mItemId = getArguments().getInt(ARG_ITEM_ID);
-            pointTourCursor.moveToPosition(mItemId);
+        // Find the relevant data in a cursor
+        int position = 0;
+        // Get a cursor position if the detail fragment was launched from the feed
+        if (getArguments().containsKey(ARG_ITEM_POSITION)) {
+            position = getArguments().getInt(ARG_ITEM_POSITION);
+        } else if (getArguments().containsKey(ARG_ITEM_ID)){
+            // Get a cursor position if the detail fragment was launched from the scanner
+            String pin = getArguments().getString(ARG_ITEM_ID);
+            pointTourCursor.moveToPosition(0);
+            position = -1;
+            do {
+                String id = pointTourCursor.getString(pointTourCursor.getColumnIndex(DatabaseConstants.POINT_ID));
+                ++position;
+                if (id.equals(pin)) {
+                    break;
+                }
+            } while (pointTourCursor.moveToNext());
+        }
+        pointTourCursor.moveToPosition(position);
 
-            try {
-                Map<String, String> partialPrimaryMapPoint = new HashMap<>();
-                partialPrimaryMapPoint.put("POINT_ID", pointTourCursor.getString(pointTourCursor.getColumnIndex(POINT_ID)));
-                pointDataCursor = FeedActivity.database.getWholeByPrimaryPartial("POINT_DATA", partialPrimaryMapPoint);
-            } catch (Exception e) {
-                Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
-            }
+        try {
+            Map<String, String> partialPrimaryMapPoint = new HashMap<>();
+            partialPrimaryMapPoint.put("POINT_ID", pointTourCursor.getString(pointTourCursor.getColumnIndex(POINT_ID)));
+            pointDataCursor = FeedActivity.database.getWholeByPrimaryPartial("POINT_DATA", partialPrimaryMapPoint);
+        } catch (Exception e) {
+            Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
         }
     }
 
@@ -187,6 +214,7 @@ public class DetailFragment extends Fragment {
                 url = localFilesAddress + "/" + url;
                 Bitmap bitmap = BitmapFactory.decodeFile(url);
                 mImageView.setImageBitmap(bitmap);
+                mImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
             } catch (NotInSchemaException e) {
                 Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
             }
@@ -269,46 +297,32 @@ public class DetailFragment extends Fragment {
     private void addVideo(final Bundle savedInstanceState, final LinearLayout linearLayout, int rank, String url) {
 
         if (url != null) {
-            final VideoView videoView = (VideoView) linearLayout.findViewById(R.id.video);
+            if(currentVideosArrayList == null) {
+                currentVideosArrayList = new ArrayList<>();
+            }
+            final EMVideoView videoView = (EMVideoView) linearLayout.findViewById(R.id.video);
+            currentVideosArrayList.add(videoView);
             videoView.setId(Integer.parseInt(mItemId + rank + ""));
-            Uri uri = Uri.parse(url);
-            videoView.setVideoURI(uri);
-            videoView.seekTo(100);
             videoView.setLayoutParams(new LinearLayout.LayoutParams(1000, 1000));
-            videoView.setBackgroundResource(android.R.color.transparent);
             videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 @Override
                 public void onPrepared(MediaPlayer mp) {
-                    videoView.setLayoutParams(new LinearLayout.LayoutParams(linearLayout.getWidth(),
-                            LinearLayout.LayoutParams.WRAP_CONTENT));
-                    if (savedInstanceState != null && savedInstanceState.containsKey(CURRENT_POSITION)) {
-                        currentPosition = savedInstanceState.getInt(CURRENT_POSITION);
+                    // Calculations to make video player in a 16:9 aspect ratio
+                    int intWidth = linearLayout.getWidth();
+                    float floatWidth = (float) intWidth;
+                    float floatHeight = floatWidth * (9f / 16);
+                    int intHeight = Math.round(floatHeight);
+                    LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(intWidth, intHeight);
+                    videoView.setLayoutParams(layoutParams);
+
+                    // Resumes video in same play if device rotated or fragment is paused
+                    if (currentPositionArray != null) {
+                        long currentPosition = currentPositionArray[currentVideosArrayList.indexOf(videoView)];
+                        videoView.seekTo((int) currentPosition);
                     }
                 }
             });
-            videoView.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                        if (videoView.isPlaying()) {
-                            videoView.pause();
-                            currentPosition = videoView.getCurrentPosition();
-                        } else {
-                            videoView.seekTo(currentPosition);
-                            videoView.start();
-                            currentVideo = videoView;
-                        }
-                        return true;
-                    }
-                    return false;
-                }
-            });
-            videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                @Override
-                public void onCompletion(MediaPlayer mp) {
-                    currentPosition = 0;
-                }
-            });
+            videoView.setVideoURI(Uri.parse(url));
         }
     }
 
@@ -320,7 +334,13 @@ public class DetailFragment extends Fragment {
      */
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putInt(CURRENT_POSITION, currentPosition);
+        if(currentVideosArrayList != null) {
+            long[] positionArray = new long[currentVideosArrayList.size()];
+            for(int i = 0; i < currentVideosArrayList.size(); i++) {
+                positionArray[i] = currentVideosArrayList.get(i).getCurrentPosition();
+            }
+            outState.putLongArray(CURRENT_POSITION_ARRAY, positionArray);
+        }
         super.onSaveInstanceState(outState);
     }
 
@@ -333,8 +353,8 @@ public class DetailFragment extends Fragment {
     @Override
     public void onViewStateRestored(Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
-        if(savedInstanceState != null && savedInstanceState.containsKey(CURRENT_POSITION)){
-           currentPosition = savedInstanceState.getInt(CURRENT_POSITION);
+        if(savedInstanceState != null && savedInstanceState.containsKey(CURRENT_POSITION_ARRAY)){
+           currentPositionArray = savedInstanceState.getLongArray(CURRENT_POSITION_ARRAY);
         }
     }
 
@@ -344,13 +364,17 @@ public class DetailFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        if(currentVideo != null) {
-            currentPosition = currentVideo.getCurrentPosition();
+        if(currentVideosArrayList != null) {
+            currentPositionArray = new long[currentVideosArrayList.size()];
+            for(int i = 0; i < currentVideosArrayList.size(); i++) {
+                currentPositionArray[i] = currentVideosArrayList.get(i).getCurrentPosition();
+                currentVideosArrayList.get(i).pause();
+            }
         }
     }
 
     private String getFileExtension(String url) {
-        String extension = url.substring(url.lastIndexOf(".")+1);
+        String extension = url.substring(url.lastIndexOf(".") + 1);
         extension = extension.toLowerCase();
         return extension;
     }
