@@ -28,12 +28,15 @@ import java.util.List;
 import java.util.Map;
 
 import uk.ac.kcl.stranders.hitour.CustomTypefaceSpan;
+import uk.ac.kcl.stranders.hitour.FeedAdapter;
 import uk.ac.kcl.stranders.hitour.R;
 import uk.ac.kcl.stranders.hitour.database.NotInSchemaException;
 
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.PASSPHRASE;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_ID;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_TOUR_TABLE;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.RANK;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TOUR_ID;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TOUR_TABLE;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.UNLOCK;
 
@@ -165,11 +168,11 @@ public class ScanningActivity extends AppCompatActivity {
                 data.putExtra("pin", Integer.parseInt(result));
 
                 Map<String, String> tourPointColumnsMap = new HashMap<>();
-                tourPointColumnsMap.put("UNLOCK","1");
+                tourPointColumnsMap.put(UNLOCK,"1");
 
                 Map<String, String> tourPointPrimaryKeysMap = new HashMap<>();
-                tourPointPrimaryKeysMap.put("TOUR_ID", ""+FeedActivity.currentTourId);
-                tourPointPrimaryKeysMap.put("POINT_ID", result);
+                tourPointPrimaryKeysMap.put(TOUR_ID, "" + FeedActivity.currentTourId);
+                tourPointPrimaryKeysMap.put(POINT_ID, result);
                 try {
                     Cursor cursorGetRank = FeedActivity.database.getWholeByPrimaryPartial(POINT_TOUR_TABLE,tourPointPrimaryKeysMap);
                     cursorGetRank.moveToFirst();

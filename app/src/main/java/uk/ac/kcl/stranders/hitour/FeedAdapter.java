@@ -12,10 +12,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,6 +24,7 @@ import uk.ac.kcl.stranders.hitour.fragment.DetailFragment;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.DESCRIPTION;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.NAME;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_ID;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_TOUR_TABLE;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TOUR_ID;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.UNLOCK;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.URL;
@@ -34,6 +33,7 @@ import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.URL;
  * that are displayed within a {@link FeedActivity#mFeed}.
  */
 public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder>  {
+
 
     /**
      * Stores the cursor that provides access to the feed data.
@@ -62,7 +62,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder>  {
      * {@inheritDoc}
      */
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(ViewGroup parent, final int viewType) {
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_feed, parent, false);
         final ViewHolder viewHolder = new ViewHolder(v);
         v.setContentDescription(v.getResources().getString(R.string.content_description_item_feed, viewHolder.tvTitle));
@@ -70,21 +70,9 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder>  {
         v.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // Start a new activity on a phone or replace a detail fragment on tablets.
+                // Start a new activity on a phone or replace a detail fragment on tablets if unlocked.
+                if (isUnLocked(viewHolder)) {
 
-                Map<String, String> tourPointPrimaryKeysMap = new HashMap<>();
-                tourPointPrimaryKeysMap.put("TOUR_ID", ""+viewHolder.tour_id);
-                tourPointPrimaryKeysMap.put("POINT_ID", ""+viewHolder.point_id);
-                Cursor cursor = null;
-                boolean unlockState = false;
-                try {
-                  cursor = FeedActivity.database.getWholeByPrimaryPartial("POINT_TOUR",tourPointPrimaryKeysMap);
-                  cursor.moveToFirst();
-                 unlockState =  (0 != Integer.parseInt(cursor.getString(cursor.getColumnIndex("UNLOCK"))));
-                } catch (NotInSchemaException e) {
-                    e.printStackTrace();
-                }
-                if (unlockState) {
                     if (!(mContext.getResources().getBoolean(R.bool.isTablet))) {
                         Intent intent = new Intent(mContext, DetailActivity.class)
                                 .putExtra(DetailActivity.EXTRA_BUNDLE, viewHolder.getAdapterPosition());
@@ -101,6 +89,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder>  {
                                 .replace(R.id.point_detail_container, fragment, DetailFragment.FRAGMENT_TAG)
                                 .commit();
                     }
+                    viewHolder.getView().findViewById(R.id.fllock).setVisibility(View.GONE);
                 }
             }
         });
@@ -131,7 +120,9 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder>  {
             url = localFilesAddress + "/" + url;
             Bitmap bitmap = BitmapFactory.decodeFile(url);
             holder.ivThumbnail.setImageBitmap(bitmap);
-
+            if(isUnLocked(holder)){
+                holder.getView().findViewById(R.id.fllock).setVisibility(View.GONE);
+            }
         } catch (NotInSchemaException e) {
             Log.e("DATABASE_FAIL",Log.getStackTraceString(e));
         }
@@ -155,6 +146,8 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder>  {
         public TextView tvDescription;
         public Integer point_id;
         public Integer tour_id;
+        private View view;
+
         /**
          * Public constructor.
          *
@@ -162,9 +155,45 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder>  {
          */
         public ViewHolder(View view) {
             super(view);
+            this.view = view;
             ivThumbnail = (ImageView) view.findViewById(R.id.thumbnail);
             tvTitle = (TextView) view.findViewById(R.id.feed_title);
             tvDescription = (TextView) view.findViewById(R.id.feed_description);
         }
+
+        public View getView(){
+          return view;
+        }
     }
+
+    /**
+     * Method to verify if ViewHolder has a tour_point that is unlocked.
+     * @param viewHolderUnlock
+     * @return unlocked
+     */
+   private boolean isUnLocked(ViewHolder viewHolderUnlock){
+       Integer tour_id = viewHolderUnlock.tour_id;
+       Integer point_id = viewHolderUnlock.point_id;
+        Map<String, String> tourPointPrimaryKeysMap = new HashMap<>();
+        tourPointPrimaryKeysMap.put("TOUR_ID", ""+tour_id);
+        tourPointPrimaryKeysMap.put("POINT_ID", ""+point_id);
+        Cursor cursor = null;
+        boolean unlockState = false;
+        try {
+           cursor = FeedActivity.database.getWholeByPrimaryPartial(POINT_TOUR_TABLE, tourPointPrimaryKeysMap);
+            if(cursor.getCount()>0) {
+                cursor.moveToFirst();
+                if (cursor.getColumnIndex(UNLOCK) != -1) {
+                    unlockState = (0 != Integer.parseInt(cursor.getString(cursor.getColumnIndex(UNLOCK))));
+                }
+            }
+
+        } catch (NotInSchemaException e) {
+            e.printStackTrace();
+        }
+        return unlockState;
+    }
+
+
+
 }

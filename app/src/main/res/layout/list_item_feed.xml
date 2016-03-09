@@ -22,26 +22,7 @@
             android:layout_gravity="center"
             android:background="@color/colorDivider"
             android:scaleType="centerCrop" />
-        <FrameLayout
-            android:id="@+id/phileas"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="visible">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@color/transparencyLock" />
-
-            <ImageView
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:layout_marginBottom="10dp"
-                android:layout_gravity="center"
-                android:background="@android:drawable/ic_lock_lock"
-                android:backgroundTint="@color/lock"
-                android:scaleType="centerCrop" />
-        </FrameLayout>
+        <include layout="@layout/fl_lock" />
 
         <TextView
             android:id="@+id/feed_title"
