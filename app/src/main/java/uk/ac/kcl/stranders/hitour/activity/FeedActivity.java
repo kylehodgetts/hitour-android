@@ -590,7 +590,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
     }
 
     /**
-     * Method to fetch current feed adapter
+     * Method to get current feed adapter
      * @return FeedAdapter
      */
     public static FeedAdapter getCurrentFeedAdapter(){

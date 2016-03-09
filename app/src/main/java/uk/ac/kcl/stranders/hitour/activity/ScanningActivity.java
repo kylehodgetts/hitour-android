@@ -183,8 +183,6 @@ public class ScanningActivity extends AppCompatActivity {
                     String pointRank = cursorGetRank.getString(cursorGetRank.getColumnIndex(RANK));
                     tourPointColumnsMap.put(RANK, pointRank);
                     FeedActivity.database.insert(tourPointColumnsMap, tourPointPrimaryKeysMap, "POINT_TOUR");
-                    Cursor cursorGetRank1 = FeedActivity.database.getWholeByPrimaryPartial(POINT_TOUR_TABLE, tourPointPrimaryKeysMap);
-                    Log.i("COUNTSIZE", ""+cursorGetRank1.getCount());
                 } catch (NotInSchemaException e) {
                     Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
                 }
