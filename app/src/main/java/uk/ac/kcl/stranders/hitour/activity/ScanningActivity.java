@@ -128,17 +128,20 @@ public class ScanningActivity extends AppCompatActivity {
         String result = etCodePinEntry.getText().toString();
         // Check if the point came from being scanned
         if(fromScanner) {
-            // Check if a point or a tour was scanned
-            if(result.substring(0,6).equals("POINT-")) {
-                // Takes identification part of point id
-                result = result.substring(6);
-            } else {
-                // Takes identification part of session passphrase
-                result = result.substring(8);
-                // Sets to identify as a tour
-                modeSwitch.setChecked(true);
+            // Check to see if length could make a valid code
+            if(result.length() > 6) {
+                // Check if a point or a tour was scanned
+                if (result.substring(0, 6).equals("POINT-")) {
+                    // Takes identification part of point id
+                    result = result.substring(6);
+                } else {
+                    // Takes identification part of session passphrase
+                    result = result.substring(8);
+                    // Sets to identify as a tour
+                    modeSwitch.setChecked(true);
+                }
+                etCodePinEntry.setText(result);
             }
-            etCodePinEntry.setText(result);
         }
         // Check if user wants to add a session or a point
         if (modeSwitch.isChecked()) {
