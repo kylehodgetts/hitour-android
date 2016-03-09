@@ -11,6 +11,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.util.Log;
+import android.util.Pair;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
@@ -26,6 +27,7 @@ import com.journeyapps.barcodescanner.CompoundBarcodeView;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Observable;
 
 import uk.ac.kcl.stranders.hitour.CustomTypefaceSpan;
 import uk.ac.kcl.stranders.hitour.FeedAdapter;
@@ -65,6 +67,7 @@ public class ScanningActivity extends AppCompatActivity {
     private Switch modeSwitch;
 
 
+
     /**
      * Field to store a {@link BarcodeCallback} which handles what the barcode scanner should accept
      * and what to do when it has detected an accepting barcode type.
@@ -87,6 +90,7 @@ public class ScanningActivity extends AppCompatActivity {
 
         }
     };
+
 
     /**
      * Creates an instance of the activity by telling barcode scanner to scan using the {@link BarcodeCallback}
@@ -117,7 +121,7 @@ public class ScanningActivity extends AppCompatActivity {
         Typeface font = Typeface.createFromAsset(this.getAssets(), "fonts/ubuntu_l.ttf");
         SpannableString s = new SpannableString("hiTour");
         s.setSpan(new CustomTypefaceSpan("", font), 0, s.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        
+
         actionbar.setTitle(s);
 
     }
@@ -167,21 +171,27 @@ public class ScanningActivity extends AppCompatActivity {
                 data.putExtra("mode", "point");
                 data.putExtra("pin", Integer.parseInt(result));
 
+                //Replace unlock with a value of 1
                 Map<String, String> tourPointColumnsMap = new HashMap<>();
                 tourPointColumnsMap.put(UNLOCK,"1");
-
                 Map<String, String> tourPointPrimaryKeysMap = new HashMap<>();
                 tourPointPrimaryKeysMap.put(TOUR_ID, "" + FeedActivity.currentTourId);
                 tourPointPrimaryKeysMap.put(POINT_ID, result);
                 try {
-                    Cursor cursorGetRank = FeedActivity.database.getWholeByPrimaryPartial(POINT_TOUR_TABLE,tourPointPrimaryKeysMap);
+                    Cursor cursorGetRank = FeedActivity.database.getWholeByPrimaryPartial(POINT_TOUR_TABLE, tourPointPrimaryKeysMap);
                     cursorGetRank.moveToFirst();
                     String pointRank = cursorGetRank.getString(cursorGetRank.getColumnIndex(RANK));
-                    tourPointColumnsMap.put(RANK,pointRank);
+                    tourPointColumnsMap.put(RANK, pointRank);
                     FeedActivity.database.insert(tourPointColumnsMap, tourPointPrimaryKeysMap, "POINT_TOUR");
+                    Cursor cursorGetRank1 = FeedActivity.database.getWholeByPrimaryPartial(POINT_TOUR_TABLE, tourPointPrimaryKeysMap);
+                    Log.i("COUNTSIZE", ""+cursorGetRank1.getCount());
                 } catch (NotInSchemaException e) {
                     Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
                 }
+                //Notify the feedAdapter that a viewHolder's view has to update.
+                ObservableLock observableLock = new ObservableLock();
+                observableLock.addObserver(FeedActivity.getCurrentFeedAdapter());
+                observableLock.setChange(result,FeedActivity.currentTourId);
                 setResult(RESULT_OK, data);
                 finish();
             } else {
@@ -281,6 +291,17 @@ public class ScanningActivity extends AppCompatActivity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         return barcodeScannerView.onKeyDown(keyCode, event) || super.onKeyDown(keyCode, event);
+    }
+
+    /**
+     * Observable class that allows us to notify a change related to lock for the ViewAdapter
+     */
+    public class ObservableLock extends Observable{
+
+        public void setChange(String point_id,String tour_id){
+            setChanged();
+            notifyObservers(new Pair(Integer.valueOf(point_id),Integer.valueOf(tour_id)));
+        }
     }
 
 }

@@ -96,6 +96,8 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
 
     private static HiTourRetrofit hiTourRetrofit;
 
+    private static FeedAdapter currentFeedAdapter;
+
     /**
      * Initializes the UI and sets an adapter for the {@link FeedActivity#mFeed}
      *
@@ -460,6 +462,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
             FeedAdapter adapter = new FeedAdapter(feedCursor, this);
             mFeed.setAdapter(adapter);
             currentTourId = tourId;
+            setCurrentFeedAdapter(adapter);
         } catch (NotInSchemaException e) {
             Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
         }
@@ -580,6 +583,18 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
             Log.e("IO_FAIL", Log.getStackTraceString(e));
         }
         return true;
+    }
+
+    private void setCurrentFeedAdapter(FeedAdapter adapter){
+        currentFeedAdapter= adapter;
+    }
+
+    /**
+     * Method to fetch current feed adapter
+     * @return FeedAdapter
+     */
+    public static FeedAdapter getCurrentFeedAdapter(){
+        return currentFeedAdapter;
     }
 
     private void removeSession(String passphrase) {

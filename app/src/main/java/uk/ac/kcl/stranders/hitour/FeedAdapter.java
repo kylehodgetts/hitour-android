@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +17,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Observable;
+import java.util.Observer;
 
 import uk.ac.kcl.stranders.hitour.activity.DetailActivity;
 import uk.ac.kcl.stranders.hitour.activity.FeedActivity;
@@ -32,8 +35,7 @@ import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.URL;
  * FeedAdapter provides a binding from a points data set to views
  * that are displayed within a {@link FeedActivity#mFeed}.
  */
-public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder>  {
-
+public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> implements Observer  {
 
     /**
      * Stores the cursor that provides access to the feed data.
@@ -46,6 +48,11 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder>  {
     private Context mContext;
 
     /**
+     * Stores the viewHolders matched by their respective tour_point primary key value.
+     */
+    private HashMap<Pair<Integer,Integer>,ViewHolder> viewHolders;
+
+    /**
      * Public constructor.
      *
      * @param cursor {@link Cursor}
@@ -54,6 +61,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder>  {
     public FeedAdapter(Cursor cursor, Context context) {
         pointTourCursor = cursor;
         mContext = context;
+        viewHolders = new HashMap();
     }
 
     /**
@@ -89,7 +97,6 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder>  {
                                 .replace(R.id.point_detail_container, fragment, DetailFragment.FRAGMENT_TAG)
                                 .commit();
                     }
-                    viewHolder.getView().findViewById(R.id.fllock).setVisibility(View.GONE);
                 }
             }
         });
@@ -120,9 +127,8 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder>  {
             url = localFilesAddress + "/" + url;
             Bitmap bitmap = BitmapFactory.decodeFile(url);
             holder.ivThumbnail.setImageBitmap(bitmap);
-            if(isUnLocked(holder)){
-                holder.getView().findViewById(R.id.fllock).setVisibility(View.GONE);
-            }
+            isUnLocked(holder);
+            viewHolders.put(new Pair(holder.point_id,holder.tour_id),holder);
         } catch (NotInSchemaException e) {
             Log.e("DATABASE_FAIL",Log.getStackTraceString(e));
         }
@@ -134,6 +140,18 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder>  {
     @Override
     public int getItemCount() {
         return pointTourCursor.getCount();
+    }
+
+    /**
+     *Observes the ScannerActivity and update a viewHolder's view if appropriate
+     * @param observable
+     * @param data
+     */
+    @Override
+    public void update(Observable observable, Object data) {
+       Integer point_id =((Pair<Integer, Integer>) data).first;
+       Integer tour_id = ((Pair<Integer, Integer>) data).second;
+        isUnLocked(getViewHolder(point_id, tour_id));
     }
 
     /**
@@ -168,6 +186,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder>  {
 
     /**
      * Method to verify if ViewHolder has a tour_point that is unlocked.
+     * If a tour_point for a specific viewHolder is unlocked then the lock FrameLayout is removed.
      * @param viewHolderUnlock
      * @return unlocked
      */
@@ -191,9 +210,21 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder>  {
         } catch (NotInSchemaException e) {
             e.printStackTrace();
         }
+       if(unlockState){
+        viewHolderUnlock.getView().findViewById(R.id.fllock).setVisibility(View.GONE);
+       }
         return unlockState;
     }
 
+    /**
+     *Method to retrieve a specific ViewHolder
+     * @param point_id
+     * @param tour_id
+     * @return
+     */
+    private ViewHolder getViewHolder(Integer point_id,Integer tour_id){
+        return viewHolders.get(new Pair(point_id,tour_id));
+    }
 
 
 }
