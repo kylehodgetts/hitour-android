@@ -511,6 +511,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
     public static String createFilename(String url) {
         url = url.replace("/","");
         url = url.replace(":","");
+        url = url.replace("%","");
         String filename = url.substring(0, url.lastIndexOf("."));
         String extension = url.substring(url.lastIndexOf("."));
         filename = filename.replace(".","");
