@@ -153,6 +153,8 @@ public class ScanningActivity extends AppCompatActivity {
                 Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
             }
         } else {
+            // Calls FeedActivity#onActivityResult if the point exists.
+            // Displays a message otherwise.
             if (pointExistsInTour(result)) {
                 Intent data = new Intent();
                 data.putExtra("mode", "point");
@@ -168,7 +170,13 @@ public class ScanningActivity extends AppCompatActivity {
         }
     }
 
-    private boolean pointExistsInTour(String result) {
+    /***
+     * Checks in a local database whether a point exists for a selected tour.
+     *
+     * @param passphrase id of a point
+     * @return true if the point is valid for a selected tour
+     */
+    private boolean pointExistsInTour(String passphrase) {
         Map<String,String> partialPrimaryMapTour = new HashMap<>();
         partialPrimaryMapTour.put("TOUR_ID", FeedActivity.currentTourId);
         Cursor pointTourCursor;
@@ -177,7 +185,7 @@ public class ScanningActivity extends AppCompatActivity {
             pointTourCursor.moveToPosition(0);
             do {
                 String id = pointTourCursor.getString(pointTourCursor.getColumnIndex(DatabaseConstants.POINT_ID));
-                if (id.equals(result)) {
+                if (id.equals(passphrase)) {
                     return true;
                 }
             } while (pointTourCursor.moveToNext());

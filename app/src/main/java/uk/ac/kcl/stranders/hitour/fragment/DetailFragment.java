@@ -139,10 +139,13 @@ public class DetailFragment extends Fragment {
             Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
         }
 
+        // Find the relevant data in a cursor
         int position = 0;
+        // Get a cursor position if the detail fragment was launched from the feed
         if (getArguments().containsKey(ARG_ITEM_POSITION)) {
             position = getArguments().getInt(ARG_ITEM_POSITION);
         } else if (getArguments().containsKey(ARG_ITEM_ID)){
+            // Get a cursor position if the detail fragment was launched from the scanner
             String pin = getArguments().getString(ARG_ITEM_ID);
             pointTourCursor.moveToPosition(0);
             position = -1;

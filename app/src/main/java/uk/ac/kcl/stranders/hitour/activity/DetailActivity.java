@@ -29,10 +29,13 @@ import uk.ac.kcl.stranders.hitour.fragment.DetailFragment;
 public class DetailActivity extends AppCompatActivity {
 
     /**
-     * Stores the key for the data passed with an intent.
+     * Stores the key for the adapter position passed with an intent.
      */
     public final static String EXTRA_ADAPTER_POSITION = "uk.ac.kcl.stranders.hitour.DetailActivity.bundle";
 
+    /**
+     * Stores the key for the pin passed with an intent.
+     */
     public final static String EXTRA_PIN = "uk.ac.kcl.stranders.hitour.DetailActivity.pin";
 
 
@@ -42,7 +45,7 @@ public class DetailActivity extends AppCompatActivity {
     private Cursor mCursor;
 
     /**
-     * Stores the initial id value of a page in {@link ViewPager}.
+     * Stores the initial position of a page in {@link ViewPager}.
      */
     private int mStartPosition;
 
