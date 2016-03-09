@@ -72,7 +72,7 @@ public class ScanningActivity extends AppCompatActivity {
                 barcodeScannerView.setStatusText(result.getText());
                 etCodePinEntry.setText(result.getText());
                 barcodeScannerView.pause();
-                submit();
+                submit(true);
             }
         }
 
@@ -102,7 +102,7 @@ public class ScanningActivity extends AppCompatActivity {
         btnSubmit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                submit();
+                submit(false);
             }
         });
 
@@ -123,9 +123,22 @@ public class ScanningActivity extends AppCompatActivity {
      *
      * Otherwise an error message is shown to the user and the input is cleared ready for the next input.
      */
-    public void submit() {
+    public void submit(boolean fromScanner) {
         EditText etCodePinEntry = (EditText) findViewById(R.id.etCodePinEntry);
         String result = etCodePinEntry.getText().toString();
+        // Check if the point came from being scanned
+        if(fromScanner) {
+            // Check if a point or a tour was scanned
+            if(result.substring(0,6).equals("POINT-")) {
+                // Takes identification part of point id
+                result = result.substring(6);
+            } else {
+                // Takes identification part of tour passphrase
+                result = result.substring(5);
+                // Sets to identify as a tour
+                modeSwitch.setChecked(true);
+            }
+        }
         // Check if user wants to add a tour or a point
         if (modeSwitch.isChecked()) {
             // For when the user attempts to add a tour
