@@ -209,11 +209,11 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
                 // Instructions for when a point is entered
                 if (!(getResources().getBoolean(R.bool.isTablet))) {
                     Intent intent = new Intent(this, DetailActivity.class)
-                            .putExtra(DetailActivity.EXTRA_BUNDLE, data.getExtras().getInt("pin"));
+                            .putExtra(DetailActivity.EXTRA_PIN, data.getExtras().getString(DetailActivity.EXTRA_PIN));
                     startActivity(intent);
                 } else {
                     Bundle bundle = new Bundle();
-                    bundle.putInt(DetailFragment.ARG_ITEM_ID, data.getExtras().getInt("pin"));
+                    bundle.putString(DetailFragment.ARG_ITEM_ID, data.getExtras().getString(DetailActivity.EXTRA_PIN));
 
                     DetailFragment fragment = new DetailFragment();
                     fragment.setArguments(bundle);
