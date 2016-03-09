@@ -133,15 +133,16 @@ public class ScanningActivity extends AppCompatActivity {
                 // Takes identification part of point id
                 result = result.substring(6);
             } else {
-                // Takes identification part of tour passphrase
-                result = result.substring(5);
+                // Takes identification part of session passphrase
+                result = result.substring(8);
                 // Sets to identify as a tour
                 modeSwitch.setChecked(true);
             }
+            etCodePinEntry.setText(result);
         }
-        // Check if user wants to add a tour or a point
+        // Check if user wants to add a session or a point
         if (modeSwitch.isChecked()) {
-            // For when the user attempts to add a tour
+            // For when the user attempts to add a session
             try {
                 // Checks to see if tour session is already on device
                 Cursor sessionCursor = FeedActivity.database.getAll("SESSION");
@@ -223,7 +224,7 @@ public class ScanningActivity extends AppCompatActivity {
             }
 
             protected void onPostExecute(Boolean result) {
-                if (result == true) {
+                if (result) {
                     Intent data = new Intent();
                     data.putExtra("mode", "tour");
                     data.putExtra("pin", etCodePinEntry.getText().toString());
