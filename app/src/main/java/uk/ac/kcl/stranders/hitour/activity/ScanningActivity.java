@@ -177,6 +177,9 @@ public class ScanningActivity extends AppCompatActivity {
      * @return true if the point is valid for a selected tour
      */
     private boolean pointExistsInTour(String passphrase) {
+        if(FeedActivity.currentTourId == null) {
+            return false;
+        }
         Map<String,String> partialPrimaryMapTour = new HashMap<>();
         partialPrimaryMapTour.put("TOUR_ID", FeedActivity.currentTourId);
         Cursor pointTourCursor;
