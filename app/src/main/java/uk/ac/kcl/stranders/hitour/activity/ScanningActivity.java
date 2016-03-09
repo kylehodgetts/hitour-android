@@ -1,5 +1,6 @@
 package uk.ac.kcl.stranders.hitour.activity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Typeface;
@@ -13,6 +14,7 @@ import android.text.SpannableString;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Switch;
@@ -124,6 +126,14 @@ public class ScanningActivity extends AppCompatActivity {
      * Otherwise an error message is shown to the user and the input is cleared ready for the next input.
      */
     public void submit(boolean fromScanner) {
+
+        // Hide keyboard when submit is pressed so Snackbar can be seen
+        View view = this.getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
+
         EditText etCodePinEntry = (EditText) findViewById(R.id.etCodePinEntry);
         String result = etCodePinEntry.getText().toString();
         // Check if the point came from being scanned
