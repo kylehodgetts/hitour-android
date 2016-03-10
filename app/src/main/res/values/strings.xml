@@ -15,4 +15,6 @@
     <string name="content_description_launch_scanner">Launch Scanner</string>
     <string name="content_description_tour_selection">Tour Selection %1$s</string>
 
+    <color name="transparent_grey">#33808080</color>
+
 </resources>

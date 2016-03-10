@@ -283,8 +283,8 @@ public class DetailFragment extends Fragment {
                             @Override
                             public void onClick(View v) {
                                 FragmentManager fm = getActivity().getSupportFragmentManager();
-                                ImageDialogFragment imageDialogFragment = new ImageDialogFragment();
-                                imageDialogFragment.setImageView(imageView);
+                                ImageDialogFragment imageDialogFragment = new ImageDialogFragment().newInstance(getArguments().describeContents(), bitmap);
+                                imageDialogFragment.setStyle(DialogFragment.STYLE_NO_FRAME, R.style.MyDialog);
                                 imageDialogFragment.show(fm, "image_dialog_fragment");
                             }
                         });
