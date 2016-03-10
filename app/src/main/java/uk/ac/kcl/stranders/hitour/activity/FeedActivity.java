@@ -572,13 +572,14 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
                 text.append(line);
             }
             String result = text.toString();
-            if(result.equals("Passprase Invalid"))
-                return false;
+            //Only return true if it starts with a curly brace indicating JSON
+            if(result.startsWith("{"))
+                return true;
         }
         catch (IOException e) {
             Log.e("IO_FAIL", Log.getStackTraceString(e));
         }
-        return true;
+        return false;
     }
 
     private void removeSession(String passphrase) {
