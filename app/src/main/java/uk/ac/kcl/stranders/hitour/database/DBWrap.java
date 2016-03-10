@@ -161,6 +161,44 @@ public class DBWrap {
     }
 
     /**
+     * Deletes any entries in the given table in the database that match the conditions
+     * @param columns       The values that should hold true for the columns in this table
+     * @param primaryKeys   The values that should hold true for the primary keys in this table for this entry
+     * @param tableName     The name of the table from which the entries should be deleted
+     * @throws NotInSchemaException In case that the request was malformed, ie does not match the schema
+     */
+    public void delete(Map<String,String> columns, Map<String,String> primaryKeys, String tableName) throws NotInSchemaException {
+        TableSchema table;
+        String whereClause = "";
+        String[] whereArgs = new String[columns.size() + primaryKeys.size()];
+        int i = 0;
+        if ((table = schema.getTable(tableName)) == null || (columns.size() == 0 && primaryKeys.size() == 0))
+            throw new NotInSchemaException();
+
+        for (Map.Entry<String,String> entry : columns.entrySet()) {
+            if (!table.hasColumn(entry.getKey()))
+                throw new NotInSchemaException();
+            whereClause = whereClause.concat(entry.getKey() + "=? and ");
+            whereArgs[i] = entry.getValue();
+            i++;
+        }
+
+        for (Map.Entry<String,String> entry : primaryKeys.entrySet()) {
+            if (!table.hasPrimaryKey(entry.getKey()))
+                throw new NotInSchemaException();
+            whereClause = whereClause.concat(entry.getKey() + "=? and ");
+            whereArgs[i] = entry.getValue();
+            i++;
+        }
+
+        // Removes last occurance of " and "
+        whereClause = whereClause.substring(0, whereClause.length() - 5);
+
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        db.delete(tableName, whereClause, whereArgs);
+    }
+
+    /**
      * Convenience function that checks whether the given primary keys are in the table
      * @param primaryKeys   The primary keys to be checked
      * @param table         The table in which the keys are supposed to be
