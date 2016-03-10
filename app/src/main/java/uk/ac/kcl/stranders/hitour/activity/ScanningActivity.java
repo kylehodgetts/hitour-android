@@ -142,9 +142,11 @@ public class ScanningActivity extends AppCompatActivity {
                 if (result.length() > 6 && result.substring(0, 6).equals("POINT-")) {
                     // Takes identification part of point id
                     result = result.substring(6);
-                } else if (result.length() > 8 && result.substring(0, 8).equals("SESSION-")) {
+                    // Sets to identify as a point
+                    modeSwitch.setChecked(false);
+                } else if (result.length() > 2 && result.substring(0, 2).equals("SN")) {
                     // Takes identification part of session passphrase
-                    result = result.substring(8);
+                    result = result.substring(2);
                     // Sets to identify as a tour
                     modeSwitch.setChecked(true);
                 }
