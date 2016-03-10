@@ -426,6 +426,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
                 downloadToStorage.run();
             } catch (Exception e) {
                 Log.e("STORAGE_FAIL", Log.getStackTraceString(e));
+                onDownloadFinish();
             }
         }
 
@@ -522,17 +523,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
 
                 @Override public void onFailure(Request request, IOException throwable) {
                     throwable.printStackTrace();
-                    downloadPosition++;
-                    if(downloadPosition == downloadItemCount) {
-                        progressDialog.dismiss();
-                        downloadItemCount = 0;
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                populateFeedAdapter(currentTourId);
-                            }
-                        });
-                    }
+                    onDownloadFinish();
                 }
 
                 @Override public void onResponse(Response response) throws IOException {
@@ -555,21 +546,26 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
                     fileOutputStream.close();
                     inputStream.close();
 
-                    downloadPosition++;
-                    if(downloadPosition == downloadItemCount) {
-                        progressDialog.dismiss();
-                        downloadItemCount = 0;
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                populateFeedAdapter(currentTourId);
-                            }
-                        });
-                    }
+                    onDownloadFinish();
                 }
             });
         }
 
+    }
+
+    private void onDownloadFinish() {
+        downloadPosition++;
+        if(downloadPosition == downloadItemCount) {
+            progressDialog.dismiss();
+            downloadItemCount = 0;
+            downloadPosition = 0;
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    populateFeedAdapter(currentTourId);
+                }
+            });
+        }
     }
 
     public static String createFilename(String url) {
