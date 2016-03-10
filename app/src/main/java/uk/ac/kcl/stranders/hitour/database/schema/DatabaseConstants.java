@@ -31,5 +31,7 @@ public class DatabaseConstants {
     public static final String AUDIENCE_DATA_TABLE = "AUDIENCE_DATA";
     public static final String POINT_DATA_TABLE = "POINT_DATA";
 
+    public static final String UNLOCK_STATE_LOCKED = "0";
+    public static final String UNLOCK_STATE_UNLOCKED = "1";
 
 }

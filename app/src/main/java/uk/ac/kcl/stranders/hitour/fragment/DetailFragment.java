@@ -134,7 +134,7 @@ public class DetailFragment extends Fragment {
         Map<String,String> partialPrimaryMapTour = new HashMap<>();
         partialPrimaryMapTour.put("TOUR_ID", FeedActivity.currentTourId);
         try {
-            pointTourCursor = FeedActivity.database.getWholeByPrimaryPartial("POINT_TOUR", partialPrimaryMapTour);
+            pointTourCursor = FeedActivity.database.getUnlocked(DatabaseConstants.UNLOCK_STATE_UNLOCKED, FeedActivity.currentTourId);
         } catch (NotInSchemaException e) {
             Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
         }

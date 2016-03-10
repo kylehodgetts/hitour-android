@@ -73,7 +73,7 @@ public class DetailActivity extends AppCompatActivity {
         Map<String,String> partialPrimaryMap = new HashMap<>();
         partialPrimaryMap.put("TOUR_ID", FeedActivity.currentTourId);
         try {
-            mCursor = FeedActivity.database.getWholeByPrimaryPartial("POINT_TOUR", partialPrimaryMap);
+            mCursor = FeedActivity.database.getUnlocked(DatabaseConstants.UNLOCK_STATE_UNLOCKED, FeedActivity.currentTourId);
         } catch (NotInSchemaException e) {
             Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
         }
