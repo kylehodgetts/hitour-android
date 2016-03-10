@@ -1,5 +1,6 @@
 package uk.ac.kcl.stranders.hitour.activity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Typeface;
@@ -13,6 +14,7 @@ import android.text.SpannableString;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Switch;
@@ -72,7 +74,7 @@ public class ScanningActivity extends AppCompatActivity {
                 barcodeScannerView.setStatusText(result.getText());
                 etCodePinEntry.setText(result.getText());
                 barcodeScannerView.pause();
-                submit();
+                submit(true);
             }
         }
 
@@ -102,7 +104,7 @@ public class ScanningActivity extends AppCompatActivity {
         btnSubmit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                submit();
+                submit(false);
             }
         });
 
@@ -123,12 +125,34 @@ public class ScanningActivity extends AppCompatActivity {
      *
      * Otherwise an error message is shown to the user and the input is cleared ready for the next input.
      */
-    public void submit() {
+    public void submit(boolean fromScanner) {
+
+        // Hide keyboard when submit is pressed so Snackbar can be seen
+        View view = this.getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
+
         EditText etCodePinEntry = (EditText) findViewById(R.id.etCodePinEntry);
         String result = etCodePinEntry.getText().toString();
-        // Check if user wants to add a tour or a point
+        // Check if the point came from being scanned
+        if(fromScanner) {
+                // Check if a point or a tour was scanned
+                if (result.length() > 6 && result.substring(0, 6).equals("POINT-")) {
+                    // Takes identification part of point id
+                    result = result.substring(6);
+                } else if (result.length() > 8 && result.substring(0, 8).equals("SESSION-")) {
+                    // Takes identification part of session passphrase
+                    result = result.substring(8);
+                    // Sets to identify as a tour
+                    modeSwitch.setChecked(true);
+                }
+                etCodePinEntry.setText(result);
+        }
+        // Check if user wants to add a session or a point
         if (modeSwitch.isChecked()) {
-            // For when the user attempts to add a tour
+            // For when the user attempts to add a session
             try {
                 // Checks to see if tour session is already on device
                 Cursor sessionCursor = FeedActivity.database.getAll("SESSION");
@@ -210,7 +234,7 @@ public class ScanningActivity extends AppCompatActivity {
             }
 
             protected void onPostExecute(Boolean result) {
-                if (result == true) {
+                if (result) {
                     Intent data = new Intent();
                     data.putExtra("mode", "tour");
                     data.putExtra("pin", etCodePinEntry.getText().toString());
