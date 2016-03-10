@@ -1,5 +1,6 @@
 package uk.ac.kcl.stranders.hitour.activity;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -40,6 +41,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +52,7 @@ import uk.ac.kcl.stranders.hitour.R;
 import uk.ac.kcl.stranders.hitour.Utilities;
 import uk.ac.kcl.stranders.hitour.database.DBWrap;
 import uk.ac.kcl.stranders.hitour.database.NotInSchemaException;
+import uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants;
 import uk.ac.kcl.stranders.hitour.database.schema.HiSchema;
 import uk.ac.kcl.stranders.hitour.fragment.AppInfoFragment;
 import uk.ac.kcl.stranders.hitour.fragment.DetailFragment;
@@ -90,8 +93,29 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
      */
     public static DBWrap database;
 
+    /**
+     * The TOUR_ID of the currently selected tour
+     */
     public static String currentTourId;
 
+    /**
+     * Integer stating number of items in download list
+     */
+    private int downloadItemCount;
+
+    /**
+     * Integer stating current position through download queue
+     */
+    private int downloadPosition;
+
+    /**
+     * Stores a reference to the {@link ProgressDialog} for showing data is being downloaded
+     */
+    private ProgressDialog progressDialog;
+
+    /**
+     * Stores a reference to the {@link Menu} for the {@link DrawerLayout}
+     */
     private Menu mMenu;
 
     private static HiTourRetrofit hiTourRetrofit;
@@ -226,6 +250,11 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
             } else {
                 // Instructions for when a tour is entered
                 if(Utilities.isNetworkAvailable(this)) {
+                    // Set ProgressDialog so user knows data is being downloaded
+                    progressDialog = new ProgressDialog(this);
+                    progressDialog.setMessage("Downloading data");
+                    progressDialog.show();
+                    progressDialog.setCancelable(false);
                     hiTourRetrofit = new HiTourRetrofit(this, data.getExtras().getString("pin"));
                     hiTourRetrofit.fetchTour();
                 } else {
@@ -267,6 +296,9 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
      * Invoked when the data has been successfully fetched from the web API.
      */
     public void onAllRequestsFinished() {
+
+        ArrayList<String> urlArrayList = new ArrayList<>();
+
         // Add the tour session to the local database
         TourSession tourSession = hiTourRetrofit.getTourSession();
         Map<String,String> tourSessionColumnsMap = new HashMap<>();
@@ -310,21 +342,12 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
             } catch(NotInSchemaException e) {
                 Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
             }
-            // Download the header image to local storage
-            try {
-                String filename = createFilename(point.getUrl());
-                String localPath = this.getFilesDir().toString();
-                File tempFile = new File(localPath + "/" + filename);
-                if(!tempFile.exists()) {
-                    DownloadToStorage downloadToStorage = new DownloadToStorage(point.getUrl());
-                    downloadToStorage.run();
-                }
-            } catch(Exception e) {
-                Log.e("STORAGE_FAIL", Log.getStackTraceString(e));
-            }
+            // Add url of the header image to list to be downloaded to local storage
+            urlArrayList.add(point.getUrl());
             // Add data to the local database
             List<Data> data = point.getData();
-            for (Data datum : data) {
+            for (int i = 0; i < data.size(); i ++) {
+                Data datum = data.get(i);
                 Map<String, String> datumColumnsMap = new HashMap<>();
                 datumColumnsMap.put("URL", datum.getUrl());
                 datumColumnsMap.put("DESCRIPTION", datum.getDescription());
@@ -336,18 +359,8 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
                 } catch (NotInSchemaException e) {
                     Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
                 }
-                // Download the physical data to storage
-                try {
-                    String filename = createFilename(datum.getUrl());
-                    String localPath = this.getFilesDir().toString();
-                    File tempFile = new File(localPath + "/" + filename);
-                    if (!tempFile.exists()) {
-                        DownloadToStorage downloadToStorage = new DownloadToStorage(datum.getUrl());
-                        downloadToStorage.run();
-                    }
-                } catch (Exception e) {
-                    Log.e("STORAGE_FAIL", Log.getStackTraceString(e));
-                }
+                // Add url of the physical data to list to be downloaded to local storage
+                urlArrayList.add(datum.getUrl());
                 // Add point data to the local database
                 Map<String, String> pointDatumColumnsMap = new HashMap<>();
                 pointDatumColumnsMap.put("RANK", datum.getRank().toString());
@@ -393,11 +406,40 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
             Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
         }
 
+        // Remove any URLs of data that should not be downloaded again
+        ArrayList<String> toRemove = new ArrayList<>();
+        for(String url : urlArrayList) {
+            String filename = createFilename(url);
+            String localPath = this.getFilesDir().toString();
+            File tempFile = new File(localPath + "/" + filename);
+            if (tempFile.exists()) {
+                toRemove.add(url);
+            }
+        }
+        urlArrayList.removeAll(toRemove);
+
+        // Download all data that us not already on the device
+        downloadItemCount = urlArrayList.size();
+        for(String url : urlArrayList) {
+            try {
+                DownloadToStorage downloadToStorage = new DownloadToStorage(url);
+                downloadToStorage.run();
+            } catch (Exception e) {
+                Log.e("STORAGE_FAIL", Log.getStackTraceString(e));
+                onDownloadFinish();
+            }
+        }
+
         updateMenu();
+        currentTourId = tourSession.getTourId().toString();
         try {
             Cursor tourCursor = database.getAll("TOUR");
-            tourCursor.moveToFirst();
-            populateFeedAdapter(tourCursor.getString(tourCursor.getColumnIndex(TOUR_ID)));
+            for(int i = 0; i < tourCursor.getCount(); i++) {
+                tourCursor.moveToPosition(i);
+                if(tourCursor.getString(tourCursor.getColumnIndex(DatabaseConstants.TOUR_ID)).equals(currentTourId)) {
+                    mMenu.getItem(i).setChecked(true);
+                }
+            }
         } catch (NotInSchemaException e) {
             Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
         }
@@ -481,6 +523,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
 
                 @Override public void onFailure(Request request, IOException throwable) {
                     throwable.printStackTrace();
+                    onDownloadFinish();
                 }
 
                 @Override public void onResponse(Response response) throws IOException {
@@ -502,10 +545,27 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
                     fileOutputStream.flush();
                     fileOutputStream.close();
                     inputStream.close();
+
+                    onDownloadFinish();
                 }
             });
         }
 
+    }
+
+    private void onDownloadFinish() {
+        downloadPosition++;
+        if(downloadPosition == downloadItemCount) {
+            progressDialog.dismiss();
+            downloadItemCount = 0;
+            downloadPosition = 0;
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    populateFeedAdapter(currentTourId);
+                }
+            });
+        }
     }
 
     public static String createFilename(String url) {
