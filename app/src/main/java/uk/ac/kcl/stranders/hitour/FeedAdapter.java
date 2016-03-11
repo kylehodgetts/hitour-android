@@ -90,7 +90,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
                         mContext.startActivity(intent);
                     } else {
                         Bundle bundle = new Bundle();
-                        bundle.putInt(DetailFragment.ARG_ITEM_POSITION, viewHolder.getAdapterPosition());
+                        bundle.putString(DetailFragment.ARG_ITEM_POSITION, "" + viewHolder.point_id);
                         // Start a new activity on a phone or replace a detail fragment on tablets if unlocked.
 
                         DetailFragment fragment = new DetailFragment();
