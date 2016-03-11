@@ -82,7 +82,8 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
                 if (isUnLocked(viewHolder)) {
                     if (!(mContext.getResources().getBoolean(R.bool.isTablet))) {
                         Intent intent = new Intent(mContext, DetailActivity.class)
-                                .putExtra(DetailActivity.EXTRA_ADAPTER_POSITION, viewHolder.getAdapterPosition());
+                                .putExtra(DetailActivity.EXTRA_POINT_ID, viewHolder.point_id);
+                        Log.e("TEST_Awesome", ""+viewHolder.point_id);
                         mContext.startActivity(intent);
                     } else {
                         Bundle bundle = new Bundle();
