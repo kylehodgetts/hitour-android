@@ -78,7 +78,7 @@ public class ScanningActivity extends AppCompatActivity {
     private BarcodeCallback callback = new BarcodeCallback() {
         @Override
         public void barcodeResult(BarcodeResult result) {
-            if(result != null && result.getBarcodeFormat().equals(BarcodeFormat.QR_CODE)) {
+            if (result != null && result.getBarcodeFormat().equals(BarcodeFormat.QR_CODE)) {
                 barcodeScannerView.setStatusText(result.getText());
                 etCodePinEntry.setText(result.getText());
                 barcodeScannerView.pause();
@@ -95,6 +95,7 @@ public class ScanningActivity extends AppCompatActivity {
     /**
      * Creates an instance of the activity by telling barcode scanner to scan using the {@link BarcodeCallback}
      * above and adding an {@link android.view.View.OnClickListener} to the Submit {@link Button}
+     *
      * @param savedInstanceState - Saved Instance Bundle
      */
     @Override
@@ -102,7 +103,7 @@ public class ScanningActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scanning);
 
-        barcodeScannerView = (CompoundBarcodeView)findViewById(R.id.zxing_barcode_scanner);
+        barcodeScannerView = (CompoundBarcodeView) findViewById(R.id.zxing_barcode_scanner);
         barcodeScannerView.decodeContinuous(callback);
         etCodePinEntry = (EditText) findViewById(R.id.etCodePinEntry);
         modeSwitch = (Switch) findViewById(R.id.mode_switch);
@@ -116,13 +117,17 @@ public class ScanningActivity extends AppCompatActivity {
             }
         });
 
+
         ActionBar actionbar = getSupportActionBar();
 
         Typeface font = Typeface.createFromAsset(this.getAssets(), "fonts/ubuntu_l.ttf");
         SpannableString s = new SpannableString("hiTour");
         s.setSpan(new CustomTypefaceSpan("", font), 0, s.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        
-        actionbar.setTitle(s);
+
+
+        if (actionbar != null) {
+            actionbar.setTitle(s);
+        }
 
     }
 
@@ -172,8 +177,9 @@ public class ScanningActivity extends AppCompatActivity {
 
                 //Replace unlock with a value of 1
                 Map<String, String> tourPointColumnsMap = new HashMap<>();
-                tourPointColumnsMap.put(UNLOCK,"1");
+                tourPointColumnsMap.put(UNLOCK, "1");
                 Map<String, String> tourPointPrimaryKeysMap = new HashMap<>();
+                Log.i("inScanning", "" + FeedActivity.currentTourId);
                 tourPointPrimaryKeysMap.put(TOUR_ID, "" + FeedActivity.currentTourId);
                 tourPointPrimaryKeysMap.put(POINT_ID, result);
                 try {
@@ -207,10 +213,10 @@ public class ScanningActivity extends AppCompatActivity {
      * @return true if the point is valid for a selected tour
      */
     private boolean pointExistsInTour(String passphrase) {
-        if(FeedActivity.currentTourId == null) {
+        if (FeedActivity.currentTourId == null) {
             return false;
         }
-        Map<String,String> partialPrimaryMapTour = new HashMap<>();
+        Map<String, String> partialPrimaryMapTour = new HashMap<>();
         partialPrimaryMapTour.put("TOUR_ID", FeedActivity.currentTourId);
         Cursor pointTourCursor;
         try {
@@ -228,32 +234,27 @@ public class ScanningActivity extends AppCompatActivity {
         return false;
     }
 
-        private class TourSubmit extends AsyncTask<String, Double, Boolean> {
-            protected Boolean doInBackground(String... params) {
-                Boolean exists;
-                if (FeedActivity.sessionExists(params[0])) {
-                    exists = true;
-                } else {
-                    exists = false;
-                }
-                return exists;
-            }
+    private class TourSubmit extends AsyncTask<String, Double, Boolean> {
+        protected Boolean doInBackground(String... params) {
 
-            protected void onPostExecute(Boolean result) {
-                if (result == true) {
-                    Intent data = new Intent();
-                    data.putExtra("mode", "tour");
-                    data.putExtra("pin", etCodePinEntry.getText().toString());
-                    setResult(RESULT_OK, data);
-                    finish();
-                } else {
-                    Log.d("FeedActivity", "Tour for " + etCodePinEntry.getText() + " not found!");
-                    Snackbar.make(barcodeScannerView, "Tour not found, please try again.", Snackbar.LENGTH_LONG).show();
-                    barcodeScannerView.resume();
-                    clearInput();
-                }
+            return FeedActivity.sessionExists(params[0]);
+        }
+
+        protected void onPostExecute(Boolean result) {
+            if (result) {
+                Intent data = new Intent();
+                data.putExtra("mode", "tour");
+                data.putExtra("pin", etCodePinEntry.getText().toString());
+                setResult(RESULT_OK, data);
+                finish();
+            } else {
+                Log.d("FeedActivity", "Tour for " + etCodePinEntry.getText() + " not found!");
+                Snackbar.make(barcodeScannerView, "Tour not found, please try again.", Snackbar.LENGTH_LONG).show();
+                barcodeScannerView.resume();
+                clearInput();
             }
         }
+    }
 
     /**
      * Clears input received in the {@link EditText} field and the Barcode Scanner's status bar text
@@ -310,7 +311,7 @@ public class ScanningActivity extends AppCompatActivity {
      * Deals with certain key presses when using the Barcode Scanner
      *
      * @param keyCode Keys pressed
-     * @param event Event
+     * @param event   Event
      * @return boolean if keys are pressed
      */
     @Override
@@ -321,11 +322,11 @@ public class ScanningActivity extends AppCompatActivity {
     /**
      * Observable class that allows us to notify a change related to lock for the ViewAdapter
      */
-    public class ObservableLock extends Observable{
+    public class ObservableLock extends Observable {
 
-        public void setChange(String point_id,String tour_id){
+        public void setChange(String point_id, String tour_id) {
             setChanged();
-            notifyObservers(new Pair(Integer.valueOf(point_id),Integer.valueOf(tour_id)));
+            notifyObservers(new Pair<>(Integer.valueOf(point_id), Integer.valueOf(tour_id)));
         }
     }
 

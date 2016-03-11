@@ -53,7 +53,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
     /**
      * Stores the viewHolders matched by their respective tour_point primary key value.
      */
-    private HashMap<Pair<Integer,Integer>,ViewHolder> viewHolders;
+    private HashMap<Pair<Integer, Integer>, View> views;
 
     /**
      * Public constructor.
@@ -64,12 +64,12 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
     public FeedAdapter(Cursor cursor, Context context) {
         pointTourCursor = cursor;
         mContext = context;
-        viewHolders = new HashMap<>();
+        views = new HashMap<>();
     }
 
     /**
      * Sets a listener for each list item in addition to a default functionality.
-     * <p/>
+     *
      * {@inheritDoc}
      */
     @Override
@@ -82,7 +82,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
             @Override
             public void onClick(View view) {
                 // Start a new activity on a phone or replace a detail fragment on tablets.
-                if (isUnLocked(viewHolder)) {
+                if (isUnLocked(viewHolder.point_id, viewHolder.tour_id)) {
                     if (!(mContext.getResources().getBoolean(R.bool.isTablet))) {
                         Intent intent = new Intent(mContext, DetailActivity.class)
                                 .putExtra(DetailActivity.EXTRA_POINT_ID, viewHolder.point_id);
@@ -101,6 +101,8 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
                                 .replace(R.id.point_detail_container, fragment, DetailFragment.FRAGMENT_TAG)
                                 .commit();
                     }
+                    viewHolder.getView().findViewById(R.id.fllock).setVisibility(View.GONE);
+
                 }
             }
         });
@@ -109,7 +111,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
 
     /**
      * Sets the point data to the feed list item.
-     * <p/>
+     *
      * {@inheritDoc}
      */
     @Override
@@ -131,8 +133,10 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
             url = localFilesAddress + "/" + url;
             Bitmap bitmap = BitmapFactory.decodeFile(url);
             holder.ivThumbnail.setImageBitmap(bitmap);
-            isUnLocked(holder);
-            viewHolders.put(new Pair<>(holder.point_id, holder.tour_id), holder);
+            if (isUnLocked(holder.point_id, holder.tour_id)) {
+                holder.getView().findViewById(R.id.fllock).setVisibility(View.GONE);
+            }
+            views.put(new Pair<>(holder.point_id, holder.tour_id), holder.getView());
         } catch (NotInSchemaException e) {
             Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
         }
@@ -150,7 +154,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
      * Observes the ScannerActivity and update a viewHolder's view if appropriate
      *
      * @param observable in class ScannerActivity
-     * @param data a pair point and tour from ScannerActivty
+     * @param data       a pair point and tour from ScannerActivty
      */
     @Override
     public void update(Observable observable, Object data) {
@@ -158,7 +162,9 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
         Integer point_id = ((Pair<Integer, Integer>) data).first;
         @SuppressWarnings("unchecked")
         Integer tour_id = ((Pair<Integer, Integer>) data).second;
-        isUnLocked(getViewHolder(point_id, tour_id));
+        if (getView(point_id, tour_id) != null) {
+            getView(point_id, tour_id).findViewById(R.id.fllock).setVisibility(View.GONE);
+        }
     }
 
     /**
@@ -195,12 +201,9 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
      * Method to verify if ViewHolder has a tour_point that is unlocked.
      * If a tour_point for a specific viewHolder is unlocked then the lock FrameLayout is removed.
      *
-     * @param viewHolderUnlock a view Holder
      * @return unlocked state of a specific point_tour
      */
-    private boolean isUnLocked(ViewHolder viewHolderUnlock) {
-        Integer tour_id = viewHolderUnlock.tour_id;
-        Integer point_id = viewHolderUnlock.point_id;
+    private boolean isUnLocked(Integer point_id, Integer tour_id) {
         Map<String, String> tourPointPrimaryKeysMap = new HashMap<>();
         tourPointPrimaryKeysMap.put("TOUR_ID", "" + tour_id);
         tourPointPrimaryKeysMap.put("POINT_ID", "" + point_id);
@@ -218,9 +221,6 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
         } catch (NotInSchemaException e) {
             e.printStackTrace();
         }
-        if (unlockState) {
-            viewHolderUnlock.getView().findViewById(R.id.fllock).setVisibility(View.GONE);
-        }
         return unlockState;
     }
 
@@ -228,12 +228,12 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
      * Method to retrieve a specific ViewHolder
      *
      * @param point_id a point's id
-     * @param tour_id a tour's id
+     * @param tour_id  a tour's id
      * @return viewHolder for a specific pointid and tourid
      */
-    private ViewHolder getViewHolder(Integer point_id, Integer tour_id) {
+    private View getView(Integer point_id, Integer tour_id) {
 
-        return viewHolders.get(new Pair<>(point_id, tour_id));
+        return views.get(new Pair<>(point_id, tour_id));
     }
 
 
