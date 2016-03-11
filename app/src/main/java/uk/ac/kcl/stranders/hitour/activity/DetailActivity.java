@@ -31,7 +31,7 @@ public class DetailActivity extends AppCompatActivity {
     /**
      * Stores the key for the adapter position passed with an intent.
      */
-    public final static String EXTRA_ADAPTER_POSITION = "uk.ac.kcl.stranders.hitour.DetailActivity.bundle";
+    public final static String EXTRA_POINT_ID = "uk.ac.kcl.stranders.hitour.DetailActivity.bundle";
 
     /**
      * Stores the key for the pin passed with an intent.
@@ -73,7 +73,7 @@ public class DetailActivity extends AppCompatActivity {
         Map<String,String> partialPrimaryMap = new HashMap<>();
         partialPrimaryMap.put("TOUR_ID", FeedActivity.currentTourId);
         try {
-            mCursor = FeedActivity.database.getWholeByPrimaryPartial("POINT_TOUR", partialPrimaryMap);
+            mCursor = FeedActivity.database.getUnlocked(DatabaseConstants.UNLOCK_STATE_UNLOCKED, FeedActivity.currentTourId);
         } catch (NotInSchemaException e) {
             Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
         }
@@ -101,25 +101,28 @@ public class DetailActivity extends AppCompatActivity {
         });
 
         if (savedInstanceState == null) {
-            if (getIntent() != null && getIntent().getIntExtra(EXTRA_ADAPTER_POSITION, -1) != - 1) {
-                mStartPosition = getIntent().getIntExtra(EXTRA_ADAPTER_POSITION, 0);
+            if (getIntent() != null && getIntent().getIntExtra(EXTRA_POINT_ID, -1) != - 1) {
+                findStartPosition("" + getIntent().getIntExtra(EXTRA_POINT_ID, 0));
             } else if (getIntent() != null && getIntent().getStringExtra(EXTRA_PIN) != null) {
-                String pointId = getIntent().getStringExtra(EXTRA_PIN);
-                mCursor.moveToPosition(0);
-                mStartPosition = -1;
-                do {
-                    String id = mCursor.getString(mCursor.getColumnIndex(DatabaseConstants.POINT_ID));
-                    ++mStartPosition;
-                    if (id.equals(pointId)) {
-                        break;
-                    }
-                } while (mCursor.moveToNext());
+                findStartPosition(getIntent().getStringExtra(EXTRA_PIN));
             } else {
                 mStartPosition = 0;
             }
         }
 
         mPager.setCurrentItem(mStartPosition, false);
+    }
+
+    private void findStartPosition(String pointId) {
+        mCursor.moveToPosition(0);
+        mStartPosition = -1;
+        do {
+            String id = mCursor.getString(mCursor.getColumnIndex(DatabaseConstants.POINT_ID));
+            ++mStartPosition;
+            if (id.equals(pointId)) {
+                break;
+            }
+        } while (mCursor.moveToNext());
     }
 
     @Override
@@ -161,7 +164,7 @@ public class DetailActivity extends AppCompatActivity {
         @Override
         public Fragment getItem(int position) {
             mCursor.moveToPosition(position);
-            return DetailFragment.newInstance(position);
+            return DetailFragment.newInstance(mCursor.getString(mCursor.getColumnIndex(DatabaseConstants.POINT_ID)));
         }
 
         @Override

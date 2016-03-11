@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import java.util.Map;
 
+import uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants;
 import uk.ac.kcl.stranders.hitour.database.schema.DatabaseSchema;
 import uk.ac.kcl.stranders.hitour.database.schema.TableSchema;
 
@@ -16,7 +17,7 @@ import uk.ac.kcl.stranders.hitour.database.schema.TableSchema;
  * A controlling abstraction on the database, handles all inputs and outputs to the database,
  * while checks with the schema whether the query is valid
  */
-public class DBWrap {
+public class  DBWrap {
 
     private DatabaseSchema schema;
     private DBHelper dbHelper;
@@ -288,5 +289,41 @@ public class DBWrap {
         public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
             onUpgrade(db,oldVersion,newVersion);
         }
+    }
+
+    /**
+     * Get all rows for a given tourID with the UNLOCK value being set to isUnlocked.
+     *
+     * @param isUnlocked the value of the point lock state
+     * @param tourId
+     * @return Cursor with filtered rows from the POINT_TOUR table
+     * @throws NotInSchemaException
+     */
+    public Cursor getUnlocked(String isUnlocked, String tourId) throws NotInSchemaException {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+
+        String[] projection = {
+                DatabaseConstants.POINT_ID,
+                DatabaseConstants.RANK,
+                DatabaseConstants.UNLOCK
+        };
+
+        String selection = DatabaseConstants.UNLOCK + " = ? AND " + DatabaseConstants.TOUR_ID + "= ?" ;
+        String[] selectionArgs = { isUnlocked, tourId };
+
+        // TODO: THE SORT ORDER MAY BE NOT CONSISTENT WITH THE CURRENT IMPLEMENTATION (is it sorted by id?)
+        String sortOrder = DatabaseConstants.POINT_ID + " ASC";
+
+        Cursor cursor = db.query(
+                DatabaseConstants.POINT_TOUR_TABLE,       // The table to query
+                projection,                               // The columns to return
+                selection,                                // The columns for the WHERE clause
+                selectionArgs,                            // The values for the WHERE clause
+                null,                                     // don't group the rows
+                null,                                     // don't filter by row groups
+                sortOrder                                 // The sort order
+        );
+
+        return cursor;
     }
 }
