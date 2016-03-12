@@ -227,7 +227,7 @@ public class ScanningActivity extends AppCompatActivity {
         private class TourSubmit extends AsyncTask<String, Double, Boolean> {
             protected Boolean doInBackground(String... params) {
                 Boolean exists;
-                if (FeedActivity.sessionExists(params[0])) {
+                if (FeedActivity.sessionExistsOnline(params[0])) {
                     exists = true;
                 } else {
                     exists = false;

@@ -191,11 +191,25 @@ public class DBWrap {
             i++;
         }
 
-        // Removes last occurance of " and "
+        // Removes last occurrence of " and "
         whereClause = whereClause.substring(0, whereClause.length() - 5);
 
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         db.delete(tableName, whereClause, whereArgs);
+    }
+
+    /**
+     * Deletes all entries in the given table in the database
+     * @param tableName     The name of the table from which the entries should be deleted
+     * @throws NotInSchemaException In case that the request was malformed, ie does not match the schema
+     */
+    public void deleteAll(String tableName) throws NotInSchemaException {
+
+        if (schema.getTable(tableName) == null)
+            throw new NotInSchemaException();
+
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        db.delete(tableName, null, null);
     }
 
     /**
