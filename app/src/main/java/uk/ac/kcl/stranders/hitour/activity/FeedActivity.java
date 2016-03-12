@@ -155,7 +155,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer);
 
         checkSessionDates();
-        
+
         mFeed = (RecyclerView) findViewById(R.id.rv_feed);
 
         mFeed.setHasFixedSize(true);
@@ -726,7 +726,6 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
 
             // If no other sessions now exist remove all entries from all tables
             if (sessionCursor.getCount() == 0) {
-                Log.i("INFO", "Apparently no other sessions exist");
                 database.deleteAll("TOUR");
                 database.deleteAll("POINT_TOUR");
                 Cursor pointCursor = database.getAll(POINT_TABLE);
@@ -754,7 +753,6 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
             for (int i = 0; i < sessionCursor.getCount(); i++) {
                 sessionCursor.moveToPosition(i);
                 if (sessionCursor.getString(sessionCursor.getColumnIndex(DatabaseConstants.TOUR_ID)).equals(completedTourId)) {
-                    Log.i("INFO", "Other sessions use the same tour");
                     // Nothing else should be deleted as tours use same data, so exit the method
                     return;
                 }
