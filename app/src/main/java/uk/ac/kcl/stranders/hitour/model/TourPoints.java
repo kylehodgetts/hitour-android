@@ -19,7 +19,8 @@ public class TourPoints implements Parcelable {
     private String createdAt;
     @SerializedName("updated_at")
     private String updatedAt;
-
+    @SerializedName("unlock")
+    private Integer unlock = 0;
     /**
      *
      * @return
@@ -127,6 +128,20 @@ public class TourPoints implements Parcelable {
     public void setUpdatedAt(String updatedAt) {
         this.updatedAt = updatedAt;
     }
+
+    /**
+     *
+     * @return unlock
+     * The lock state
+     */
+    public Integer getUnlock(){  return unlock;}
+
+    /**
+     *
+     * @param unlock
+     * The lock state
+     */
+    public void setUnlock(boolean unlock){this.unlock = (unlock)? 1 : 0; }
 
     @Override
     public int describeContents() {

@@ -23,6 +23,7 @@
             android:background="@color/colorDivider"
             android:scaleType="centerCrop" />
 
+        <include layout="@layout/fl_lock" />
         <TextView
             android:id="@+id/feed_title"
             style="@style/TextAppearance.AppCompat.Subhead"

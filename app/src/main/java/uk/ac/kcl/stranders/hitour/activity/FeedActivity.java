@@ -137,6 +137,8 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
 
     private static HiTourRetrofit hiTourRetrofit;
 
+    private static FeedAdapter currentFeedAdapter;
+
     /**
      * Initializes the UI and sets an adapter for the {@link FeedActivity#mFeed}
      *
@@ -403,6 +405,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
             // Add tour points to the local database
             Map<String, String> tourPointColumnsMap = new HashMap<>();
             tourPointColumnsMap.put("RANK", point.getRank().toString());
+            tourPointColumnsMap.put("UNLOCK","0");
             Map<String, String> tourPointPrimaryKeysMap = new HashMap<>();
             tourPointPrimaryKeysMap.put("TOUR_ID", tour.getId().toString());
             tourPointPrimaryKeysMap.put("POINT_ID", point.getId().toString());
@@ -517,6 +520,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
             FeedAdapter adapter = new FeedAdapter(feedCursor, this);
             mFeed.setAdapter(adapter);
             currentTourId = tourId;
+            setCurrentFeedAdapter(adapter);
         } catch (NotInSchemaException e) {
             Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
         }
@@ -660,6 +664,18 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
             Log.e("IO_FAIL", Log.getStackTraceString(e));
         }
         return false;
+    }
+
+    private void setCurrentFeedAdapter(FeedAdapter adapter){
+        currentFeedAdapter= adapter;
+    }
+
+    /**
+     * Method to get current feed adapter
+     * @return FeedAdapter
+     */
+    public static FeedAdapter getCurrentFeedAdapter(){
+        return currentFeedAdapter;
     }
 
     private class SessionValidationOffline extends AsyncTask<Map<String, String>, Double, ArrayList<String>> {

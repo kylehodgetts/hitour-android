@@ -115,9 +115,9 @@ public class DetailFragment extends Fragment {
      * @param itemId Integer item id
      * @return {@link Fragment}
      */
-    public static DetailFragment newInstance(int itemId) {
+    public static DetailFragment newInstance(String itemId) {
         Bundle arguments = new Bundle();
-        arguments.putInt(ARG_ITEM_POSITION, itemId);
+        arguments.putString(ARG_ITEM_POSITION, itemId);
         DetailFragment fragment = new DetailFragment();
         fragment.setArguments(arguments);
         return fragment;
@@ -134,28 +134,19 @@ public class DetailFragment extends Fragment {
         Map<String,String> partialPrimaryMapTour = new HashMap<>();
         partialPrimaryMapTour.put("TOUR_ID", FeedActivity.currentTourId);
         try {
-            pointTourCursor = FeedActivity.database.getWholeByPrimaryPartial("POINT_TOUR", partialPrimaryMapTour);
+            pointTourCursor = FeedActivity.database.getUnlocked(DatabaseConstants.UNLOCK_STATE_UNLOCKED, FeedActivity.currentTourId);
         } catch (NotInSchemaException e) {
             Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
         }
 
         // Find the relevant data in a cursor
         int position = 0;
-        // Get a cursor position if the detail fragment was launched from the feed
         if (getArguments().containsKey(ARG_ITEM_POSITION)) {
-            position = getArguments().getInt(ARG_ITEM_POSITION);
+            // Get a cursor position if the detail fragment was launched from the feed
+            position = findStartPosition(getArguments().getString(ARG_ITEM_POSITION));
         } else if (getArguments().containsKey(ARG_ITEM_ID)){
             // Get a cursor position if the detail fragment was launched from the scanner
-            String pin = getArguments().getString(ARG_ITEM_ID);
-            pointTourCursor.moveToPosition(0);
-            position = -1;
-            do {
-                String id = pointTourCursor.getString(pointTourCursor.getColumnIndex(DatabaseConstants.POINT_ID));
-                ++position;
-                if (id.equals(pin)) {
-                    break;
-                }
-            } while (pointTourCursor.moveToNext());
+            position = findStartPosition(getArguments().getString(ARG_ITEM_ID));
         }
         pointTourCursor.moveToPosition(position);
 
@@ -166,6 +157,19 @@ public class DetailFragment extends Fragment {
         } catch (Exception e) {
             Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
         }
+    }
+
+    private int findStartPosition(String pin) {
+        int position = -1;
+        pointTourCursor.moveToPosition(0);
+        do {
+            String id = pointTourCursor.getString(pointTourCursor.getColumnIndex(DatabaseConstants.POINT_ID));
+            ++position;
+            if (id.equals(pin)) {
+                break;
+            }
+        } while (pointTourCursor.moveToNext());
+        return position;
     }
 
     /**
