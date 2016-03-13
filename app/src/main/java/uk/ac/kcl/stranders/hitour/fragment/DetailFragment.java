@@ -251,7 +251,7 @@ public class DetailFragment extends Fragment {
                     url = FeedActivity.createFilename(url);
                     String localFilesAddress = getContext().getFilesDir().toString();
                     url = localFilesAddress + "/" + url;
-                    String fileExtension = getFileExtension(dataCursor.getString(dataCursor.getColumnIndex(URL)));
+                    String fileExtension = FeedActivity.getFileExtension(dataCursor.getString(dataCursor.getColumnIndex(URL)));
 
                     StringBuilder text = new StringBuilder();
                     if (fileExtension.matches("jpg|jpeg|png")) {
@@ -375,12 +375,6 @@ public class DetailFragment extends Fragment {
                 currentVideosArrayList.get(i).pause();
             }
         }
-    }
-
-    private String getFileExtension(String url) {
-        String extension = url.substring(url.lastIndexOf(".") + 1);
-        extension = extension.toLowerCase();
-        return extension;
     }
 
     private boolean checkDataAudience(String dataId) {
