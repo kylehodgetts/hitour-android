@@ -67,7 +67,6 @@ import uk.ac.kcl.stranders.hitour.retrofit.HiTourRetrofit;
 
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.AUDIENCE_DATA_TABLE;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.AUDIENCE_ID;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.AUDIENCE_TABLE;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.DATA_ID;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.DATA_TABLE;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.DURATION;
@@ -76,7 +75,6 @@ import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.PASSP
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_DATA_TABLE;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_ID;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_TABLE;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_TOUR_TABLE;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.SESSION_ID;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.SESSION_TABLE;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.START_DATE;
