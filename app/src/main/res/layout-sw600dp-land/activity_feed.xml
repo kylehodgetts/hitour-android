@@ -69,7 +69,7 @@
 
         <android.support.v4.widget.Space
             android:id="@+id/layout_center"
-            android:layout_width="164dp"
+            android:layout_width="@dimen/layout_center_space_width"
             android:layout_height="0dp"
             android:layout_centerInParent="true" />
 
