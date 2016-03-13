@@ -23,9 +23,6 @@ import uk.ac.kcl.stranders.hitour.database.NotInSchemaException;
 import uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants;
 import uk.ac.kcl.stranders.hitour.fragment.DetailFragment;
 
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_TOUR_TABLE;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.RANK;
-
 /**
  * Provides the {@link ViewPager} to swipe between instances of {@link DetailFragment}.
  */
@@ -77,8 +74,6 @@ public class DetailActivity extends AppCompatActivity {
         partialPrimaryMap.put("TOUR_ID", FeedActivity.currentTourId);
         try {
             mCursor = FeedActivity.database.getUnlocked(DatabaseConstants.UNLOCK_STATE_UNLOCKED, FeedActivity.currentTourId);
-            // TODO: MERGE CONFLICT
-            // mCursor = FeedActivity.database.getWholeByPrimaryPartialSorted(POINT_TOUR_TABLE, partialPrimaryMap, RANK);
         } catch (NotInSchemaException e) {
             Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
         }

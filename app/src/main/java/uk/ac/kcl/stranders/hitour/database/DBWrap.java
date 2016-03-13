@@ -389,8 +389,7 @@ public class  DBWrap {
         String selection = DatabaseConstants.UNLOCK + " = ? AND " + DatabaseConstants.TOUR_ID + "= ?" ;
         String[] selectionArgs = { isUnlocked, tourId };
 
-        // TODO: THE SORT ORDER MAY BE NOT CONSISTENT WITH THE CURRENT IMPLEMENTATION (is it sorted by id?)
-        String sortOrder = DatabaseConstants.POINT_ID + " ASC";
+        String sortOrder = DatabaseConstants.RANK + " ASC";
 
         Cursor cursor = db.query(
                 DatabaseConstants.POINT_TOUR_TABLE,       // The table to query
