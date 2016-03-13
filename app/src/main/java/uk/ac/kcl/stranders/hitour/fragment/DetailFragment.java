@@ -117,9 +117,9 @@ public class DetailFragment extends Fragment {
      * @param itemId Integer item id
      * @return {@link Fragment}
      */
-    public static DetailFragment newInstance(int itemId) {
+    public static DetailFragment newInstance(String itemId) {
         Bundle arguments = new Bundle();
-        arguments.putInt(ARG_ITEM_POSITION, itemId);
+        arguments.putString(ARG_ITEM_POSITION, itemId);
         DetailFragment fragment = new DetailFragment();
         fragment.setArguments(arguments);
         return fragment;
@@ -136,28 +136,21 @@ public class DetailFragment extends Fragment {
         Map<String,String> partialPrimaryMapTour = new HashMap<>();
         partialPrimaryMapTour.put("TOUR_ID", FeedActivity.currentTourId);
         try {
-            pointTourCursor = FeedActivity.database.getWholeByPrimaryPartialSorted(POINT_TOUR_TABLE, partialPrimaryMapTour, RANK);
+            pointTourCursor = FeedActivity.database.getUnlocked(DatabaseConstants.UNLOCK_STATE_UNLOCKED, FeedActivity.currentTourId);
+            // TODO: MERGE CONFLICT
+            // pointTourCursor = FeedActivity.database.getWholeByPrimaryPartialSorted(POINT_TOUR_TABLE, partialPrimaryMapTour, RANK);
         } catch (NotInSchemaException e) {
             Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
         }
 
         // Find the relevant data in a cursor
         int position = 0;
-        // Get a cursor position if the detail fragment was launched from the feed
         if (getArguments().containsKey(ARG_ITEM_POSITION)) {
-            position = getArguments().getInt(ARG_ITEM_POSITION);
+            // Get a cursor position if the detail fragment was launched from the feed
+            position = findStartPosition(getArguments().getString(ARG_ITEM_POSITION));
         } else if (getArguments().containsKey(ARG_ITEM_ID)){
             // Get a cursor position if the detail fragment was launched from the scanner
-            String pin = getArguments().getString(ARG_ITEM_ID);
-            pointTourCursor.moveToPosition(0);
-            position = -1;
-            do {
-                String id = pointTourCursor.getString(pointTourCursor.getColumnIndex(DatabaseConstants.POINT_ID));
-                ++position;
-                if (id.equals(pin)) {
-                    break;
-                }
-            } while (pointTourCursor.moveToNext());
+            position = findStartPosition(getArguments().getString(ARG_ITEM_ID));
         }
         pointTourCursor.moveToPosition(position);
 
@@ -168,6 +161,19 @@ public class DetailFragment extends Fragment {
         } catch (Exception e) {
             Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
         }
+    }
+
+    private int findStartPosition(String pin) {
+        int position = -1;
+        pointTourCursor.moveToPosition(0);
+        do {
+            String id = pointTourCursor.getString(pointTourCursor.getColumnIndex(DatabaseConstants.POINT_ID));
+            ++position;
+            if (id.equals(pin)) {
+                break;
+            }
+        } while (pointTourCursor.moveToNext());
+        return position;
     }
 
     /**
@@ -249,7 +255,7 @@ public class DetailFragment extends Fragment {
                     url = FeedActivity.createFilename(url);
                     String localFilesAddress = getContext().getFilesDir().toString();
                     url = localFilesAddress + "/" + url;
-                    String fileExtension = getFileExtension(dataCursor.getString(dataCursor.getColumnIndex(URL)));
+                    String fileExtension = FeedActivity.getFileExtension(dataCursor.getString(dataCursor.getColumnIndex(URL)));
 
                     StringBuilder text = new StringBuilder();
                     if (fileExtension.matches("jpg|jpeg|png")) {
@@ -373,12 +379,6 @@ public class DetailFragment extends Fragment {
                 currentVideosArrayList.get(i).pause();
             }
         }
-    }
-
-    private String getFileExtension(String url) {
-        String extension = url.substring(url.lastIndexOf(".") + 1);
-        extension = extension.toLowerCase();
-        return extension;
     }
 
     private boolean checkDataAudience(String dataId) {

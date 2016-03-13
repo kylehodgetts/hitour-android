@@ -41,7 +41,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,11 +65,23 @@ import uk.ac.kcl.stranders.hitour.model.Tour;
 import uk.ac.kcl.stranders.hitour.model.TourSession;
 import uk.ac.kcl.stranders.hitour.retrofit.HiTourRetrofit;
 
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.AUDIENCE_DATA_TABLE;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.AUDIENCE_ID;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.DATA_ID;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.DATA_TABLE;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.DURATION;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.NAME;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.PASSPHRASE;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_DATA_TABLE;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_ID;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_TABLE;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.SESSION_ID;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.SESSION_TABLE;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.START_DATE;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_TOUR_TABLE;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.RANK;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TOUR_ID;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TOUR_TABLE;
 
 /**
  * The main activity that displays all available points for a given tour.
@@ -121,6 +136,8 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
     private Menu mMenu;
 
     private static HiTourRetrofit hiTourRetrofit;
+
+    private static FeedAdapter currentFeedAdapter;
 
     /**
      * Initializes the UI and sets an adapter for the {@link FeedActivity#mFeed}
@@ -388,6 +405,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
             // Add tour points to the local database
             Map<String, String> tourPointColumnsMap = new HashMap<>();
             tourPointColumnsMap.put("RANK", point.getRank().toString());
+            tourPointColumnsMap.put("UNLOCK","0");
             Map<String, String> tourPointPrimaryKeysMap = new HashMap<>();
             tourPointPrimaryKeysMap.put("TOUR_ID", tour.getId().toString());
             tourPointPrimaryKeysMap.put("POINT_ID", point.getId().toString());
@@ -502,6 +520,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
             FeedAdapter adapter = new FeedAdapter(feedCursor, this);
             mFeed.setAdapter(adapter);
             currentTourId = tourId;
+            setCurrentFeedAdapter(adapter);
         } catch (NotInSchemaException e) {
             Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
         }
@@ -581,52 +600,55 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         return url;
     }
 
+    public static String getFileExtension(String url) {
+        String extension = url.substring(url.lastIndexOf(".") + 1);
+        extension = extension.toLowerCase();
+        return extension;
+    }
+
     private void checkSessionDates() {
         try {
             Cursor sessionCursor = database.getAll("SESSION");
-            String[] passphraseArray = new String[sessionCursor.getCount()];
+            Map<String, String> sessionIdPassphraseMap = new HashMap<>();
             for(int i = 0; i < sessionCursor.getCount(); i++) {
                 sessionCursor.moveToPosition(i);
                 String passphrase = sessionCursor.getString(sessionCursor.getColumnIndex(PASSPHRASE));
-                passphraseArray[i] = passphrase;
+                String sessionId = sessionCursor.getString(sessionCursor.getColumnIndex(SESSION_ID));
+                sessionIdPassphraseMap.put(passphrase, sessionId);
             }
             if(Utilities.isNetworkAvailable(this)) {
-                SessionValidation sessionValidation = new SessionValidation();
-                sessionValidation.execute(passphraseArray);
+                SessionValidationOnline sessionValidationOnline = new SessionValidationOnline();
+                sessionValidationOnline.execute(sessionIdPassphraseMap);
             } else {
-                //TODO: use date on phone to check if session is still valid
+                SessionValidationOffline sessionValidationOffline = new SessionValidationOffline();
+                sessionValidationOffline.execute(sessionIdPassphraseMap);
             }
         } catch (NotInSchemaException e) {
             Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
         }
     }
 
-    private class SessionValidation extends AsyncTask<String[],Double,Boolean[]> {
-        private String[] passphraseArray;
-        protected Boolean[] doInBackground(String[]... params) {
-            passphraseArray = params[0];
-            Boolean[] exists = new Boolean[passphraseArray.length];
-            for(int i = 0; i < passphraseArray.length; i++) {
-                if(sessionExists(passphraseArray[i])) {
-                    exists[i] = true;
-                } else {
-                    exists[i] = false;
+    private class SessionValidationOnline extends AsyncTask<Map<String, String>, Double, ArrayList<String>> {
+        protected ArrayList<String> doInBackground(Map<String, String>... params) {
+            Map<String, String> sessionIdPassphraseMap = params[0];
+            ArrayList<String> sessionIdArrayList = new ArrayList<>();
+            for(Map.Entry<String, String> entry : sessionIdPassphraseMap.entrySet()) {
+                if(!sessionExistsOnline(entry.getKey())) {
+                    sessionIdArrayList.add(entry.getValue());
                 }
             }
-            return exists;
+            return sessionIdArrayList;
         }
-        protected void onPostExecute(Boolean[] result) {
-            for (int i = 0; i < result.length; i++) {
-                if (result[i] == false) {
-                    removeSession(passphraseArray[i]);
-                }
+        protected void onPostExecute(ArrayList<String> result) {
+            for (int i = 0; i < result.size(); i++) {
+                removeSession(result.get(i));
             }
         }
     }
 
-    public static boolean sessionExists(String sessionCode) {
+    public static boolean sessionExistsOnline(String passphrase) {
         try {
-            InputStream inputStream = new URL("https://hitour.herokuapp.com/api/A7DE6825FD96CCC79E63C89B55F88/" + sessionCode).openStream();
+            InputStream inputStream = new URL("https://hitour.herokuapp.com/api/A7DE6825FD96CCC79E63C89B55F88/" + passphrase).openStream();
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             StringBuilder text = new StringBuilder();
             String line;
@@ -644,9 +666,326 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         return false;
     }
 
-    private void removeSession(String passphrase) {
-        //TODO: add algorithm to remove tour session without removing any shared elements
+    private void setCurrentFeedAdapter(FeedAdapter adapter){
+        currentFeedAdapter= adapter;
+    }
 
+    /**
+     * Method to get current feed adapter
+     * @return FeedAdapter
+     */
+    public static FeedAdapter getCurrentFeedAdapter(){
+        return currentFeedAdapter;
+    }
+
+    private class SessionValidationOffline extends AsyncTask<Map<String, String>, Double, ArrayList<String>> {
+        protected ArrayList<String> doInBackground(Map<String, String>... params) {
+            try {
+                Map<String, String> sessionIdPassphraseMap = params[0];
+                ArrayList<String> sessionIdArrayList = new ArrayList<>();
+                for (Map.Entry<String, String> entry : sessionIdPassphraseMap.entrySet()) {
+                    Map<String, String> primaryKeysMap = new HashMap<>();
+                    primaryKeysMap.put(SESSION_ID, entry.getValue());
+                    // Get START_DATE and DURATION for this session
+                    Cursor sessionCursor = database.getWholeByPrimary(SESSION_TABLE, primaryKeysMap);
+                    sessionCursor.moveToFirst();
+                    String startDate = sessionCursor.getString(sessionCursor.getColumnIndex(START_DATE));
+                    String duration = sessionCursor.getString(sessionCursor.getColumnIndex(DURATION));
+                    if (!sessionExistsOffline(startDate, duration)) {
+                        sessionIdArrayList.add(entry.getValue());
+                    }
+                }
+                return sessionIdArrayList;
+            } catch (NotInSchemaException e) {
+                Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
+            }
+            return null;
+        }
+        protected void onPostExecute(ArrayList<String> result) {
+            if(result != null) {
+                for (int i = 0; i < result.size(); i++) {
+                    removeSession(result.get(i));
+                }
+            }
+        }
+    }
+
+    private boolean sessionExistsOffline(String startDate, String duration) {
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            Calendar calendarFinish = Calendar.getInstance();
+            calendarFinish.setTime(sdf.parse(startDate));
+            calendarFinish.add(Calendar.DATE, Integer.parseInt(duration));
+            Calendar calendarNow = Calendar.getInstance();
+            if(calendarNow.after(calendarFinish)) {
+                return false;
+            }
+        } catch (ParseException e) {
+            Log.e("PARSE_FAIL", Log.getStackTraceString(e));
+        }
+        return true;
+    }
+
+    private void removeSession(String sessionId) {
+        try {
+            // Remove session from session table making note of the TOUR_ID
+            Map<String,String> columnsMapSession = new HashMap<>();
+            Map<String,String> primaryKeysMapSession = new HashMap<>();
+            primaryKeysMapSession.put(SESSION_ID, sessionId);
+            Cursor exactSessionCursor = database.getWholeByPrimary(SESSION_TABLE, primaryKeysMapSession);
+            exactSessionCursor.moveToFirst();
+            String completedTourId = exactSessionCursor.getString(exactSessionCursor.getColumnIndex(DatabaseConstants.TOUR_ID));
+            database.delete(columnsMapSession, primaryKeysMapSession, SESSION_TABLE);
+
+            // Get the updated session table
+            Cursor sessionCursor = database.getAll("SESSION");
+
+            // If no other sessions now exist remove all entries from all tables
+            if (sessionCursor.getCount() == 0) {
+                database.deleteAll("TOUR");
+                database.deleteAll("POINT_TOUR");
+                Cursor pointCursor = database.getAll(POINT_TABLE);
+                for(int i = 0; i < pointCursor.getCount(); i++) {
+                    pointCursor.moveToPosition(i);
+                    String url = pointCursor.getString(pointCursor.getColumnIndex(DatabaseConstants.URL));
+                    deleteDataFile(url);
+                }
+                database.deleteAll("POINT");
+                database.deleteAll("POINT_DATA");
+                Cursor dataCursor = database.getAll(DATA_TABLE);
+                for(int i = 0; i < dataCursor.getCount(); i++) {
+                    dataCursor.moveToPosition(i);
+                    String url = dataCursor.getString(dataCursor.getColumnIndex(DatabaseConstants.URL));
+                    deleteDataFile(url);
+                }
+                database.deleteAll("DATA");
+                database.deleteAll("AUDIENCE_DATA");
+                database.deleteAll("AUDIENCE");
+                // No other checks needed, so exit the method
+                return;
+            }
+
+            // Check if other sessions use the same tour
+            for (int i = 0; i < sessionCursor.getCount(); i++) {
+                sessionCursor.moveToPosition(i);
+                if (sessionCursor.getString(sessionCursor.getColumnIndex(DatabaseConstants.TOUR_ID)).equals(completedTourId)) {
+                    // Nothing else should be deleted as tours use same data, so exit the method
+                    return;
+                }
+            }
+
+            // Remove tour from tour table
+            Map<String,String> columnsMapTour = new HashMap<>();
+            Map<String,String> primaryKeysMapTour = new HashMap<>();
+            primaryKeysMapTour.put(TOUR_ID, completedTourId);
+            Cursor exactTourCursor = database.getWholeByPrimary(TOUR_TABLE, primaryKeysMapTour);
+            exactTourCursor.moveToFirst();
+            String completedAudienceId = exactTourCursor.getString(exactTourCursor.getColumnIndex(AUDIENCE_ID));
+            database.delete(columnsMapTour, primaryKeysMapTour, TOUR_TABLE);
+
+            // Check to see if other tours use same audience, if not remove the audience from the AUDIENCE table
+            Cursor updatedTourCursor = database.getAll("TOUR");
+            boolean audienceStillNeeded = false;
+            for(int i = 0; i < updatedTourCursor.getCount(); i++) {
+                updatedTourCursor.moveToPosition(i);
+                String audienceId = updatedTourCursor.getString(updatedTourCursor.getColumnIndex(AUDIENCE_ID));
+                if(audienceId.equals(completedAudienceId)) {
+                    audienceStillNeeded = true;
+                    break;
+                }
+            }
+            if(!audienceStillNeeded) {
+                Map<String, String> columnsMapAudience = new HashMap<>();
+                Map<String, String> primaryKeysMapAudience = new HashMap<>();
+                primaryKeysMapAudience.put("AUDIENCE_ID", completedAudienceId);
+                database.delete(columnsMapAudience, primaryKeysMapAudience, "AUDIENCE");
+                database.delete(columnsMapAudience, primaryKeysMapAudience, "AUDIENCE_DATA");
+            }
+
+            // Get list of POINT_IDs that tour used and delete rows for tour from POINT_TOUR table
+            ArrayList<String> forRemovingPointIdArrayList = new ArrayList<>();
+            Map<String, String> columnsMapPointTour = new HashMap<>();
+            Map<String, String> primaryKeysMapPointTour = new HashMap<>();
+            primaryKeysMapPointTour.put("TOUR_ID", completedTourId);
+            Cursor completedPointTourCursor = database.getWholeByPrimaryPartial("POINT_TOUR", primaryKeysMapPointTour);
+            for(int i = 0; i < completedPointTourCursor.getCount(); i++) {
+                completedPointTourCursor.moveToPosition(i);
+                String tempPointId = completedPointTourCursor.getString(completedPointTourCursor.getColumnIndex(POINT_ID));
+                forRemovingPointIdArrayList.add(tempPointId);
+            }
+            database.delete(columnsMapPointTour, primaryKeysMapPointTour, "POINT_TOUR");
+
+            // Go through POINT_TOUR table to find which, if any, other tours use same points
+            ArrayList<String> stillNeededPointIdArrayList = new ArrayList<>();
+            for(String pointId : forRemovingPointIdArrayList) {
+                // Get Cursor that shows other tours that use this POINT_ID
+                Map<String, String> primaryKeysMapUpdatedPointTour = new HashMap<>();
+                primaryKeysMapUpdatedPointTour.put("POINT_ID", pointId);
+                Cursor updatedPointTourCursor = database.getWholeByPrimaryPartial("POINT_TOUR", primaryKeysMapUpdatedPointTour);
+                if(updatedPointTourCursor.getCount() > 0) {
+                    // Add to list of points that cannot be deleted as used by other tours
+                    stillNeededPointIdArrayList.add(pointId);
+                }
+            }
+            // Remove POINT_IDs from list if they are still needed
+            forRemovingPointIdArrayList.removeAll(stillNeededPointIdArrayList);
+
+            // Remove all points that are no longer needed from POINT and POINT_DATA tables
+            ArrayList<String> dataIdArrayList = new ArrayList<>();
+            // Also make note of DATA_IDs used by these no longer needed points
+            for(String pointId : forRemovingPointIdArrayList) {
+                Map<String, String> columnsMapRemoving = new HashMap<>();
+                Map<String, String> primaryKeysMapRemoving = new HashMap<>();
+                primaryKeysMapRemoving.put("POINT_ID", pointId);
+                database.delete(columnsMapRemoving, primaryKeysMapRemoving, "POINT");
+                Cursor pointDataRemovingCursor = database.getWholeByPrimaryPartial("POINT_DATA", primaryKeysMapRemoving);
+                for(int i = 0; i < pointDataRemovingCursor.getCount(); i++) {
+                    pointDataRemovingCursor.moveToPosition(i);
+                    String tempDataId = pointDataRemovingCursor.getString(pointDataRemovingCursor.getColumnIndex(DATA_ID));
+                    if(!dataIdArrayList.contains(tempDataId))
+                        dataIdArrayList.add(tempDataId);
+                }
+                database.delete(columnsMapRemoving, primaryKeysMapRemoving, "POINT_DATA");
+            }
+
+            // Make note of DATA_IDs of data from points that are still needed
+            for(String pointId : stillNeededPointIdArrayList) {
+                Map<String, String> primaryKeysMapKeeping = new HashMap<>();
+                primaryKeysMapKeeping.put("POINT_ID", pointId);
+                Cursor pointDataKeepingCursor = database.getWholeByPrimaryPartial("POINT_DATA", primaryKeysMapKeeping);
+                for(int i = 0; i < pointDataKeepingCursor.getCount(); i++) {
+                    pointDataKeepingCursor.moveToPosition(i);
+                    String tempDataId = pointDataKeepingCursor.getString(pointDataKeepingCursor.getColumnIndex(DATA_ID));
+                    if(!dataIdArrayList.contains(tempDataId))
+                        dataIdArrayList.add(tempDataId);
+                }
+            }
+
+            // Make note all points that use a piece of data that was used by the removed tour
+            HashMap<String, ArrayList<String>> dataPointsMap = new HashMap<>();
+            for(String dataId : dataIdArrayList) {
+                Map<String, String> primaryKeysMapPointData = new HashMap<>();
+                primaryKeysMapPointData.put("DATA_ID", dataId);
+                Cursor tempPointDataCursor = database.getWholeByPrimaryPartial("POINT_DATA", primaryKeysMapPointData);
+                ArrayList<String> tempPointIdArrayList = new ArrayList<>();
+                for(int i = 0; i < tempPointDataCursor.getCount(); i++) {
+                    tempPointDataCursor.moveToPosition(i);
+                    String tempPointId = tempPointDataCursor.getString(tempPointDataCursor.getColumnIndex(POINT_ID));
+                    tempPointIdArrayList.add(tempPointId);
+                }
+                dataPointsMap.put(dataId, tempPointIdArrayList);
+            }
+
+            // Make note of all tours that use each point
+            Cursor pointCursor = database.getAll("POINT");
+            Map<String, ArrayList<String>> pointToursMap = new HashMap<>();
+            for(int i = 0; i < pointCursor.getCount(); i++) {
+                pointCursor.moveToPosition(i);
+                String pointId = pointCursor.getString(pointCursor.getColumnIndex(POINT_ID));
+                ArrayList<String> tourIds = new ArrayList<>();
+
+                Map<String, String> primaryKeysMapSpecificPoint = new HashMap<>();
+                primaryKeysMapSpecificPoint.put("POINT_ID", pointId);
+                Cursor pointTourCursor = database.getWholeByPrimaryPartial("POINT_TOUR", primaryKeysMapSpecificPoint);
+                for(int j = 0; j < pointTourCursor.getCount(); j++) {
+                    pointTourCursor.moveToPosition(j);
+                    tourIds.add(pointTourCursor.getString(pointTourCursor.getColumnIndex(TOUR_ID)));
+                }
+                pointToursMap.put(pointId, tourIds);
+            }
+
+            // Make connection between TOUR_ID and the AUDIENCE_ID of that tour
+            Cursor tourCursor = database.getAll("TOUR");
+            Map<String, String> tourAudienceMap = new HashMap<>();
+            for(int i = 0; i < tourCursor.getCount(); i++) {
+                tourCursor.moveToPosition(i);
+                String tourId = tourCursor.getString(tourCursor.getColumnIndex(TOUR_ID));
+                String audienceId = tourCursor.getString(tourCursor.getColumnIndex(AUDIENCE_ID));
+                tourAudienceMap.put(tourId, audienceId);
+            }
+
+            // Make list of all audiences that a piece of data is available to
+            Map<String, ArrayList<String>> dataAudiencesMap = new HashMap<>();
+            for(int i = 0; i < dataIdArrayList.size(); i++) {
+                String dataId = dataIdArrayList.get(i);
+                Map<String, String> primaryKeysMapDataAudience = new HashMap<>();
+                primaryKeysMapDataAudience.put("DATA_ID", dataId);
+                ArrayList<String> audienceIdArrayList = new ArrayList<>();
+                Cursor dataAudienceCursor = database.getWholeByPrimaryPartial("AUDIENCE_DATA", primaryKeysMapDataAudience);
+                for(int j = 0; j < dataAudienceCursor.getCount(); j++) {
+                    dataAudienceCursor.moveToPosition(j);
+                    String audienceId = dataAudienceCursor.getString(dataAudienceCursor.getColumnIndex(AUDIENCE_ID));
+                    audienceIdArrayList.add(audienceId);
+                }
+                dataAudiencesMap.put(dataId, audienceIdArrayList);
+            }
+
+            // Go through and remove any relevant entries from POINT_DATA, DATA, and DATA_AUDIENCE tables
+            for(Map.Entry<String, ArrayList<String>> entry : dataPointsMap.entrySet()) {
+                // If data not used by any points then remove it from POINT_DATA, DATA, and DATA_AUDIENCE tables
+                ArrayList<String> points = entry.getValue();
+                boolean dataUsed = false;
+                for (int i = 0; i < points.size(); i++) {
+                    String pointId = points.get(i);
+                    ArrayList<String> tours = pointToursMap.get(pointId);
+                    // The data can only be used by this point if a tour that uses it exists
+                    if (tours.size() > 0) {
+                        ArrayList<String> tourAudiences = new ArrayList<>();
+                        for (int j = 0; j < tours.size(); j++) {
+                            String tourId = tours.get(i);
+                            tourAudiences.add(tourAudienceMap.get(tourId));
+                        }
+                        ArrayList<String> dataAudiences = dataAudiencesMap.get(entry.getKey());
+                        dataAudiences.retainAll(tourAudiences);
+                        // If they share at least one audience then the data is used
+                        if (dataAudiences.size() > 0) {
+                            dataUsed = true;
+                            break;
+                        }
+                    }
+                }
+                // If no tour exists that uses the data then remove it
+                if (!dataUsed) {
+                    removeData(entry.getKey());
+                }
+            }
+
+        } catch (NotInSchemaException e) {
+            Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
+        }
+    }
+
+    private void removeData(String dataId) throws NotInSchemaException {
+        HashMap<String, String> columnsMap = new HashMap<>();
+        HashMap<String, String> primaryKeysMap = new HashMap<>();
+        primaryKeysMap.put(DATA_ID, dataId);
+        Cursor dataCursor = database.getWholeByPrimary(DATA_TABLE, primaryKeysMap);
+        dataCursor.moveToFirst();
+        String url = dataCursor.getString(dataCursor.getColumnIndex(DatabaseConstants.URL));
+        if(!usedByPoint(url)) {
+            deleteDataFile(url);
+        }
+        database.delete(columnsMap, primaryKeysMap, DATA_TABLE);
+        database.delete(columnsMap, primaryKeysMap, AUDIENCE_DATA_TABLE);
+        database.delete(columnsMap, primaryKeysMap, POINT_DATA_TABLE);
+    }
+
+    private void deleteDataFile(String url) {
+        String filename = createFilename(url);
+        filename = this.getFilesDir().toString() + "/" + filename;
+        File file = new File(filename);
+        file.delete();
+    }
+
+    private boolean usedByPoint(String dataUrl) throws NotInSchemaException {
+        Cursor pointCursor = database.getAll(POINT_TABLE);
+        for(int i = 0; i < pointCursor.getCount(); i++) {
+            pointCursor.moveToPosition(i);
+            String pointUrl = pointCursor.getString(pointCursor.getColumnIndex(DatabaseConstants.URL));
+            if(dataUrl.equals(pointUrl))
+                return true;
+        }
+        return false;
     }
 
 }

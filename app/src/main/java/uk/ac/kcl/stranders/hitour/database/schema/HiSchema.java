@@ -46,6 +46,7 @@ public class HiSchema extends DatabaseSchema {
         TableSchema pointTour = new TableSchema(TOUR_ID, POINT_TOUR_TABLE);
         pointTour.addPrimaryKey(POINT_ID);
         pointTour.addValue(RANK, DataType.Text);
+        pointTour.addValue(UNLOCK, DataType.Text);
         addTable(pointTour);
 
         TableSchema audienceData = new TableSchema(DATA_ID, AUDIENCE_DATA_TABLE);

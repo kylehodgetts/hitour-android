@@ -12,6 +12,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.util.Log;
+import android.util.Pair;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -28,6 +29,7 @@ import com.journeyapps.barcodescanner.CompoundBarcodeView;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Observable;
 
 import uk.ac.kcl.stranders.hitour.CustomTypefaceSpan;
 import uk.ac.kcl.stranders.hitour.R;
@@ -35,6 +37,11 @@ import uk.ac.kcl.stranders.hitour.database.NotInSchemaException;
 import uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants;
 
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.PASSPHRASE;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_ID;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_TOUR_TABLE;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.RANK;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TOUR_ID;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.UNLOCK;
 
 /**
  * {@link AppCompatActivity} class that is used to retrieve input by means of scanning a QR Code or
@@ -70,7 +77,7 @@ public class ScanningActivity extends AppCompatActivity {
     private BarcodeCallback callback = new BarcodeCallback() {
         @Override
         public void barcodeResult(BarcodeResult result) {
-            if(result != null && result.getBarcodeFormat().equals(BarcodeFormat.QR_CODE)) {
+            if (result != null && result.getBarcodeFormat().equals(BarcodeFormat.QR_CODE)) {
                 barcodeScannerView.setStatusText(result.getText());
                 etCodePinEntry.setText(result.getText());
                 barcodeScannerView.pause();
@@ -87,6 +94,7 @@ public class ScanningActivity extends AppCompatActivity {
     /**
      * Creates an instance of the activity by telling barcode scanner to scan using the {@link BarcodeCallback}
      * above and adding an {@link android.view.View.OnClickListener} to the Submit {@link Button}
+     *
      * @param savedInstanceState - Saved Instance Bundle
      */
     @Override
@@ -94,7 +102,7 @@ public class ScanningActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scanning);
 
-        barcodeScannerView = (CompoundBarcodeView)findViewById(R.id.zxing_barcode_scanner);
+        barcodeScannerView = (CompoundBarcodeView) findViewById(R.id.zxing_barcode_scanner);
         barcodeScannerView.decodeContinuous(callback);
         etCodePinEntry = (EditText) findViewById(R.id.etCodePinEntry);
         modeSwitch = (Switch) findViewById(R.id.mode_switch);
@@ -108,13 +116,17 @@ public class ScanningActivity extends AppCompatActivity {
             }
         });
 
+
         ActionBar actionbar = getSupportActionBar();
 
         Typeface font = Typeface.createFromAsset(this.getAssets(), "fonts/ubuntu_l.ttf");
         SpannableString s = new SpannableString("hiTour");
         s.setSpan(new CustomTypefaceSpan("", font), 0, s.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        
-        actionbar.setTitle(s);
+
+
+        if (actionbar != null) {
+            actionbar.setTitle(s);
+        }
 
     }
 
@@ -142,9 +154,11 @@ public class ScanningActivity extends AppCompatActivity {
                 if (result.length() > 6 && result.substring(0, 6).equals("POINT-")) {
                     // Takes identification part of point id
                     result = result.substring(6);
-                } else if (result.length() > 8 && result.substring(0, 8).equals("SESSION-")) {
+                    // Sets to identify as a point
+                    modeSwitch.setChecked(false);
+                } else if (result.length() > 2 && result.substring(0, 2).equals("SN")) {
                     // Takes identification part of session passphrase
-                    result = result.substring(8);
+                    result = result.substring(2);
                     // Sets to identify as a tour
                     modeSwitch.setChecked(true);
                 }
@@ -183,6 +197,27 @@ public class ScanningActivity extends AppCompatActivity {
                 Intent data = new Intent();
                 data.putExtra("mode", "point");
                 data.putExtra(DetailActivity.EXTRA_PIN, result);
+
+                //Replace unlock with a value of 1
+                Map<String, String> tourPointColumnsMap = new HashMap<>();
+                tourPointColumnsMap.put(UNLOCK, "1");
+                Map<String, String> tourPointPrimaryKeysMap = new HashMap<>();
+                Log.i("inScanning", "" + FeedActivity.currentTourId);
+                tourPointPrimaryKeysMap.put(TOUR_ID, "" + FeedActivity.currentTourId);
+                tourPointPrimaryKeysMap.put(POINT_ID, result);
+                try {
+                    Cursor cursorGetRank = FeedActivity.database.getWholeByPrimaryPartial(POINT_TOUR_TABLE, tourPointPrimaryKeysMap);
+                    cursorGetRank.moveToFirst();
+                    String pointRank = cursorGetRank.getString(cursorGetRank.getColumnIndex(RANK));
+                    tourPointColumnsMap.put(RANK, pointRank);
+                    FeedActivity.database.insert(tourPointColumnsMap, tourPointPrimaryKeysMap, "POINT_TOUR");
+                } catch (NotInSchemaException e) {
+                    Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
+                }
+                //Notify the feedAdapter that a viewHolder's view has to update.
+                ObservableLock observableLock = new ObservableLock();
+                observableLock.addObserver(FeedActivity.getCurrentFeedAdapter());
+                observableLock.setChange(result, FeedActivity.currentTourId);
                 setResult(RESULT_OK, data);
                 finish();
             } else {
@@ -201,10 +236,10 @@ public class ScanningActivity extends AppCompatActivity {
      * @return true if the point is valid for a selected tour
      */
     private boolean pointExistsInTour(String passphrase) {
-        if(FeedActivity.currentTourId == null) {
+        if (FeedActivity.currentTourId == null) {
             return false;
         }
-        Map<String,String> partialPrimaryMapTour = new HashMap<>();
+        Map<String, String> partialPrimaryMapTour = new HashMap<>();
         partialPrimaryMapTour.put("TOUR_ID", FeedActivity.currentTourId);
         Cursor pointTourCursor;
         try {
@@ -225,7 +260,7 @@ public class ScanningActivity extends AppCompatActivity {
         private class TourSubmit extends AsyncTask<String, Double, Boolean> {
             protected Boolean doInBackground(String... params) {
                 Boolean exists;
-                if (FeedActivity.sessionExists(params[0])) {
+                if (FeedActivity.sessionExistsOnline(params[0])) {
                     exists = true;
                 } else {
                     exists = false;
@@ -248,6 +283,7 @@ public class ScanningActivity extends AppCompatActivity {
                 }
             }
         }
+
 
     /**
      * Clears input received in the {@link EditText} field and the Barcode Scanner's status bar text
@@ -310,6 +346,17 @@ public class ScanningActivity extends AppCompatActivity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         return barcodeScannerView.onKeyDown(keyCode, event) || super.onKeyDown(keyCode, event);
+    }
+
+    /**
+     * Observable class that allows us to notify a change related to lock for the ViewAdapter
+     */
+    public class ObservableLock extends Observable {
+
+        public void setChange(String point_id, String tour_id) {
+            setChanged();
+            notifyObservers(new Pair<>(Integer.valueOf(point_id), Integer.valueOf(tour_id)));
+        }
     }
 
 }
