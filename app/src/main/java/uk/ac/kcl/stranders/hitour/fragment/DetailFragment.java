@@ -36,6 +36,7 @@ import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.DATA_
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.DESCRIPTION;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.NAME;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_ID;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.RANK;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TITLE;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.URL;
 
@@ -153,7 +154,7 @@ public class DetailFragment extends Fragment {
         try {
             Map<String, String> partialPrimaryMapPoint = new HashMap<>();
             partialPrimaryMapPoint.put("POINT_ID", pointTourCursor.getString(pointTourCursor.getColumnIndex(POINT_ID)));
-            pointDataCursor = FeedActivity.database.getWholeByPrimaryPartial("POINT_DATA", partialPrimaryMapPoint);
+            pointDataCursor = FeedActivity.database.getWholeByPrimaryPartialSorted("POINT_DATA", partialPrimaryMapPoint, RANK);
         } catch (Exception e) {
             Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
         }
