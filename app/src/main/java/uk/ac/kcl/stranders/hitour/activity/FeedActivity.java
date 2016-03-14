@@ -25,6 +25,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.google.zxing.integration.android.IntentIntegrator;
@@ -62,8 +63,11 @@ import uk.ac.kcl.stranders.hitour.model.Tour;
 import uk.ac.kcl.stranders.hitour.model.TourSession;
 import uk.ac.kcl.stranders.hitour.retrofit.HiTourRetrofit;
 
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.DESCRIPTION;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.NAME;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.PASSPHRASE;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.SESSION_TABLE;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.START_DATE;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TOUR_ID;
 
 /**
@@ -198,12 +202,18 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
                             appInfoFragment.show(fm, "app_info_fragment");
                         } else {
                             try {
-                                Cursor tourCursor = database.getAll("TOUR");
-                                if(tourCursor.getCount() > 0) {
-                                    tourCursor.moveToFirst();
-                                    tourCursor.move(item.getItemId());
-                                    if (!tourCursor.getString(tourCursor.getColumnIndex(TOUR_ID)).equals(FeedActivity.this.currentTourId)) {
-                                        populateFeedAdapter(tourCursor.getString(tourCursor.getColumnIndex(TOUR_ID)));
+                                Cursor sessionCursor = database.getAll(SESSION_TABLE);
+                                if(sessionCursor.getCount() > 0) {
+                                    sessionCursor.moveToPosition(item.getItemId());
+                                    if (!sessionCursor.getString(sessionCursor.getColumnIndex(TOUR_ID)).equals(FeedActivity.this.currentTourId)) {
+                                        populateFeedAdapter(sessionCursor.getString(sessionCursor.getColumnIndex(TOUR_ID)));
+                                        String description = sessionCursor.getString(sessionCursor.getColumnIndex(DESCRIPTION));
+                                        TextView descriptionTextView = (TextView) findViewById(R.id.nav_tour_info);
+                                        descriptionTextView.setText(description);
+                                        String startDate = sessionCursor.getString(sessionCursor.getColumnIndex(START_DATE));
+                                        TextView startDateTextView = (TextView) findViewById(R.id.tour_date);
+                                        startDateTextView.setText(startDate);
+                                        // TODO: code for expiration date (copy from other branch and make method)
                                     }
                                 }
                             } catch (NotInSchemaException e) {
@@ -473,11 +483,10 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
      */
     private void updateMenu() {
         mMenu.clear();
-        int i = 0;
         try {
             Cursor tourCursor = database.getAll("TOUR");
             tourCursor.moveToFirst();
-            for(i = 0; i < tourCursor.getCount(); i++) {
+            for(int i = 0; i < tourCursor.getCount(); i++) {
                 tourCursor.moveToPosition(i);
                 mMenu.add(0, i, Menu.NONE, tourCursor.getString(tourCursor.getColumnIndex(NAME))).setIcon(R.drawable.ic_action_local_hospital);
                 // TODO: Fix content description
