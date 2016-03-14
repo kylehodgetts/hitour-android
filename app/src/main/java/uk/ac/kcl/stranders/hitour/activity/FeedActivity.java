@@ -15,10 +15,12 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.util.Log;
@@ -69,7 +71,6 @@ import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.AUDIE
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.AUDIENCE_ID;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.DATA_ID;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.DATA_TABLE;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.DESCRIPTION;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.DURATION;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.NAME;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.PASSPHRASE;
@@ -77,10 +78,10 @@ import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_ID;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_TABLE;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_TOUR_TABLE;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.RANK;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.SESSION_ID;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.SESSION_TABLE;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.START_DATE;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.RANK;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TOUR_ID;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TOUR_TABLE;
 
@@ -183,15 +184,6 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
 
         mFeed.setLayoutManager(mLayoutManager);
 
-        try {
-            Cursor tourCursor = database.getAll("TOUR");
-            if(tourCursor.getCount() > 0) {
-                tourCursor.moveToFirst();
-                populateFeedAdapter(tourCursor.getString(tourCursor.getColumnIndex(TOUR_ID)));
-            }
-        } catch (NotInSchemaException e) {
-            Log.e("DATABASE_FAIL",Log.getStackTraceString(e));
-        }
 
         mMenu = navigationView.getMenu();
         updateMenu();
@@ -202,11 +194,46 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
             supportActionBar.setDisplayHomeAsUpEnabled(true);
         }
 
+        try {
+            Cursor sessionCursor = database.getAll(SESSION_TABLE);
+            if(sessionCursor.getCount() > 0) {
+                sessionCursor.moveToFirst();
+                populateFeedAdapter(sessionCursor.getString(sessionCursor.getColumnIndex(TOUR_ID)));
+            }
+        } catch (NotInSchemaException e) {
+            Log.e("DATABASE_FAIL",Log.getStackTraceString(e));
+        }
+
+        ActionBarDrawerToggle drawerToggle = new ActionBarDrawerToggle(
+                this,
+                mDrawerLayout,
+                toolbar,
+                R.string.open_drawer,
+                R.string.close_drawer) {
+            @Override
+            public void onDrawerStateChanged(int newState) {
+                if(newState == DrawerLayout.STATE_SETTLING) {
+                    try {
+                        Cursor sessionCursor = database.getAll(SESSION_TABLE);
+                        for (int i = 0; i < sessionCursor.getCount(); i++) {
+                            sessionCursor.moveToPosition(i);
+                            if (sessionCursor.getString(sessionCursor.getColumnIndex(TOUR_ID)).equals(currentTourId)) {
+                                updateHeader(sessionCursor, i);
+                            }
+                        }
+                    } catch (NotInSchemaException e) {
+                        Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
+                    }
+                }
+            }
+        };
+        mDrawerLayout.setDrawerListener(drawerToggle);
+
         navigationView.setNavigationItemSelectedListener(
                 new NavigationView.OnNavigationItemSelectedListener() {
                     @Override
                     public boolean onNavigationItemSelected(MenuItem item) {
-                           
+
                         // TODO: Refactor this block of code
 
                         // If the "about" section is clicked, the DialogFragment shows up
@@ -219,15 +246,8 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
                                 Cursor sessionCursor = database.getAll(SESSION_TABLE);
                                 if(sessionCursor.getCount() > 0) {
                                     sessionCursor.moveToPosition(item.getItemId());
-                                    if (!sessionCursor.getString(sessionCursor.getColumnIndex(TOUR_ID)).equals(FeedActivity.this.currentTourId)) {
+                                    if (!sessionCursor.getString(sessionCursor.getColumnIndex(TOUR_ID)).equals(currentTourId)) {
                                         populateFeedAdapter(sessionCursor.getString(sessionCursor.getColumnIndex(TOUR_ID)));
-                                        String description = sessionCursor.getString(sessionCursor.getColumnIndex(DESCRIPTION));
-                                        TextView descriptionTextView = (TextView) findViewById(R.id.nav_tour_info);
-                                        descriptionTextView.setText(description);
-                                        String startDate = sessionCursor.getString(sessionCursor.getColumnIndex(START_DATE));
-                                        TextView startDateTextView = (TextView) findViewById(R.id.tour_date);
-                                        startDateTextView.setText(startDate);
-                                        // TODO: code for expiration date (copy from other branch and make method)
                                     }
                                 }
                             } catch (NotInSchemaException e) {
@@ -332,6 +352,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         tourSessionColumnsMap.put("START_DATE", tourSession.getStartDate());
         tourSessionColumnsMap.put("DURATION", tourSession.getDuration().toString());
         tourSessionColumnsMap.put("PASSPHRASE", tourSession.getPassphrase());
+        tourSessionColumnsMap.put(NAME, tourSession.getName());
         Map<String,String> tourSessionPrimaryKeysMap = new HashMap<>();
         tourSessionPrimaryKeysMap.put("SESSION_ID", tourSession.getId().toString());
         try {
@@ -493,15 +514,18 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
     }
 
     /**
-     * Invoked to fill drawer with list of tours saved on the device's database.
+     * Invoked to fill drawer with list of tour sessions saved on the device's database
      */
     private void updateMenu() {
         mMenu.clear();
         try {
-            Cursor tourCursor = database.getAll("TOUR");
-            tourCursor.moveToFirst();
-            for(int i = 0; i < tourCursor.getCount(); i++) {
-                tourCursor.moveToPosition(i);
+            Cursor sessionCursor = database.getAll(SESSION_TABLE);
+            for(int i = 0; i < sessionCursor.getCount(); i++) {
+                sessionCursor.moveToPosition(i);
+                Map<String, String> primaryKeysMap = new HashMap<>();
+                primaryKeysMap.put(TOUR_ID, sessionCursor.getString(sessionCursor.getColumnIndex(TOUR_ID)));
+                Cursor tourCursor = database.getWholeByPrimary(TOUR_TABLE, primaryKeysMap);
+                tourCursor.moveToFirst();
                 mMenu.add(0, i, Menu.NONE, tourCursor.getString(tourCursor.getColumnIndex(NAME))).setIcon(R.drawable.ic_action_local_hospital);
                 // TODO: Fix content description
 //                mMenu.getItem(i).getActionView().setContentDescription(getString(R.string.content_description_tour_selection, mMenu.getItem(i).getTitle()));
@@ -516,6 +540,39 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         mMenu.addSubMenu("s");
         mMenu.add(R.id.end_padder, R.id.app_info_item, Menu.NONE, getString(R.string.about)).setIcon(R.drawable.ic_action_local_hospital);
 //        mMenu.getItem(i).getActionView().setContentDescription(getString(R.string.content_description_tour_selection, mMenu.getItem(i).getTitle()));
+    }
+
+    /**
+     * Update the header portion of the drawer layout for a different session
+     * @param sessionCursor cursor of the whole SESSION table
+     * @param position position in the cursor of the session we want
+     */
+    private void updateHeader(Cursor sessionCursor, int position) {
+        sessionCursor.moveToPosition(position);
+
+        TextView nameTextView = (TextView) findViewById(R.id.nav_tour_info);
+        TextView startDateTextView = (TextView) findViewById(R.id.tour_date);
+        TextView expirationDateTextView = (TextView) findViewById(R.id.expiration_date);
+
+        SimpleDateFormat sdfStart = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat sdfFinish = new SimpleDateFormat("dd-MM-yyyy");
+
+        String name = sessionCursor.getString(sessionCursor.getColumnIndex(NAME));
+        String startDate = sessionCursor.getString(sessionCursor.getColumnIndex(START_DATE));
+        String duration = sessionCursor.getString(sessionCursor.getColumnIndex(DURATION));
+
+        nameTextView.setText(name);
+
+        Calendar expirationDateCalendar = getFinishDate(startDate, duration);
+        String expirationDate = sdfFinish.format(expirationDateCalendar.getTime());
+        expirationDateTextView.setText(Html.fromHtml("<b>" + FeedActivity.this.getString(R.string.expiration_date) + "</b><br/>" + expirationDate));
+
+        try {
+            startDate = sdfFinish.format(sdfStart.parse(startDate));
+        } catch (ParseException e) {
+            Log.e("PARSE_FAIL", Log.getStackTraceString(e));
+        }
+        startDateTextView.setText(Html.fromHtml("<b>" + FeedActivity.this.getString(R.string.start_date) + "</b><br/>" + startDate));
     }
 
     private void populateFeedAdapter(String tourId) {
@@ -717,19 +774,25 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
     }
 
     private boolean sessionExistsOffline(String startDate, String duration) {
+        Calendar calendarFinish = getFinishDate(startDate, duration);
+        Calendar calendarNow = Calendar.getInstance();
+        if (calendarNow.after(calendarFinish)) {
+            return false;
+        }
+        return true;
+    }
+
+    private Calendar getFinishDate(String startDate, String duration) {
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             Calendar calendarFinish = Calendar.getInstance();
             calendarFinish.setTime(sdf.parse(startDate));
             calendarFinish.add(Calendar.DATE, Integer.parseInt(duration));
-            Calendar calendarNow = Calendar.getInstance();
-            if(calendarNow.after(calendarFinish)) {
-                return false;
-            }
+            return calendarFinish;
         } catch (ParseException e) {
             Log.e("PARSE_FAIL", Log.getStackTraceString(e));
         }
-        return true;
+        return null;
     }
 
     private void removeSession(String sessionId) {
