@@ -15,6 +15,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
 
+import com.devbrackets.android.exomedia.EMVideoView;
+
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -60,6 +64,8 @@ public class DetailActivity extends AppCompatActivity {
      */
     private DetailPagerAdapter mPagerAdapter;
 
+    private static HashMap<Integer,ArrayList<EMVideoView>> allVideos;
+
     /**
      * Initializes and populates {@link DetailActivity#mPager}.
      *
@@ -69,7 +75,7 @@ public class DetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
-
+        allVideos = new HashMap<>();
         Map<String,String> partialPrimaryMap = new HashMap<>();
         partialPrimaryMap.put("TOUR_ID", FeedActivity.currentTourId);
         try {
@@ -92,9 +98,20 @@ public class DetailActivity extends AppCompatActivity {
                 super.onPageScrollStateChanged(state);
             }
 
+            //Pauses all videos of the current view and changes the cursor position
             @Override
             public void onPageSelected(int position) {
                 if (mCursor != null) {
+                    if(mCursor.getPosition() != -1 ) {
+                        Integer itemId = Integer.parseInt(mCursor.getString(mCursor.getColumnIndex(DatabaseConstants.POINT_ID)));
+                        if( itemId != -1 && !allVideos.isEmpty() ) {
+                            if( !allVideos.get(itemId).isEmpty() ) {
+                                for (EMVideoView video : allVideos.get(itemId)) {
+                                    video.pause();
+                                }
+                            }
+                        }
+                    }
                     mCursor.moveToPosition(position);
                 }
             }
@@ -170,6 +187,24 @@ public class DetailActivity extends AppCompatActivity {
         @Override
         public int getCount() {
             return (mCursor != null) ? mCursor.getCount() : 0;
+        }
+    }
+
+    /**
+     * Metho to add a video to a collection of videos associated with a DetailFragment's itemId.
+     * @param itemId itemId of the DetailFragment
+     * @param video a video from the collection of videos of the DetailFragment
+     */
+    public static void addToVideoCollection(Integer itemId,EMVideoView video){
+        if(allVideos.get(itemId) != null){
+            if(!allVideos.get(itemId).contains(video)){
+                allVideos.get(itemId).add(video);
+            }
+        }
+        else {
+            ArrayList<EMVideoView> arraylist = new ArrayList<>();
+            arraylist.add(video);
+            allVideos.put(itemId, arraylist);
         }
     }
 }
