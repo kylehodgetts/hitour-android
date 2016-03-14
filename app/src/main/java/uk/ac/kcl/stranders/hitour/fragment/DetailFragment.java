@@ -8,11 +8,9 @@ import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TITLE;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.URL;
 
-import android.app.Dialog;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
@@ -23,12 +21,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
-import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -119,6 +115,8 @@ public class DetailFragment extends Fragment {
      * Stores the current position of the videos
      */
     private long[] currentPositionArray;
+
+    public WindowManager windowManager;
 
     /**
      * Default empty required public constructor
@@ -277,14 +275,15 @@ public class DetailFragment extends Fragment {
                         final ImageView imageView = (ImageView) layoutDetail.findViewById(R.id.image);
                         final Bitmap bitmap = BitmapFactory.decodeFile(url);
                         imageView.setImageBitmap(bitmap);
-                        Log.d("_____HITOUR____", "WHat i need");
 
                         imageView.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
                                 FragmentManager fm = getActivity().getSupportFragmentManager();
-                                ImageDialogFragment imageDialogFragment = new ImageDialogFragment().newInstance(getArguments().describeContents(), bitmap);
+                                ImageDialogFragment imageDialogFragment = new ImageDialogFragment().newInstance(getArguments().describeContents(), bitmap, getActivity());
                                 imageDialogFragment.setStyle(DialogFragment.STYLE_NO_FRAME, R.style.MyDialog);
+
+
                                 imageDialogFragment.show(fm, "image_dialog_fragment");
                             }
                         });
