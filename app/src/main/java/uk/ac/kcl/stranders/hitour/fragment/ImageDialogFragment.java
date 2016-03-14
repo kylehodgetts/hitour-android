@@ -1,15 +1,21 @@
 package uk.ac.kcl.stranders.hitour.fragment;
 
+import android.app.Activity;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.PointF;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ImageView;
 
 import uk.ac.kcl.stranders.hitour.R;
@@ -44,12 +50,32 @@ public class ImageDialogFragment extends DialogFragment {
 
     }
 
-    public static ImageDialogFragment newInstance(int arg, Bitmap bmp) {
+    public static ImageDialogFragment newInstance(int arg, Bitmap bmp, Activity activity) {
         ImageDialogFragment frag = new ImageDialogFragment();
         Bundle args = new Bundle();
         args.putInt("count", arg);
         frag.setArguments(args);
-        frag.setBitmap(bmp);
+
+        DisplayMetrics displaymetrics = new DisplayMetrics();
+        activity.getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+        int displayHeight = displaymetrics.heightPixels;
+        int displayWidth = displaymetrics.widthPixels;
+
+        Log.d(TAG, displayHeight + " px high and " + displayWidth + " px wide");
+
+        int bmpWidth = bmp.getWidth();
+        int bmpHeight = bmp.getHeight();
+
+
+        Log.d(TAG, bmpHeight + " px high and " + bmpWidth + " px wide");
+        Bitmap bitmap;
+        if(bmp.getHeight() > displayHeight){
+        bitmap= Bitmap.createScaledBitmap(bmp, displayHeight*bmpWidth/bmpHeight, displayHeight, false);}
+        else {
+            bitmap = Bitmap.createScaledBitmap(bmp, displayWidth, displayWidth*bmpHeight/bmpWidth, false);
+        }
+
+        frag.setBitmap(bitmap);
         return frag;
     }
 
@@ -99,12 +125,23 @@ public class ImageDialogFragment extends DialogFragment {
                             matrix.postTranslate(event.getX() - start.x, event.getY()
                                     - start.y);
                         } else if (mode == ZOOM) {
+                            float[] f = new float[9];
+
                             float newDist = spacing(event);
-                            Log.d(TAG, "newDist=" + newDist);
                             if (newDist > 10f) {
                                 matrix.set(savedMatrix);
                                 float scale = newDist / oldDist;
                                 matrix.postScale(scale, scale, mid.x, mid.y);
+                            }
+
+                            matrix.getValues(f);
+                            float scaleX = f[Matrix.MSCALE_X];
+                            float scaleY = f[Matrix.MSCALE_Y];
+
+                            if(scaleX <= 0.7f) {
+                                matrix.postScale((0.7f)/scaleX, (0.7f)/scaleY, mid.x, mid.y);
+                            } else if(scaleX >= 2.5f) {
+                                matrix.postScale((2.5f)/scaleX, (2.5f)/scaleY, mid.x, mid.y);
                             }
                         }
                         break;
