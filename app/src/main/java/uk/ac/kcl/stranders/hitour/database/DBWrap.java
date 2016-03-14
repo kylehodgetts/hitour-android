@@ -41,7 +41,7 @@ public class  DBWrap {
     public Cursor getWholeByPrimary(String tableName,Map<String,String> primaryKeys) throws NotInSchemaException {
         TableSchema table = checkTable(tableName, primaryKeys, true);
 
-        return searchCursor(tableName, null, table.wherePrimary(), getSortedPrimary(primaryKeys, table), "1");
+        return searchCursor(tableName, null, table.wherePrimary(), getSortedPrimary(primaryKeys, table), null, "1");
     }
 
     /**
@@ -65,7 +65,33 @@ public class  DBWrap {
         }
         where = where.substring(0,where.length()-5);
 
-        return searchCursor(tableName, null, where, args, null);
+        return searchCursor(tableName, null, where, args, null, null);
+    }
+
+    /**
+     * Gets a whole row in a table where the primary keys match, this is used with composite primary key,
+     * where you want to supply only partial key and get the result sorted by values in a specific column
+     * in an ascending order
+     * @param tableName     The name of a table to fetch from
+     * @param primaryKeys   The map of primary keys for this table and their values
+     * @param column        The column by which values should be sorted
+     * @return              A cursor of the records
+     * @throws NotInSchemaException
+     */
+    public Cursor getWholeByPrimaryPartialSorted(String tableName,Map<String,String> primaryKeys, String column) throws NotInSchemaException{
+        checkTable(tableName, primaryKeys, false);
+
+        //Constructs a custom where
+        String where = "";
+        String[] args = new String[primaryKeys.size()];
+        int i = 0;
+        for (Map.Entry<String, String> stringStringEntry : primaryKeys.entrySet()) {
+            where += stringStringEntry.getKey()+"=? AND ";
+            args[i++] = stringStringEntry.getValue();
+        }
+        where = where.substring(0,where.length()-5);
+
+        return searchCursor(tableName, null, where, args, column + " ASC", null);
     }
 
     /**
@@ -79,7 +105,7 @@ public class  DBWrap {
     public Cursor getColumnByPrimary(String tableName,Map<String,String> primaryKeys, String column) throws NotInSchemaException {
         TableSchema table = checkTable(tableName, primaryKeys, true);
 
-        return searchCursor(tableName, new String[]{column}, table.wherePrimary(), getSortedPrimary(primaryKeys, table), "1");
+        return searchCursor(tableName, new String[]{column}, table.wherePrimary(), getSortedPrimary(primaryKeys, table), null, "1");
     }
 
     /**
@@ -93,7 +119,7 @@ public class  DBWrap {
         if(!schema.hasTable(tableName))
             throw new NotInSchemaException();
 
-        return searchCursor(tableName, new String[]{column}, null, null, null);
+        return searchCursor(tableName, new String[]{column}, null, null, null, null);
     }
 
     /**
@@ -103,7 +129,7 @@ public class  DBWrap {
      * @throws NotInSchemaException In case that the request was malformed
      */
     public Cursor getAll(String tableName) throws NotInSchemaException {
-        return searchCursor(tableName, null, null, null, null);
+        return searchCursor(tableName, null, null, null, null, null);
     }
 
     /**
@@ -117,7 +143,7 @@ public class  DBWrap {
      * @return  A list of Map with all column->value that were returned
      * @throws NotInSchemaException In case that the request was malformed
      */
-    private Cursor searchCursor(String tableName, String[] columns, String selection, String[] args, String limit) throws NotInSchemaException{
+    private Cursor searchCursor(String tableName, String[] columns, String selection, String[] args, String orderBy, String limit) throws NotInSchemaException{
         //Table exists
         if (!schema.hasTable(tableName))
             throw new NotInSchemaException();
@@ -132,7 +158,7 @@ public class  DBWrap {
         //Getting db
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         //querying
-        return db.query(true, tableName, columns, selection, args, null, null, null, limit);
+        return db.query(true, tableName, columns, selection, args, null, null, orderBy, limit);
     }
 
     /**
@@ -159,6 +185,58 @@ public class  DBWrap {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         db.insertWithOnConflict(tableName, null, content, SQLiteDatabase.CONFLICT_REPLACE);
 
+    }
+
+    /**
+     * Deletes any entries in the given table in the database that match the conditions
+     * @param columns       The values that should hold true for the columns in this table
+     * @param primaryKeys   The values that should hold true for the primary keys in this table for this entry
+     * @param tableName     The name of the table from which the entries should be deleted
+     * @throws NotInSchemaException In case that the request was malformed, ie does not match the schema
+     */
+    public void delete(Map<String,String> columns, Map<String,String> primaryKeys, String tableName) throws NotInSchemaException {
+        TableSchema table;
+        String whereClause = "";
+        String[] whereArgs = new String[columns.size() + primaryKeys.size()];
+        int i = 0;
+        if ((table = schema.getTable(tableName)) == null || (columns.size() == 0 && primaryKeys.size() == 0))
+            throw new NotInSchemaException();
+
+        for (Map.Entry<String,String> entry : columns.entrySet()) {
+            if (!table.hasColumn(entry.getKey()))
+                throw new NotInSchemaException();
+            whereClause = whereClause.concat(entry.getKey() + "=? and ");
+            whereArgs[i] = entry.getValue();
+            i++;
+        }
+
+        for (Map.Entry<String,String> entry : primaryKeys.entrySet()) {
+            if (!table.hasPrimaryKey(entry.getKey()))
+                throw new NotInSchemaException();
+            whereClause = whereClause.concat(entry.getKey() + "=? and ");
+            whereArgs[i] = entry.getValue();
+            i++;
+        }
+
+        // Removes last occurrence of " and "
+        whereClause = whereClause.substring(0, whereClause.length() - 5);
+
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        db.delete(tableName, whereClause, whereArgs);
+    }
+
+    /**
+     * Deletes all entries in the given table in the database
+     * @param tableName     The name of the table from which the entries should be deleted
+     * @throws NotInSchemaException In case that the request was malformed, ie does not match the schema
+     */
+    public void deleteAll(String tableName) throws NotInSchemaException {
+
+        if (schema.getTable(tableName) == null)
+            throw new NotInSchemaException();
+
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        db.delete(tableName, null, null);
     }
 
     /**
@@ -311,8 +389,7 @@ public class  DBWrap {
         String selection = DatabaseConstants.UNLOCK + " = ? AND " + DatabaseConstants.TOUR_ID + "= ?" ;
         String[] selectionArgs = { isUnlocked, tourId };
 
-        // TODO: THE SORT ORDER MAY BE NOT CONSISTENT WITH THE CURRENT IMPLEMENTATION (is it sorted by id?)
-        String sortOrder = DatabaseConstants.POINT_ID + " ASC";
+        String sortOrder = DatabaseConstants.RANK + " ASC";
 
         Cursor cursor = db.query(
                 DatabaseConstants.POINT_TOUR_TABLE,       // The table to query
