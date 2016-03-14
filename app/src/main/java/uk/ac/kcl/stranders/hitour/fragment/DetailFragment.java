@@ -23,8 +23,6 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -42,7 +40,6 @@ import java.util.Map;
 import uk.ac.kcl.stranders.hitour.R;
 import uk.ac.kcl.stranders.hitour.activity.FeedActivity;
 import uk.ac.kcl.stranders.hitour.database.NotInSchemaException;
-import uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants;
 
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.AUDIENCE_ID;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.DATA_ID;
@@ -115,8 +112,6 @@ public class DetailFragment extends Fragment {
      * Stores the current position of the videos
      */
     private long[] currentPositionArray;
-
-    public WindowManager windowManager;
 
     /**
      * Default empty required public constructor

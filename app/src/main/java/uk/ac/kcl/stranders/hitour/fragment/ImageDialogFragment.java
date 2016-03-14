@@ -1,21 +1,18 @@
 package uk.ac.kcl.stranders.hitour.fragment;
 
 import android.app.Activity;
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.PointF;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.ImageView;
 
 import uk.ac.kcl.stranders.hitour.R;
@@ -24,8 +21,6 @@ public class ImageDialogFragment extends DialogFragment {
 
     private ImageView mImageView;
     private Bitmap mBitmap;
-
-    private static final String TAG = "____HITOUR___";
 
     // These matrices will be used to move and zoom image
     Matrix matrix = new Matrix();
@@ -41,7 +36,6 @@ public class ImageDialogFragment extends DialogFragment {
     PointF start = new PointF();
     PointF mid = new PointF();
     float oldDist = 1f;
-    String savedItemClicked;
 
     /**
      * Empty constructor required
@@ -50,24 +44,30 @@ public class ImageDialogFragment extends DialogFragment {
 
     }
 
+    /**
+     * Get a new intance of the dialog fragment with an image in it
+     * @param arg argument for the bundle
+     * @param bmp {@link Bitmap} image to be put in the dialog
+     * @param activity {@link Activity} get the parent activity
+     * @return the fragment to be shown
+     */
     public static ImageDialogFragment newInstance(int arg, Bitmap bmp, Activity activity) {
         ImageDialogFragment frag = new ImageDialogFragment();
         Bundle args = new Bundle();
         args.putInt("count", arg);
         frag.setArguments(args);
 
+        // Get width and height of device
         DisplayMetrics displaymetrics = new DisplayMetrics();
         activity.getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
         int displayHeight = displaymetrics.heightPixels;
         int displayWidth = displaymetrics.widthPixels;
 
-        Log.d(TAG, displayHeight + " px high and " + displayWidth + " px wide");
-
+        // Get width and height of image
         int bmpWidth = bmp.getWidth();
         int bmpHeight = bmp.getHeight();
 
-
-        Log.d(TAG, bmpHeight + " px high and " + bmpWidth + " px wide");
+        // Resize the image to full screen
         Bitmap bitmap;
         if(bmp.getHeight() > displayHeight){
         bitmap= Bitmap.createScaledBitmap(bmp, displayHeight*bmpWidth/bmpHeight, displayHeight, false);}
@@ -79,12 +79,16 @@ public class ImageDialogFragment extends DialogFragment {
         return frag;
     }
 
+    /**
+     * Set the image to work on
+     * @param bmp {@link Bitmap} the full screen image
+     */
     public void setBitmap(Bitmap bmp){
         mBitmap = bmp;
     }
-
+    
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.image_dialog_fragment, container, false);
 
         mImageView = (ImageView)view.findViewById(R.id.image_dialog);
@@ -94,30 +98,25 @@ public class ImageDialogFragment extends DialogFragment {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 ImageView view = (ImageView) v;
-                dumpEvent(event);
 
                 // Handle touch events here...
                 switch (event.getAction() & MotionEvent.ACTION_MASK) {
                     case MotionEvent.ACTION_DOWN:
                         savedMatrix.set(matrix);
                         start.set(event.getX(), event.getY());
-                        Log.d(TAG, "mode=DRAG");
                         mode = DRAG;
                         break;
                     case MotionEvent.ACTION_POINTER_DOWN:
                         oldDist = spacing(event);
-                        Log.d(TAG, "oldDist=" + oldDist);
                         if (oldDist > 10f) {
                             savedMatrix.set(matrix);
                             midPoint(mid, event);
                             mode = ZOOM;
-                            Log.d(TAG, "mode=ZOOM");
                         }
                         break;
                     case MotionEvent.ACTION_UP:
                     case MotionEvent.ACTION_POINTER_UP:
                         mode = NONE;
-                        Log.d(TAG, "mode=NONE");
                         break;
                     case MotionEvent.ACTION_MOVE:
                         if (mode == DRAG) {
@@ -146,7 +145,7 @@ public class ImageDialogFragment extends DialogFragment {
                         }
                         break;
                 }
-
+                limitDrag(matrix, view, view.getWidth(), view.getHeight());
                 view.setImageMatrix(matrix);
                 return true;
             }
@@ -155,43 +154,84 @@ public class ImageDialogFragment extends DialogFragment {
         return view;
     }
 
-    private void dumpEvent(MotionEvent event) {
-        String names[] = { "DOWN", "UP", "MOVE", "CANCEL", "OUTSIDE",
-                "POINTER_DOWN", "POINTER_UP", "7?", "8?", "9?" };
-        StringBuilder sb = new StringBuilder();
-        int action = event.getAction();
-        int actionCode = action & MotionEvent.ACTION_MASK;
-        sb.append("event ACTION_").append(names[actionCode]);
-        if (actionCode == MotionEvent.ACTION_POINTER_DOWN
-                || actionCode == MotionEvent.ACTION_POINTER_UP) {
-            sb.append("(pid ").append(
-                    action >> MotionEvent.ACTION_POINTER_INDEX_SHIFT);
-            sb.append(")");
-        }
-        sb.append("[");
-        for (int i = 0; i < event.getPointerCount(); i++) {
-            sb.append("#").append(i);
-            sb.append("(pid ").append(event.getPointerId(i));
-            sb.append(")=").append((int) event.getX(i));
-            sb.append(",").append((int) event.getY(i));
-            if (i + 1 < event.getPointerCount())
-                sb.append(";");
-        }
-        sb.append("]");
-        Log.d(TAG, sb.toString());
-    }
-
-    /** Determine the space between the first two fingers */
+    /**
+     * Determine the space between the first two fingers
+     * @param event {@link MotionEvent} type of event
+     * @return distance between the first two fingers
+     */
     private float spacing(MotionEvent event) {
         float x = event.getX(0) - event.getX(1);
         float y = event.getY(0) - event.getY(1);
         return (float)Math.sqrt(x * x + y * y);
     }
 
-    /** Calculate the mid point of the first two fingers */
+    /**
+     * Calculate the mid point of the first two fingers
+     * @param point {@link PointF} point of fingers
+     * @param event {@link MotionEvent} motion event that makes it zoom
+     */
     private void midPoint(PointF point, MotionEvent event) {
         float x = event.getX(0) + event.getX(1);
         float y = event.getY(0) + event.getY(1);
         point.set(x / 2, y / 2);
+    }
+
+    /**
+     * Limit how much to drag the image
+     * @param m {@link Matrix} matrix of the current position of image
+     * @param view {@link ImageView} the current image
+     * @param imageWidth width of current image
+     * @param imageHeight height of image
+     */
+    private void limitDrag(Matrix m, ImageView view, int imageWidth, int imageHeight) {
+        float[] values = new float[9];
+        m.getValues(values);
+        float[] orig = new float[] {0,0, imageWidth, imageHeight};
+        float[] trans = new float[4];
+        m.mapPoints(trans, orig);
+
+        float transLeft = trans[0];
+        float transTop = trans[1];
+        float transRight = trans[2];
+        float transBottom = trans[3];
+        float transWidth = transRight - transLeft;
+        float transHeight = transBottom - transTop;
+
+        float xOffset = 0;
+        if (transWidth > view.getWidth()) {
+            if (transLeft > 0) {
+                xOffset = -transLeft;
+            } else if (transRight < view.getWidth()) {
+                xOffset = view.getWidth() - transRight;
+            }
+        } else {
+            if (transLeft < 0) {
+                xOffset = -transLeft;
+            } else if (transRight > view.getWidth()) {
+                xOffset = -(transRight - view.getWidth());
+            }
+        }
+
+        float yOffset = 0;
+        if (transHeight > view.getHeight()) {
+            if (transTop > 0) {
+                yOffset = -transTop;
+            } else if (transBottom < view.getHeight()) {
+                yOffset = view.getHeight() - transBottom;
+            }
+        } else {
+            if (transTop < 0) {
+                yOffset = -transTop;
+            } else if (transBottom > view.getHeight()) {
+                yOffset = -(transBottom - view.getHeight());
+            }
+        }
+
+        float transX = values[Matrix.MTRANS_X];
+        float transY = values[Matrix.MTRANS_Y];
+
+        values[Matrix.MTRANS_X] = transX + xOffset;
+        values[Matrix.MTRANS_Y] = transY + yOffset;
+        m.setValues(values);
     }
 }
