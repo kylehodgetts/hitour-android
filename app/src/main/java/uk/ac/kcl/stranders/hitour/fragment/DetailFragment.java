@@ -1,17 +1,34 @@
 package uk.ac.kcl.stranders.hitour.fragment;
 
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.AUDIENCE_ID;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.DATA_ID;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.DESCRIPTION;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.NAME;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_ID;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TITLE;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.URL;
+
+import android.app.Dialog;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -257,9 +274,21 @@ public class DetailFragment extends Fragment {
                     StringBuilder text = new StringBuilder();
                     if (fileExtension.matches("jpg|jpeg|png")) {
                         layoutDetail = (LinearLayout) inflater.inflate(R.layout.image_detail, container, false);
-                        ImageView imageView = (ImageView) layoutDetail.findViewById(R.id.image);
-                        Bitmap bitmap = BitmapFactory.decodeFile(url);
+                        final ImageView imageView = (ImageView) layoutDetail.findViewById(R.id.image);
+                        final Bitmap bitmap = BitmapFactory.decodeFile(url);
                         imageView.setImageBitmap(bitmap);
+                        Log.d("_____HITOUR____", "WHat i need");
+
+                        imageView.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                FragmentManager fm = getActivity().getSupportFragmentManager();
+                                ImageDialogFragment imageDialogFragment = new ImageDialogFragment();
+                                imageDialogFragment.setImageView(imageView);
+                                imageDialogFragment.show(fm, "image_dialog_fragment");
+                            }
+                        });
+
                     } else if (fileExtension.matches("mp4")) {
                         layoutDetail = (LinearLayout) inflater.inflate(R.layout.video_detail, container, false);
                         addVideo(savedInstanceState, layoutDetail, i, url);
@@ -400,5 +429,4 @@ public class DetailFragment extends Fragment {
         }
         return false;
     }
-
 }
