@@ -79,6 +79,7 @@ import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_TABLE;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_TOUR_TABLE;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.RANK;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.QUIZ_URL;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.SESSION_ID;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.SESSION_TABLE;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.START_DATE;
@@ -367,6 +368,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         Map<String,String> tourColumnsMap = new HashMap<>();
         tourColumnsMap.put("NAME", tour.getName());
         tourColumnsMap.put("AUDIENCE_ID", tour.getAudienceId().toString());
+        tourColumnsMap.put(QUIZ_URL, tour.getQuizUrl());
         Map<String, String> tourPrimaryKeysMap = new HashMap<>();
         tourPrimaryKeysMap.put("TOUR_ID", tour.getId().toString());
         try {
@@ -479,13 +481,15 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         }
 
         updateMenu();
+
         currentTourId = tourSession.getTourId().toString();
         try {
-            Cursor tourCursor = database.getAll("TOUR");
-            for(int i = 0; i < tourCursor.getCount(); i++) {
-                tourCursor.moveToPosition(i);
-                if(tourCursor.getString(tourCursor.getColumnIndex(DatabaseConstants.TOUR_ID)).equals(currentTourId)) {
+            Cursor sessionCursor = database.getAll(SESSION_TABLE);
+            for(int i = 0; i < sessionCursor.getCount(); i++) {
+                sessionCursor.moveToPosition(i);
+                if(sessionCursor.getString(sessionCursor.getColumnIndex(DatabaseConstants.TOUR_ID)).equals(currentTourId)) {
                     mMenu.getItem(i).setChecked(true);
+                    break;
                 }
             }
         } catch (NotInSchemaException e) {
