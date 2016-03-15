@@ -101,9 +101,9 @@ public class DetailActivity extends AppCompatActivity {
             //Pauses all videos of the current view and changes the cursor position
             @Override
             public void onPageSelected(int position) {
-                if (mCursor != null) {
+                if (mCursor != null ) {
                     Integer itemId = Integer.parseInt(mCursor.getString(mCursor.getColumnIndex(DatabaseConstants.POINT_ID)));
-                    if (pointVideoCollection(itemId,allVideos) != null){
+                    if (pointVideoCollection(itemId,allVideos) != null && allVideos != null){
                         DetailFragment.pauseAll(pointVideoCollection(itemId,allVideos));
                     }
                     mCursor.moveToPosition(position);
@@ -208,11 +208,13 @@ public class DetailActivity extends AppCompatActivity {
      * @param hashMap of key point and of a value arraylist
      * @return ArrayList of videos belonging to a specific point
      */
-    private ArrayList<EMVideoView> pointVideoCollection (Integer itemId,HashMap<Integer,ArrayList<EMVideoView>> hashMap) {
+    private ArrayList<EMVideoView> pointVideoCollection(Integer itemId,HashMap<Integer,ArrayList<EMVideoView>> hashMap) {
         if (mCursor.getPosition() != -1) {
-            if (itemId != -1 && !hashMap.isEmpty()) {
-                if (!hashMap.get(itemId).isEmpty()) {
-                    return hashMap.get(itemId);
+            if (itemId != -1) {
+                if(hashMap.get(itemId) != null) {
+                    if (!hashMap.get(itemId).isEmpty()) {
+                        return hashMap.get(itemId);
+                    }
                 }
             }
         }
