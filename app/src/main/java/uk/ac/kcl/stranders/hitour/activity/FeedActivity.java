@@ -3,6 +3,7 @@ package uk.ac.kcl.stranders.hitour.activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Typeface;
@@ -27,6 +28,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.TextView;
 
 import com.google.zxing.integration.android.IntentIntegrator;
@@ -196,39 +198,20 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         }
 
         try {
-            Cursor sessionCursor = database.getAll(SESSION_TABLE);
+            final Cursor sessionCursor = database.getAll(SESSION_TABLE);
             if(sessionCursor.getCount() > 0) {
                 sessionCursor.moveToFirst();
                 populateFeedAdapter(sessionCursor.getString(sessionCursor.getColumnIndex(TOUR_ID)));
+                mDrawerLayout.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        updateHeader(sessionCursor, 0);
+                    }
+                });
             }
         } catch (NotInSchemaException e) {
-            Log.e("DATABASE_FAIL",Log.getStackTraceString(e));
+            Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
         }
-
-        ActionBarDrawerToggle drawerToggle = new ActionBarDrawerToggle(
-                this,
-                mDrawerLayout,
-                toolbar,
-                R.string.open_drawer,
-                R.string.close_drawer) {
-            @Override
-            public void onDrawerStateChanged(int newState) {
-                if(newState == DrawerLayout.STATE_SETTLING) {
-                    try {
-                        Cursor sessionCursor = database.getAll(SESSION_TABLE);
-                        for (int i = 0; i < sessionCursor.getCount(); i++) {
-                            sessionCursor.moveToPosition(i);
-                            if (sessionCursor.getString(sessionCursor.getColumnIndex(TOUR_ID)).equals(currentTourId)) {
-                                updateHeader(sessionCursor, i);
-                            }
-                        }
-                    } catch (NotInSchemaException e) {
-                        Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
-                    }
-                }
-            }
-        };
-        mDrawerLayout.setDrawerListener(drawerToggle);
 
         navigationView.setNavigationItemSelectedListener(
                 new NavigationView.OnNavigationItemSelectedListener() {
@@ -249,6 +232,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
                                     sessionCursor.moveToPosition(item.getItemId());
                                     if (!sessionCursor.getString(sessionCursor.getColumnIndex(TOUR_ID)).equals(currentTourId)) {
                                         populateFeedAdapter(sessionCursor.getString(sessionCursor.getColumnIndex(TOUR_ID)));
+                                        updateHeader(sessionCursor, item.getItemId());
                                     }
                                 }
                             } catch (NotInSchemaException e) {
@@ -298,7 +282,9 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
                 // Instructions for when a tour is entered
                 if(Utilities.isNetworkAvailable(this)) {
                     // Set ProgressDialog so user knows data is being downloaded
+                    setRequestedOrientation(getResources().getConfiguration().orientation);
                     progressDialog = new ProgressDialog(this);
+                    progressDialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                     progressDialog.setMessage("Downloading data");
                     progressDialog.show();
                     progressDialog.setCancelable(false);
@@ -470,6 +456,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
 
         // Download all data that us not already on the device
         downloadItemCount = urlArrayList.size();
+        progressDialog.setMessage("Downloading data: 0 of " + downloadItemCount + " files downloaded");
         for(String url : urlArrayList) {
             try {
                 DownloadToStorage downloadToStorage = new DownloadToStorage(url);
@@ -489,6 +476,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
                 sessionCursor.moveToPosition(i);
                 if(sessionCursor.getString(sessionCursor.getColumnIndex(DatabaseConstants.TOUR_ID)).equals(currentTourId)) {
                     mMenu.getItem(i).setChecked(true);
+                    updateHeader(sessionCursor, i);
                     break;
                 }
             }
@@ -643,6 +631,12 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
 
     private void onDownloadFinish() {
         downloadPosition++;
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                progressDialog.setMessage("Downloading data: " + downloadPosition + " of " + downloadItemCount + " files downloaded");
+            }
+        });
         if(downloadPosition == downloadItemCount) {
             progressDialog.dismiss();
             downloadItemCount = 0;
@@ -651,6 +645,8 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
                 @Override
                 public void run() {
                     populateFeedAdapter(currentTourId);
+                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER);
+                    progressDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                 }
             });
         }
