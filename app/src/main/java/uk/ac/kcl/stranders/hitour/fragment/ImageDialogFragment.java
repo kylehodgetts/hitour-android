@@ -1,14 +1,13 @@
 package uk.ac.kcl.stranders.hitour.fragment;
 
 import android.app.Activity;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.PointF;
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -20,7 +19,7 @@ import uk.ac.kcl.stranders.hitour.R;
 public class ImageDialogFragment extends DialogFragment {
 
     private ImageView mImageView;
-    private Bitmap mBitmap;
+    private static Bitmap mBitmap;
 
     // These matrices will be used to move and zoom image
     Matrix matrix = new Matrix();
@@ -37,6 +36,16 @@ public class ImageDialogFragment extends DialogFragment {
     PointF mid = new PointF();
     float oldDist = 1f;
 
+    // Remember some things for the full screen functionality
+    int LANDSCAPE = Configuration.ORIENTATION_LANDSCAPE;
+    int PORTRAIT = Configuration.ORIENTATION_PORTRAIT;
+    static int orient = 0;
+    static DisplayMetrics displaymetrics;
+    static int displayHeight;
+    static int displayWidth;
+    static ImageDialogFragment frag;
+    static Activity act;
+
     /**
      * Empty constructor required
      */
@@ -46,52 +55,52 @@ public class ImageDialogFragment extends DialogFragment {
 
     /**
      * Get a new intance of the dialog fragment with an image in it
-     * @param arg argument for the bundle
-     * @param bmp {@link Bitmap} image to be put in the dialog
+     *
+     * @param arg      argument for the bundle
+     * @param bmp      {@link Bitmap} image to be put in the dialog
      * @param activity {@link Activity} get the parent activity
      * @return the fragment to be shown
      */
     public static ImageDialogFragment newInstance(int arg, Bitmap bmp, Activity activity) {
-        ImageDialogFragment frag = new ImageDialogFragment();
+        frag = new ImageDialogFragment();
         Bundle args = new Bundle();
         args.putInt("count", arg);
         frag.setArguments(args);
 
         // Get width and height of device
-        DisplayMetrics displaymetrics = new DisplayMetrics();
-        activity.getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
-        int displayHeight = displaymetrics.heightPixels;
-        int displayWidth = displaymetrics.widthPixels;
-
-        // Get width and height of image
-        int bmpWidth = bmp.getWidth();
-        int bmpHeight = bmp.getHeight();
-
-        // Resize the image to full screen
-        Bitmap bitmap;
-        if(bmp.getHeight() > displayHeight){
-        bitmap= Bitmap.createScaledBitmap(bmp, displayHeight*bmpWidth/bmpHeight, displayHeight, false);}
-        else {
-            bitmap = Bitmap.createScaledBitmap(bmp, displayWidth, displayWidth*bmpHeight/bmpWidth, false);
-        }
-
-        frag.setBitmap(bitmap);
+        act = activity;
+        displaymetrics = new DisplayMetrics();
+        frag.setBitmap(bmp);
+        fullScreen();
         return frag;
     }
 
     /**
      * Set the image to work on
+     *
      * @param bmp {@link Bitmap} the full screen image
      */
-    public void setBitmap(Bitmap bmp){
+    public void setBitmap(Bitmap bmp) {
         mBitmap = bmp;
     }
-    
+
     @Override
     public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.image_dialog_fragment, container, false);
 
-        mImageView = (ImageView)view.findViewById(R.id.image_dialog);
+        mImageView = (ImageView) view.findViewById(R.id.image_dialog);
+        if (orient != getResources().getConfiguration().orientation) {
+            if (orient== LANDSCAPE) {
+                orient = PORTRAIT;
+                fullScreen();
+            } else if(orient == PORTRAIT) {
+                orient = LANDSCAPE;
+                fullScreen();
+            } else {
+                orient = getResources().getConfiguration().orientation;
+            }
+        }
+
         mImageView.setImageBitmap(mBitmap);
 
         mImageView.setOnTouchListener(new View.OnTouchListener() {
@@ -137,10 +146,10 @@ public class ImageDialogFragment extends DialogFragment {
                             float scaleX = f[Matrix.MSCALE_X];
                             float scaleY = f[Matrix.MSCALE_Y];
 
-                            if(scaleX <= 0.7f) {
-                                matrix.postScale((0.7f)/scaleX, (0.7f)/scaleY, mid.x, mid.y);
-                            } else if(scaleX >= 2.5f) {
-                                matrix.postScale((2.5f)/scaleX, (2.5f)/scaleY, mid.x, mid.y);
+                            if (scaleX <= 0.7f) {
+                                matrix.postScale((0.7f) / scaleX, (0.7f) / scaleY, mid.x, mid.y);
+                            } else if (scaleX >= 2.5f) {
+                                matrix.postScale((2.5f) / scaleX, (2.5f) / scaleY, mid.x, mid.y);
                             }
                         }
                         break;
@@ -156,17 +165,19 @@ public class ImageDialogFragment extends DialogFragment {
 
     /**
      * Determine the space between the first two fingers
+     *
      * @param event {@link MotionEvent} type of event
      * @return distance between the first two fingers
      */
     private float spacing(MotionEvent event) {
         float x = event.getX(0) - event.getX(1);
         float y = event.getY(0) - event.getY(1);
-        return (float)Math.sqrt(x * x + y * y);
+        return (float) Math.sqrt(x * x + y * y);
     }
 
     /**
      * Calculate the mid point of the first two fingers
+     *
      * @param point {@link PointF} point of fingers
      * @param event {@link MotionEvent} motion event that makes it zoom
      */
@@ -178,15 +189,16 @@ public class ImageDialogFragment extends DialogFragment {
 
     /**
      * Limit how much to drag the image
-     * @param m {@link Matrix} matrix of the current position of image
-     * @param view {@link ImageView} the current image
-     * @param imageWidth width of current image
+     *
+     * @param m           {@link Matrix} matrix of the current position of image
+     * @param view        {@link ImageView} the current image
+     * @param imageWidth  width of current image
      * @param imageHeight height of image
      */
     private void limitDrag(Matrix m, ImageView view, int imageWidth, int imageHeight) {
         float[] values = new float[9];
         m.getValues(values);
-        float[] orig = new float[] {0,0, imageWidth, imageHeight};
+        float[] orig = new float[]{0, 0, imageWidth, imageHeight};
         float[] trans = new float[4];
         m.mapPoints(trans, orig);
 
@@ -233,5 +245,28 @@ public class ImageDialogFragment extends DialogFragment {
         values[Matrix.MTRANS_X] = transX + xOffset;
         values[Matrix.MTRANS_Y] = transY + yOffset;
         m.setValues(values);
+    }
+
+    /**
+     * Method that scales the image as wide or as high as the display
+     */
+    private static void fullScreen() {
+        act.getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+        displayHeight = displaymetrics.heightPixels;
+        displayWidth = displaymetrics.widthPixels;
+
+        // Get width and height of image
+        int bmpWidth = mBitmap.getWidth();
+        int bmpHeight = mBitmap.getHeight();
+
+        // Resize the image to full screen
+        Bitmap bitmap;
+        if (mBitmap.getHeight() > displayHeight || displayHeight < displayWidth) {
+            bitmap = Bitmap.createScaledBitmap(mBitmap, displayHeight * bmpWidth / bmpHeight, displayHeight, false);
+        } else {
+            bitmap = Bitmap.createScaledBitmap(mBitmap, displayWidth, displayWidth * bmpHeight / bmpWidth, false);
+        }
+
+        frag.setBitmap(bitmap);
     }
 }
