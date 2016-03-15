@@ -102,7 +102,7 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
-        app:headerLayout="@layout/navheader"
+        app:headerLayout="@layout/nav_header"
         app:itemTextColor="@color/colorDrawerText"
         app:menu="@menu/menu_navigation" />
 

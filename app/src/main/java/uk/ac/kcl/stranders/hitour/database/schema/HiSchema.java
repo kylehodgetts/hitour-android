@@ -27,6 +27,7 @@ public class HiSchema extends DatabaseSchema {
         session.addValue(START_DATE, DataType.Text);
         session.addValue(DURATION, DataType.Text);
         session.addValue(TOUR_ID, DataType.Text);
+        session.addValue(NAME, DataType.Text);
         addTable(session);
 
         TableSchema audience = new TableSchema(AUDIENCE_ID,AUDIENCE_TABLE);
