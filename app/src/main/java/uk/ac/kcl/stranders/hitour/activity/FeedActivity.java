@@ -616,6 +616,10 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         Map<String,String> partialPrimaryMap = new HashMap<>();
         partialPrimaryMap.put("TOUR_ID", tourId);
         try {
+            // Clear the fragment on change so point from previous tour does not show on tablet
+            if(currentFeedAdapter != null)
+                currentFeedAdapter.clearFragment();
+
             Cursor feedCursor = database.getWholeByPrimaryPartialSorted(POINT_TOUR_TABLE, partialPrimaryMap, RANK);
             FeedAdapter adapter = new FeedAdapter(feedCursor, this);
             mFeed.setAdapter(adapter);

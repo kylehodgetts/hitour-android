@@ -56,6 +56,11 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
     private HashMap<Pair<Integer, Integer>, View> views;
 
     /**
+     * Stores the current {@link DetailFragment} that is being shown
+     */
+    private DetailFragment fragment;
+
+    /**
      * Public constructor.
      *
      * @param cursor  {@link Cursor}
@@ -92,7 +97,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
                         bundle.putString(DetailFragment.ARG_ITEM_POSITION, "" + viewHolder.point_id);
                         // Start a new activity on a phone or replace a detail fragment on tablets if unlocked.
 
-                        DetailFragment fragment = new DetailFragment();
+                        fragment = new DetailFragment();
                         fragment.setArguments(bundle);
 
                         ((AppCompatActivity) mContext).getSupportFragmentManager()
@@ -233,6 +238,11 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
     private View getView(Integer point_id, Integer tour_id) {
 
         return views.get(new Pair<>(point_id, tour_id));
+    }
+
+    public void clearFragment() {
+        if(fragment != null)
+            ((AppCompatActivity) mContext).getSupportFragmentManager().beginTransaction().remove(fragment).commit();
     }
 
 
