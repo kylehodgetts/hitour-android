@@ -406,4 +406,10 @@ public class DetailFragment extends Fragment {
         return false;
     }
 
+    public static  void pauseAll(ArrayList<EMVideoView> collectionOfVideos){
+        for (EMVideoView video : collectionOfVideos) {
+            video.pause();
+        }
+    }
+
 }

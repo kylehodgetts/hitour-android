@@ -102,15 +102,9 @@ public class DetailActivity extends AppCompatActivity {
             @Override
             public void onPageSelected(int position) {
                 if (mCursor != null) {
-                    if(mCursor.getPosition() != -1 ) {
-                        Integer itemId = Integer.parseInt(mCursor.getString(mCursor.getColumnIndex(DatabaseConstants.POINT_ID)));
-                        if( itemId != -1 && !allVideos.isEmpty() ) {
-                            if( !allVideos.get(itemId).isEmpty() ) {
-                                for (EMVideoView video : allVideos.get(itemId)) {
-                                    video.pause();
-                                }
-                            }
-                        }
+                    Integer itemId = Integer.parseInt(mCursor.getString(mCursor.getColumnIndex(DatabaseConstants.POINT_ID)));
+                    if (pointVideoCollection(itemId,allVideos) != null){
+                        DetailFragment.pauseAll(pointVideoCollection(itemId,allVideos));
                     }
                     mCursor.moveToPosition(position);
                 }
@@ -191,7 +185,7 @@ public class DetailActivity extends AppCompatActivity {
     }
 
     /**
-     * Metho to add a video to a collection of videos associated with a DetailFragment's itemId.
+     * Method to add a video to a collection of videos associated with a DetailFragment's itemId.
      * @param itemId itemId of the DetailFragment
      * @param video a video from the collection of videos of the DetailFragment
      */
@@ -207,4 +201,22 @@ public class DetailActivity extends AppCompatActivity {
             allVideos.put(itemId, arraylist);
         }
     }
+
+    /**
+     * Method that returns the videos associated to a particular point
+     * @param itemId point ID
+     * @param hashMap of key point and of a value arraylist
+     * @return ArrayList of videos belonging to a specific point
+     */
+    private ArrayList<EMVideoView> pointVideoCollection (Integer itemId,HashMap<Integer,ArrayList<EMVideoView>> hashMap) {
+        if (mCursor.getPosition() != -1) {
+            if (itemId != -1 && !hashMap.isEmpty()) {
+                if (!hashMap.get(itemId).isEmpty()) {
+                    return hashMap.get(itemId);
+                }
+            }
+        }
+        return null;
+    }
+
 }
