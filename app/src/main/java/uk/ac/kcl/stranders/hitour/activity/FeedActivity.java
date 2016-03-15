@@ -89,6 +89,11 @@ import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TOUR_
 public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.CallbackRetrofit {
 
     /**
+     * Static String to name to store in a bundle the currently selected tour's id
+     */
+    public static final String CURRENT_TOUR_ID = "CURRENT_TOUR_ID";
+
+    /**
      * The list of all available points.
      */
     private RecyclerView mFeed;
@@ -147,6 +152,13 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if(savedInstanceState != null) {
+            if(savedInstanceState.containsKey(CURRENT_TOUR_ID)) {
+                currentTourId = savedInstanceState.getString(CURRENT_TOUR_ID);
+            }
+        }
+
         database = new DBWrap(this, new HiSchema(1));
         setContentView(R.layout.activity_feed);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -182,14 +194,18 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
 
         mFeed.setLayoutManager(mLayoutManager);
 
-        try {
-            Cursor tourCursor = database.getAll("TOUR");
-            if(tourCursor.getCount() > 0) {
-                tourCursor.moveToFirst();
-                populateFeedAdapter(tourCursor.getString(tourCursor.getColumnIndex(TOUR_ID)));
+        if(currentTourId != null) {
+            populateFeedAdapter(currentTourId);
+        } else {
+            try {
+                Cursor tourCursor = database.getAll("TOUR");
+                if (tourCursor.getCount() > 0) {
+                    tourCursor.moveToFirst();
+                    populateFeedAdapter(tourCursor.getString(tourCursor.getColumnIndex(TOUR_ID)));
+                }
+            } catch (NotInSchemaException e) {
+                Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
             }
-        } catch (NotInSchemaException e) {
-            Log.e("DATABASE_FAIL",Log.getStackTraceString(e));
         }
 
         mMenu = navigationView.getMenu();
@@ -244,6 +260,14 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
             }
         });
 
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        // Save the currently selected tour's ID
+        savedInstanceState.putString(CURRENT_TOUR_ID, currentTourId);
+
+        super.onSaveInstanceState(savedInstanceState);
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
