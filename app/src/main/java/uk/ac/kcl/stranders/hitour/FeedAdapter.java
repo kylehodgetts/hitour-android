@@ -43,7 +43,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
     /**
      * Stores the cursor that provides access to the feed data.
      */
-    private Cursor pointTourCursor;
+    private static Cursor pointTourCursor;
 
     /**
      * Stores the context of the application.
@@ -65,6 +65,10 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
         pointTourCursor = cursor;
         mContext = context;
         views = new HashMap<>();
+
+        if(pointTourCursor == null) {
+            Log.d("____HITOUR_____", "FeedAdapter");
+        }
     }
 
     /**
@@ -74,6 +78,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
      */
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, final int viewType) {
+        Log.d("____HITOUR_____", "onCreateViewHolder");
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_feed, parent, false);
         final ViewHolder viewHolder = new ViewHolder(v);
         v.setContentDescription(v.getResources().getString(R.string.content_description_item_feed, viewHolder.tvTitle));
@@ -116,6 +121,8 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
      */
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
+        Log.d("____HITOUR_____", "onBindViewHolder");
+        // TODO: IMPLEMENT THE EMPTY VIEW HERE
         pointTourCursor.moveToPosition(position);
         try {
             Map<String, String> primaryMap = new HashMap<>();
@@ -147,7 +154,11 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
      */
     @Override
     public int getItemCount() {
-        return pointTourCursor.getCount();
+        Log.d("____HITOUR_____", "getItemCount");
+        if(pointTourCursor!=null) {
+            return pointTourCursor.getCount();
+        }
+        return 1;
     }
 
     /**
@@ -158,6 +169,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
      */
     @Override
     public void update(Observable observable, Object data) {
+        Log.d("____HITOUR_____", "update");
         @SuppressWarnings("unchecked")
         Integer point_id = ((Pair<Integer, Integer>) data).first;
         @SuppressWarnings("unchecked")
@@ -186,6 +198,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
          */
         public ViewHolder(View view) {
             super(view);
+            Log.d("____HITOUR_____", "viewholder");
             this.view = view;
             ivThumbnail = (ImageView) view.findViewById(R.id.thumbnail);
             tvTitle = (TextView) view.findViewById(R.id.feed_title);
@@ -232,7 +245,6 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
      * @return viewHolder for a specific pointid and tourid
      */
     private View getView(Integer point_id, Integer tour_id) {
-
         return views.get(new Pair<>(point_id, tour_id));
     }
 

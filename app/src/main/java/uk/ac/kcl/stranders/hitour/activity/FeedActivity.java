@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -21,10 +22,15 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Spannable;
 import android.text.SpannableString;
+import android.util.AttributeSet;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.zxing.integration.android.IntentIntegrator;
@@ -187,6 +193,9 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
             if(tourCursor.getCount() > 0) {
                 tourCursor.moveToFirst();
                 populateFeedAdapter(tourCursor.getString(tourCursor.getColumnIndex(TOUR_ID)));
+            } else {
+                Log.d("____HITOUR_____", "Empty cursor");
+                populateFeedAdapter(null);
             }
         } catch (NotInSchemaException e) {
             Log.e("DATABASE_FAIL",Log.getStackTraceString(e));
@@ -513,10 +522,19 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
     }
 
     private void populateFeedAdapter(String tourId) {
+        if(tourId == null) {
+            Log.d("____HITOUR_____", "populateFeedAdapter");
+        }
         Map<String,String> partialPrimaryMap = new HashMap<>();
         partialPrimaryMap.put("TOUR_ID", tourId);
         try {
-            Cursor feedCursor = database.getWholeByPrimaryPartialSorted(POINT_TOUR_TABLE, partialPrimaryMap, RANK);
+            Cursor feedCursor;
+            if(tourId != null) {
+                feedCursor = database.getWholeByPrimaryPartialSorted(POINT_TOUR_TABLE, partialPrimaryMap, RANK);}
+            else {
+                Log.d("____HITOUR_____", "in try");
+                feedCursor = null;
+            }
             FeedAdapter adapter = new FeedAdapter(feedCursor, this);
             mFeed.setAdapter(adapter);
             currentTourId = tourId;
