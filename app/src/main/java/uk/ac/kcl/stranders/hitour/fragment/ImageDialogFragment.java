@@ -261,7 +261,7 @@ public class ImageDialogFragment extends DialogFragment {
 
         // Resize the image to full screen
         Bitmap bitmap;
-        if (mBitmap.getHeight() > displayHeight || displayHeight < displayWidth) {
+        if (bmpHeight > displayHeight || displayHeight < displayWidth) {
             bitmap = Bitmap.createScaledBitmap(mBitmap, displayHeight * bmpWidth / bmpHeight, displayHeight, false);
         } else {
             bitmap = Bitmap.createScaledBitmap(mBitmap, displayWidth, displayWidth * bmpHeight / bmpWidth, false);

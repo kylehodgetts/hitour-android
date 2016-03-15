@@ -40,6 +40,7 @@ import java.util.Map;
 import uk.ac.kcl.stranders.hitour.R;
 import uk.ac.kcl.stranders.hitour.activity.FeedActivity;
 import uk.ac.kcl.stranders.hitour.database.NotInSchemaException;
+import uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants;
 
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.AUDIENCE_ID;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.DATA_ID;
@@ -277,8 +278,6 @@ public class DetailFragment extends Fragment {
                                 FragmentManager fm = getActivity().getSupportFragmentManager();
                                 ImageDialogFragment imageDialogFragment = new ImageDialogFragment().newInstance(getArguments().describeContents(), bitmap, getActivity());
                                 imageDialogFragment.setStyle(DialogFragment.STYLE_NO_FRAME, R.style.MyDialog);
-
-
                                 imageDialogFragment.show(fm, "image_dialog_fragment");
                             }
                         });
