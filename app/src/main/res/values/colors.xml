@@ -14,7 +14,7 @@
 
     <color name="colorDrawerText">#262626</color>
 
-    <color name="lock">#f9de02</color>
+    <color name="lock">#FFFFFF</color>
     <color name="transparencyLock">#da0b1146</color>
 
     <color name="transparentHeader">#d40288D1</color>

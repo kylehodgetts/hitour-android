@@ -9,11 +9,10 @@
             android:background="@color/transparencyLock" />
 
         <ImageView
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:layout_marginBottom="10dp"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_marginBottom="16dp"
             android:layout_gravity="center"
-            android:background="@android:drawable/ic_lock_lock"
-            android:backgroundTint="@color/lock"
+            android:background="@drawable/ic_lock_white_48dp"
             android:scaleType="centerCrop" />
 </FrameLayout>
