@@ -6,14 +6,17 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.MotionEvent;
 import android.view.View;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.widget.Toast;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import uk.ac.kcl.stranders.hitour.R;
+import uk.ac.kcl.stranders.hitour.Utilities;
 import uk.ac.kcl.stranders.hitour.database.NotInSchemaException;
 
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.QUIZ_URL;
@@ -45,6 +48,17 @@ public class QuizActivity extends AppCompatActivity {
         } catch (NotInSchemaException e) {
             e.printStackTrace();
         }
+
+        mWebView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (!Utilities.isNetworkAvailable(getApplicationContext())) {
+                    finish();
+                    Toast.makeText(getApplicationContext(), "No internet connection", Toast.LENGTH_SHORT).show();
+                }
+                return false;
+            }
+        });
     }
 
 }

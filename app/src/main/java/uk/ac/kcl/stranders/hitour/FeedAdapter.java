@@ -134,7 +134,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
                         fragment.setArguments(bundle);
 
                         ((AppCompatActivity) mContext).getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.point_detail_container, fragment, QuizFragment.FRAGMENT_TAG).commit();
+                                .replace(R.id.point_detail_container, fragment, QuizFragment.FRAGMENT_TAG).addToBackStack(null).commit();
                     }
                 }
             }

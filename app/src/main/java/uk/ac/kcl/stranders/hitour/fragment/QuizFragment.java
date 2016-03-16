@@ -6,16 +6,19 @@ import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Toast;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import uk.ac.kcl.stranders.hitour.R;
+import uk.ac.kcl.stranders.hitour.Utilities;
 import uk.ac.kcl.stranders.hitour.activity.FeedActivity;
 import uk.ac.kcl.stranders.hitour.database.NotInSchemaException;
 
@@ -70,6 +73,18 @@ public class QuizFragment extends Fragment {
         } catch (NotInSchemaException e) {
             e.printStackTrace();
         }
+
+        mWebView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (!Utilities.isNetworkAvailable(getActivity().getApplicationContext())) {
+                    getActivity().getSupportFragmentManager().popBackStack();
+                    Log.d("____HITOUR_____", "should be dismissed");
+                    Toast.makeText(getActivity(),"No internet connection", Toast.LENGTH_SHORT).show();
+                }
+                return false;
+            }
+        });
 
         return mView;
     }
