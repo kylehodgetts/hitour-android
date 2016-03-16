@@ -1,9 +1,11 @@
 package uk.ac.kcl.stranders.hitour.activity;
 
+import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Typeface;
@@ -12,11 +14,12 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -92,6 +95,11 @@ import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TOUR_
  * The main activity that displays all available points for a given tour.
  */
 public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.CallbackRetrofit {
+
+    /**
+     * Int value for result of requesting camera permission
+     */
+    public static final int MY_PERMISSIONS_REQUEST_CAMERA = 1;
 
     /**
      * The list of all available points.
@@ -252,7 +260,14 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                scanCode();
+                //Request camera permissions on Android 6.0 +
+                if(ContextCompat.checkSelfPermission(FeedActivity.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(FeedActivity.this,
+                            new String[]{Manifest.permission.CAMERA},
+                            MY_PERMISSIONS_REQUEST_CAMERA);
+                } else {
+                    scanCode();
+                }
             }
         });
 
@@ -307,6 +322,15 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         integrator.setOrientationLocked(true);
         integrator.setBeepEnabled(false);
         integrator.initiateScan();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_CAMERA: {
+                scanCode();
+            }
+        }
     }
 
     @Override
