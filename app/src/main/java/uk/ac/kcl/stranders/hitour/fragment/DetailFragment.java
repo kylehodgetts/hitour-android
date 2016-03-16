@@ -214,12 +214,14 @@ public class DetailFragment extends Fragment {
                 bodyView.setText(pointCursor.getString(pointCursor.getColumnIndex(DESCRIPTION)));
 
                 String url = pointCursor.getString(pointCursor.getColumnIndex(URL));
-                url = FeedActivity.createFilename(url);
-                String localFilesAddress = getContext().getFilesDir().toString();
-                url = localFilesAddress + "/" + url;
-                Bitmap bitmap = BitmapFactory.decodeFile(url);
-                mImageView.setImageBitmap(bitmap);
-                mImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                if(!url.equals("none")) {
+                    url = FeedActivity.createFilename(url);
+                    String localFilesAddress = getContext().getFilesDir().toString();
+                    url = localFilesAddress + "/" + url;
+                    Bitmap bitmap = BitmapFactory.decodeFile(url);
+                    mImageView.setImageBitmap(bitmap);
+                    mImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                }
             } catch (NotInSchemaException e) {
                 Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
             }
