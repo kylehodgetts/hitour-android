@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -24,12 +25,14 @@ import java.util.Observer;
 import uk.ac.kcl.stranders.hitour.activity.DetailActivity;
 import uk.ac.kcl.stranders.hitour.activity.FeedActivity;
 import uk.ac.kcl.stranders.hitour.database.NotInSchemaException;
+import uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants;
 import uk.ac.kcl.stranders.hitour.fragment.DetailFragment;
 
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.DESCRIPTION;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.NAME;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_ID;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_TOUR_TABLE;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.RANK;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TOUR_ID;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.UNLOCK;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.URL;
@@ -55,6 +58,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
      */
     private HashMap<Pair<Integer, Integer>, View> views;
 
+    private HashMap<Integer,ViewHolder> viewHolderQuiz;
     /**
      * Public constructor.
      *
@@ -65,6 +69,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
         pointTourCursor = cursor;
         mContext = context;
         views = new HashMap<>();
+        viewHolderQuiz = new HashMap<>();
     }
 
     /**
@@ -102,6 +107,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
                                 .commit();
                     }
                     viewHolder.getView().findViewById(R.id.fllock).setVisibility(View.GONE);
+                    // Only unlock the quiz once the last unlocked item is viewed (clicked)
 
                 }
             }
@@ -116,6 +122,18 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
      */
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
+        if(position == pointTourCursor.getCount()) {
+            holder.tvTitle.setText("Quiz");
+            holder.ivThumbnail.setImageDrawable(ContextCompat.getDrawable(mContext,R.drawable.profile));
+            holder.quiz = true;
+            holder.tour_id = Integer.parseInt(FeedActivity.currentTourId);
+            viewHolderQuiz.put(holder.tour_id,holder);
+            if (allUnlocked(holder.tour_id)) {
+                    holder.getView().findViewById(R.id.fllock).setVisibility(View.GONE);
+
+            }
+            return;
+        }
         pointTourCursor.moveToPosition(position);
         try {
             Map<String, String> primaryMap = new HashMap<>();
@@ -138,6 +156,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
             if (isUnLocked(holder.point_id, holder.tour_id)) {
                 holder.getView().findViewById(R.id.fllock).setVisibility(View.GONE);
             }
+            holder.quiz = false;
             views.put(new Pair<>(holder.point_id, holder.tour_id), holder.getView());
         } catch (NotInSchemaException e) {
             Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
@@ -149,7 +168,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
      */
     @Override
     public int getItemCount() {
-        return pointTourCursor.getCount();
+               return pointTourCursor.getCount() + 1;
     }
 
     /**
@@ -167,6 +186,11 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
         if (getView(point_id, tour_id) != null) {
             getView(point_id, tour_id).findViewById(R.id.fllock).setVisibility(View.GONE);
         }
+        if (allUnlocked(tour_id)) {
+            if(viewHolderQuiz.get(tour_id) != null) {
+                viewHolderQuiz.get(tour_id).getView().findViewById(R.id.fllock).setVisibility(View.GONE);
+            }
+        }
     }
 
     /**
@@ -180,7 +204,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
         public Integer point_id;
         public Integer tour_id;
         private View view;
-
+        public boolean quiz;
         /**
          * Public constructor.
          *
@@ -226,6 +250,26 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
         return unlockState;
     }
 
+    private boolean allUnlocked(Integer tour_id){
+        Map<String, String> primaryKey = new HashMap<>();
+        primaryKey.put("TOUR_ID",""+tour_id);
+        try {
+            pointTourCursor = FeedActivity.database.getWholeByPrimaryPartialSorted(POINT_TOUR_TABLE,primaryKey,RANK);
+        } catch (NotInSchemaException e) {
+            e.printStackTrace();
+        }
+        pointTourCursor.moveToPosition(0);
+        do {
+            Integer unlocked = Integer.parseInt(pointTourCursor.getString(pointTourCursor.getColumnIndex(DatabaseConstants.UNLOCK)));
+            Log.e("unlocked",""+unlocked);
+            if(unlocked == 0){
+                return false;
+            }
+
+        } while (pointTourCursor.moveToNext());
+//        allUnlocked.put(""+tour_id,true);
+        return true;
+    }
     /**
      * Method to retrieve a specific ViewHolder
      *
