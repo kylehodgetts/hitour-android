@@ -555,7 +555,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
             Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
         }
         mMenu.addSubMenu("s");
-        mMenu.add(R.id.end_padder, R.id.app_info_item, Menu.NONE, getString(R.string.about)).setIcon(R.drawable.ic_action_local_hospital);
+        mMenu.add(R.id.end_padder, R.id.app_info_item, Menu.NONE, getString(R.string.about)).setIcon(R.drawable.ic_action_live_help);
 //        mMenu.getItem(i).getActionView().setContentDescription(getString(R.string.content_description_tour_selection, mMenu.getItem(i).getTitle()));
     }
 
