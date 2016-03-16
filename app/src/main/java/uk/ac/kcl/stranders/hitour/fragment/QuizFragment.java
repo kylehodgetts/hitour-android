@@ -1,5 +1,6 @@
 package uk.ac.kcl.stranders.hitour.fragment;
 
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -43,27 +44,6 @@ public class QuizFragment extends Fragment {
 
     }
 
-
-//    @Override
-//    public void onCreate(Bundle savedInstanceState) {
-//        super.onCreate(savedInstanceState);
-//
-//        Log.d("____HITOUR____", "In the fragment");
-//        Map<String, String> partialPrimaryMap = new HashMap<>();
-//        partialPrimaryMap.put("TOUR_ID", FeedActivity.currentTourId);
-//        Cursor tourCursor = null;
-//
-//        try {
-//            tourCursor = FeedActivity.database.getWholeByPrimary(TOUR_TABLE, partialPrimaryMap);
-//            tourCursor.moveToFirst();
-//            quizURL = tourCursor.getString(tourCursor.getColumnIndex(QUIZ_URL));
-//        } catch (NotInSchemaException e) {
-//            e.printStackTrace();
-//        }
-//
-//
-//    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -89,5 +69,10 @@ public class QuizFragment extends Fragment {
         }
 
         return mView;
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
     }
 }
