@@ -255,7 +255,7 @@ public class DetailFragment extends Fragment {
                     String fileExtension = FeedActivity.getFileExtension(dataCursor.getString(dataCursor.getColumnIndex(URL)));
 
                     StringBuilder text = new StringBuilder();
-                    if (fileExtension.matches("jpg|jpeg|png")) {
+                    if (fileExtension.matches("jpg|jpeg|png|gif")) {
                         layoutDetail = (LinearLayout) inflater.inflate(R.layout.image_detail, container, false);
                         ImageView imageView = (ImageView) layoutDetail.findViewById(R.id.image);
                         Bitmap bitmap = BitmapFactory.decodeFile(url);
