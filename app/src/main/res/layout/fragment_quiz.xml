@@ -9,5 +9,9 @@
                 tools:showIn="@layout/activity_quiz"
                 tools:context="uk.ac.kcl.stranders.hitour.fragment.QuizFragment">
 
+    <WebView
+        android:id="@+id/fragment_quiz_webview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
 </RelativeLayout>

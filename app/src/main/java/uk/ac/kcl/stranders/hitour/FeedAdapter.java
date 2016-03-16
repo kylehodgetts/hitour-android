@@ -27,6 +27,7 @@ import uk.ac.kcl.stranders.hitour.activity.QuizActivity;
 import uk.ac.kcl.stranders.hitour.database.DBWrap;
 import uk.ac.kcl.stranders.hitour.database.NotInSchemaException;
 import uk.ac.kcl.stranders.hitour.fragment.DetailFragment;
+import uk.ac.kcl.stranders.hitour.fragment.QuizFragment;
 
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.DESCRIPTION;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.NAME;
@@ -90,8 +91,8 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
                 if (isUnLocked(viewHolder.point_id, viewHolder.tour_id)) {
                     if (!(mContext.getResources().getBoolean(R.bool.isTablet))) {
                         // Start an activity for the quiz
-                        Intent quizIntent = new Intent(mContext, QuizActivity.class);
-                        mContext.startActivity(quizIntent);
+//                        Intent quizIntent = new Intent(mContext, QuizActivity.class);
+//                        mContext.startActivity(quizIntent);
 
                         Intent intent = new Intent(mContext, DetailActivity.class)
                                 .putExtra(DetailActivity.EXTRA_POINT_ID, viewHolder.point_id);
