@@ -40,21 +40,35 @@ public class QuizFragment extends Fragment {
     public static final String FRAGMENT_TAG = "uk.ac.kcl.stranders.hitour.fragment.QuizFragment.TAG";
 
     public QuizFragment() {
+
     }
-    public static QuizFragment newInstance(String itemId) {
-        Bundle arguments = new Bundle();
-        arguments.putString(ARG_ITEM_POSITION, itemId);
-        QuizFragment fragment = new QuizFragment();
-        fragment.setArguments(arguments);
-        return fragment;
-    }
+
+
+//    @Override
+//    public void onCreate(Bundle savedInstanceState) {
+//        super.onCreate(savedInstanceState);
+//
+//        Log.d("____HITOUR____", "In the fragment");
+//        Map<String, String> partialPrimaryMap = new HashMap<>();
+//        partialPrimaryMap.put("TOUR_ID", FeedActivity.currentTourId);
+//        Cursor tourCursor = null;
+//
+//        try {
+//            tourCursor = FeedActivity.database.getWholeByPrimary(TOUR_TABLE, partialPrimaryMap);
+//            tourCursor.moveToFirst();
+//            quizURL = tourCursor.getString(tourCursor.getColumnIndex(QUIZ_URL));
+//        } catch (NotInSchemaException e) {
+//            e.printStackTrace();
+//        }
+//
+//
+//    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         mView = inflater.inflate(R.layout.fragment_quiz, container, false);
 
-        Log.d("____HITOUR____", "In the fragment");
         Map<String, String> partialPrimaryMap = new HashMap<>();
         partialPrimaryMap.put("TOUR_ID", FeedActivity.currentTourId);
         Cursor tourCursor = null;
@@ -69,6 +83,7 @@ public class QuizFragment extends Fragment {
             WebSettings webSettings = mWebView.getSettings();
             webSettings.setJavaScriptEnabled(true);
             mWebView.loadUrl(quizURL);
+
         } catch (NotInSchemaException e) {
             e.printStackTrace();
         }
