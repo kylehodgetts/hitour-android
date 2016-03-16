@@ -95,32 +95,32 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
             @Override
             public void onClick(View view) {
                 //Start a new activity on a phone or replace a detail fragment on tablets.
-//                if (isUnLocked(viewHolder.point_id, viewHolder.tour_id)) {
-//                    if (!(mContext.getResources().getBoolean(R.bool.isTablet))) {
-//                        // Start an activity for the quiz
-////                        Intent quizIntent = new Intent(mContext, QuizActivity.class);
-////                        mContext.startActivity(quizIntent);
-//
-//                        Intent intent = new Intent(mContext, DetailActivity.class)
-//                                .putExtra(DetailActivity.EXTRA_POINT_ID, viewHolder.point_id);
-//                        Log.e("TEST_Awesome", "" + viewHolder.point_id);
-//                        mContext.startActivity(intent);
-//                    } else {
-//                        Bundle bundle = new Bundle();
-//                        bundle.putString(DetailFragment.ARG_ITEM_POSITION, "" + viewHolder.point_id);
-//                        // Start a new activity on a phone or replace a detail fragment on tablets if unlocked.
-//
-//                        DetailFragment fragment = new DetailFragment();
-//                        fragment.setArguments(bundle);
-//
-//                        ((AppCompatActivity) mContext).getSupportFragmentManager()
-//                                .beginTransaction()
-//                                .replace(R.id.point_detail_container, fragment, DetailFragment.FRAGMENT_TAG)
-//                                .commit();
-//                    }
-//                    viewHolder.getView().findViewById(R.id.fllock).setVisibility(View.GONE);
-//
-//                }
+                if (isUnLocked(viewHolder.point_id, viewHolder.tour_id)) {
+                    if (!(mContext.getResources().getBoolean(R.bool.isTablet))) {
+                        // Start an activity for the quiz
+//                        Intent quizIntent = new Intent(mContext, QuizActivity.class);
+//                        mContext.startActivity(quizIntent);
+
+                        Intent intent = new Intent(mContext, DetailActivity.class)
+                                .putExtra(DetailActivity.EXTRA_POINT_ID, viewHolder.point_id);
+                        Log.e("TEST_Awesome", "" + viewHolder.point_id);
+                        mContext.startActivity(intent);
+                    } else {
+                        Bundle bundle = new Bundle();
+                        bundle.putString(DetailFragment.ARG_ITEM_POSITION, "" + viewHolder.point_id);
+                        // Start a new activity on a phone or replace a detail fragment on tablets if unlocked.
+
+                        DetailFragment fragment = new DetailFragment();
+                        fragment.setArguments(bundle);
+
+                        ((AppCompatActivity) mContext).getSupportFragmentManager()
+                                .beginTransaction()
+                                .replace(R.id.point_detail_container, fragment, DetailFragment.FRAGMENT_TAG)
+                                .commit();
+                    }
+                    viewHolder.getView().findViewById(R.id.fllock).setVisibility(View.GONE);
+
+                }
                 if (!(mContext.getResources().getBoolean(R.bool.isTablet))) {
                     Intent quizIntent = new Intent(mContext, QuizActivity.class);
                         mContext.startActivity(quizIntent);
