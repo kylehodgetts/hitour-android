@@ -55,6 +55,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import uk.ac.kcl.stranders.hitour.CustomTypefaceSpan;
 import uk.ac.kcl.stranders.hitour.FeedAdapter;
@@ -612,6 +613,9 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
 
         private DownloadToStorage(String url) {
             this.url = url;
+            client.setConnectTimeout(5, TimeUnit.SECONDS);
+            client.setWriteTimeout(5, TimeUnit.SECONDS);
+            client.setReadTimeout(5, TimeUnit.SECONDS);
         }
 
         public void run() throws Exception {
