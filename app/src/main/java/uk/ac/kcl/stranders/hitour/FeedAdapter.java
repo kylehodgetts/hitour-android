@@ -102,10 +102,6 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
                 // Start a new activity on a phone or replace a detail fragment on tablets.
                 if (isUnLocked(viewHolder.point_id, viewHolder.tour_id)) {
                     if (!(mContext.getResources().getBoolean(R.bool.isTablet))) {
-                        // Start an activity for the quiz
-//                        Intent quizIntent = new Intent(mContext, QuizActivity.class);
-//                        mContext.startActivity(quizIntent);
-
                         Intent intent = new Intent(mContext, DetailActivity.class)
                                 .putExtra(DetailActivity.EXTRA_POINT_ID, viewHolder.point_id);
                         Log.e("TEST_Awesome", "" + viewHolder.point_id);
@@ -126,19 +122,20 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
                     viewHolder.getView().findViewById(R.id.fllock).setVisibility(View.GONE);
                     // Only unlock the quiz once the last unlocked item is viewed (clicked)
 
-                }
-                if (!(mContext.getResources().getBoolean(R.bool.isTablet))) {
-                    Intent quizIntent = new Intent(mContext, QuizActivity.class);
+                } else if (viewHolder.quiz && allUnlocked(viewHolder.tour_id)) {
+                    if (!(mContext.getResources().getBoolean(R.bool.isTablet))) {
+                        Intent quizIntent = new Intent(mContext, QuizActivity.class);
                         mContext.startActivity(quizIntent);
-                } else {
-                    Bundle bundle = new Bundle();
+                    } else {
+                        Bundle bundle = new Bundle();
                         bundle.putString(QuizFragment.ARG_ITEM_POSITION, "" + viewHolder.point_id);
-                    // Start a new activity on a phone or replace a detail fragment on tablets if unlocked.
-                    QuizFragment fragment = new QuizFragment();
-                    fragment.setArguments(bundle);
+                        // Start a new activity on a phone or replace a detail fragment on tablets if unlocked.
+                        QuizFragment fragment = new QuizFragment();
+                        fragment.setArguments(bundle);
 
-                    ((AppCompatActivity) mContext).getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.point_detail_container, fragment, QuizFragment.FRAGMENT_TAG).commit();
+                        ((AppCompatActivity) mContext).getSupportFragmentManager().beginTransaction()
+                                .replace(R.id.point_detail_container, fragment, QuizFragment.FRAGMENT_TAG).commit();
+                    }
                 }
             }
         });
@@ -312,5 +309,9 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
         return views.get(new Pair<>(point_id, tour_id));
     }
 
+    public void clearFragment() {
+        if(fragment != null)
+            ((AppCompatActivity) mContext).getSupportFragmentManager().beginTransaction().remove(fragment).commit();
+    }
 
 }
