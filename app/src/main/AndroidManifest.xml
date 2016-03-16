@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="uk.ac.kcl.stranders.hitour">
+    package="uk.ac.kcl.stranders.hitour" >
 
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -15,10 +15,10 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme" >
         <activity
             android:name=".activity.FeedActivity"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme.NoActionBar" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -28,19 +28,28 @@
         <activity
             android:name=".activity.DetailActivity"
             android:label="@string/title_activity_detail"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:parentActivityName=".activity.FeedActivity">
+            android:parentActivityName=".activity.FeedActivity"
+            android:theme="@style/AppTheme.NoActionBar" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activity.FeedActivity" />
         </activity>
         <activity
             android:name=".activity.ScanningActivity"
-            android:parentActivityName=".activity.FeedActivity"
-            android:noHistory="true">
+            android:noHistory="true"
+            android:parentActivityName=".activity.FeedActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activity.FeedActivity" />
+        </activity>
+        <activity
+            android:name=".activity.QuizActivity"
+            android:label="@string/title_activity_quiz"
+            android:parentActivityName=".activity.FeedActivity"
+            android:theme="@style/AppTheme.NoActionBar" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="uk.ac.kcl.stranders.hitour.activity.FeedActivity" />
         </activity>
     </application>
 

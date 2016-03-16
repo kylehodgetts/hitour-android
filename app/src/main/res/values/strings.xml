@@ -18,5 +18,7 @@
     <string name="content_description_item_feed">Item Feed %1$s</string>
     <string name="content_description_launch_scanner">Launch Scanner</string>
     <string name="content_description_tour_selection">Tour Selection %1$s</string>
+    <string name="title_activity_quiz">QuizActivity</string>
+    <string name="action_settings">Settings</string>
 
 </resources>
