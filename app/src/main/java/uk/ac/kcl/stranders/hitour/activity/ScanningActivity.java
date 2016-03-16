@@ -48,7 +48,6 @@ import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.UNLOC
  * manually entering a pin or point reference.
  *
  * This Activity contains a Barcode Scanner as well as an {@link EditText} to receive input
- * and a {@link Switch} to toggle between adding a Tour and a Point.
  */
 public class ScanningActivity extends AppCompatActivity {
 
@@ -63,12 +62,6 @@ public class ScanningActivity extends AppCompatActivity {
     private EditText etCodePinEntry;
 
     /**
-     * Field that stores a reference to the {@link Switch} in the Activity
-     */
-    private Switch modeSwitch;
-
-
-    /**
      * Field to store a {@link BarcodeCallback} which handles what the barcode scanner should accept
      * and what to do when it has detected an accepting barcode type.
      *
@@ -81,7 +74,7 @@ public class ScanningActivity extends AppCompatActivity {
                 barcodeScannerView.setStatusText(result.getText());
                 etCodePinEntry.setText(result.getText());
                 barcodeScannerView.pause();
-                submit(true);
+                submit();
             }
         }
 
@@ -105,14 +98,13 @@ public class ScanningActivity extends AppCompatActivity {
         barcodeScannerView = (CompoundBarcodeView) findViewById(R.id.zxing_barcode_scanner);
         barcodeScannerView.decodeContinuous(callback);
         etCodePinEntry = (EditText) findViewById(R.id.etCodePinEntry);
-        modeSwitch = (Switch) findViewById(R.id.mode_switch);
 
         Button btnSubmit = (Button) findViewById(R.id.btnSubmit);
         btnSubmit.setContentDescription(btnSubmit.getResources().getString(R.string.content_description_submits));
         btnSubmit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                submit(false);
+                submit();
             }
         });
 
@@ -137,7 +129,7 @@ public class ScanningActivity extends AppCompatActivity {
      *
      * Otherwise an error message is shown to the user and the input is cleared ready for the next input.
      */
-    public void submit(boolean fromScanner) {
+    public void submit() {
 
         // Hide keyboard when submit is pressed so Snackbar can be seen
         View view = this.getCurrentFocus();
@@ -149,23 +141,21 @@ public class ScanningActivity extends AppCompatActivity {
         EditText etCodePinEntry = (EditText) findViewById(R.id.etCodePinEntry);
         String result = etCodePinEntry.getText().toString();
         // Check if the point came from being scanned
-        if(fromScanner) {
-                // Check if a point or a tour was scanned
-                if (result.length() > 6 && result.substring(0, 6).equals("POINT-")) {
-                    // Takes identification part of point id
-                    result = result.substring(6);
-                    // Sets to identify as a point
-                    modeSwitch.setChecked(false);
-                } else if (result.length() > 2 && result.substring(0, 2).equals("SN")) {
-                    // Takes identification part of session passphrase
-                    result = result.substring(2);
-                    // Sets to identify as a tour
-                    modeSwitch.setChecked(true);
-                }
-                etCodePinEntry.setText(result);
+
+        // Check if a point or a tour was submitted
+        boolean isTour = false;
+        if (result.length() > 6 && result.substring(0, 6).equals("POINT-")) {
+            // Takes identification part of point id
+            result = result.substring(6);
+        } else if (result.length() > 2 && result.substring(0, 2).equals("SN")) {
+            // Takes identification part of session passphrase
+            result = result.substring(2);
+            // Sets to identify as a tour
+            isTour = true;
         }
+
         // Check if user wants to add a session or a point
-        if (modeSwitch.isChecked()) {
+        if (isTour) {
             // For when the user attempts to add a session
             try {
                 // Checks to see if tour session is already on device
