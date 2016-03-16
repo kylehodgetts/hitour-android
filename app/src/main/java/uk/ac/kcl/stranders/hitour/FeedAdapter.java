@@ -126,13 +126,15 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
             holder.tvDescription.setText(pointCursor.getString(pointCursor.getColumnIndex(DESCRIPTION)));
 
             String url = pointCursor.getString(pointCursor.getColumnIndex(URL));
-            holder.point_id = Integer.parseInt(pointTourCursor.getString(pointTourCursor.getColumnIndex(POINT_ID)));
-            holder.tour_id = Integer.parseInt(pointTourCursor.getString(pointTourCursor.getColumnIndex(TOUR_ID)));
-            url = FeedActivity.createFilename(url);
-            String localFilesAddress = mContext.getFilesDir().toString();
-            url = localFilesAddress + "/" + url;
-            Bitmap bitmap = BitmapFactory.decodeFile(url);
-            holder.ivThumbnail.setImageBitmap(bitmap);
+                holder.point_id = Integer.parseInt(pointTourCursor.getString(pointTourCursor.getColumnIndex(POINT_ID)));
+                holder.tour_id = Integer.parseInt(pointTourCursor.getString(pointTourCursor.getColumnIndex(TOUR_ID)));
+            if(!url.equals("none")) {
+                url = FeedActivity.createFilename(url);
+                String localFilesAddress = mContext.getFilesDir().toString();
+                url = localFilesAddress + "/" + url;
+                Bitmap bitmap = BitmapFactory.decodeFile(url);
+                holder.ivThumbnail.setImageBitmap(bitmap);
+            }
             if (isUnLocked(holder.point_id, holder.tour_id)) {
                 holder.getView().findViewById(R.id.fllock).setVisibility(View.GONE);
             }
@@ -234,6 +236,14 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
     private View getView(Integer point_id, Integer tour_id) {
 
         return views.get(new Pair<>(point_id, tour_id));
+    }
+
+    /**
+     *
+     * @return context
+     */
+    public Context getmContext(){
+        return mContext;
     }
 
 

@@ -581,9 +581,16 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
 
     private void populateFeedAdapter(String tourId) {
         Map<String,String> partialPrimaryMap = new HashMap<>();
-        partialPrimaryMap.put("TOUR_ID", tourId);
+        partialPrimaryMap.put("TOUR_ID",tourId);
         try {
+            Cursor tourCursor = database.getWholeByPrimary(TOUR_TABLE,partialPrimaryMap);
             Cursor feedCursor = database.getWholeByPrimaryPartialSorted(POINT_TOUR_TABLE, partialPrimaryMap, RANK);
+            tourCursor.moveToFirst();feedCursor.moveToFirst();
+            if (tourCursor.getString(tourCursor.getColumnIndex(QUIZ_URL)).length() > 0) {
+                    addQuiz(feedCursor, tourId);
+                    feedCursor = database.getWholeByPrimaryPartialSorted(POINT_TOUR_TABLE, partialPrimaryMap, RANK);
+            }
+
             FeedAdapter adapter = new FeedAdapter(feedCursor, this);
             mFeed.setAdapter(adapter);
             currentTourId = tourId;
@@ -1060,5 +1067,66 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         }
         return false;
     }
+
+
+    private boolean addQuiz(Cursor feedCursor, String tourId) {
+// Add tour point to the local database
+        Map<String, String> primaryTourPointMap = new HashMap<>();
+        primaryTourPointMap.put("TOUR_ID", tourId);
+        primaryTourPointMap.put("POINT_ID", "987654321");
+        try {
+            Cursor cursor =  database.getWholeByPrimary(POINT_TOUR_TABLE, primaryTourPointMap);
+            if(cursor.getCount() == 0){
+                Map<String, String> tourPointColumnsMap = new HashMap<>();
+                tourPointColumnsMap.put("RANK", "" + feedCursor.getCount() + 1);
+                tourPointColumnsMap.put("UNLOCK", "0");
+                Map<String, String> tourPointPrimaryKeysMap = new HashMap<>();
+                tourPointPrimaryKeysMap.put("TOUR_ID", tourId);
+                tourPointPrimaryKeysMap.put("POINT_ID", "987654321");
+
+                // Add / put point to the local database
+                Map<String, String> pointColumnMap = new HashMap<>();
+                pointColumnMap.put("NAME", "QUIZ");
+                pointColumnMap.put("URL", "none");
+                pointColumnMap.put("DESCRIPTION", "");
+                Map<String, String> pointPrimaryKeysMap = new HashMap<>();
+                pointPrimaryKeysMap.put("POINT_ID", "987654321");
+                try {
+                    database.insert(pointColumnMap, pointPrimaryKeysMap, "POINT");
+                    database.insert(tourPointColumnsMap, tourPointPrimaryKeysMap, "POINT_TOUR");
+                    return true;
+                } catch (NotInSchemaException e) {
+                    Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
+                }
+                return false;
+            }
+        } catch (NotInSchemaException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public static boolean isQuizPoint(String tourId,String pointId) {
+        Map<String, String> primaryTourMap = new HashMap<>();
+        primaryTourMap.put("TOUR_ID", tourId);
+        Map<String, String> primaryTourPointMap = new HashMap<>();
+        primaryTourPointMap.put("TOUR_ID", tourId);
+        primaryTourPointMap.put("POINT_ID", pointId);
+        try {
+            Cursor tourCursor = database.getWholeByPrimary(TOUR_TABLE, primaryTourMap);
+            Cursor currentPointCursor = database.getWholeByPrimary(POINT_TOUR_TABLE, primaryTourPointMap);
+            Cursor feedCursor = database.getWholeByPrimaryPartialSorted(POINT_TOUR_TABLE, primaryTourMap, RANK);
+            feedCursor.moveToFirst();
+            tourCursor.moveToFirst();
+            currentPointCursor.moveToFirst();
+            Integer quizIndex = tourCursor.getColumnIndex(QUIZ_URL);
+            Integer rank = Integer.parseInt(currentPointCursor.getString(currentPointCursor.getColumnIndex(RANK)));
+            if (tourCursor.getString(quizIndex).length() > 0 && (feedCursor.getCount() == rank)) {
+                return true;
+            }
+        } catch (NotInSchemaException e) { e.printStackTrace(); }
+        return false;
+    }
+
 
 }
