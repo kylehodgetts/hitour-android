@@ -23,6 +23,8 @@ import java.util.Observer;
 
 import uk.ac.kcl.stranders.hitour.activity.DetailActivity;
 import uk.ac.kcl.stranders.hitour.activity.FeedActivity;
+import uk.ac.kcl.stranders.hitour.activity.QuizActivity;
+import uk.ac.kcl.stranders.hitour.database.DBWrap;
 import uk.ac.kcl.stranders.hitour.database.NotInSchemaException;
 import uk.ac.kcl.stranders.hitour.fragment.DetailFragment;
 
@@ -30,7 +32,10 @@ import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.DESCR
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.NAME;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_ID;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_TOUR_TABLE;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.QUIZ_URL;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.SESSION_TABLE;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TOUR_ID;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TOUR_TABLE;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.UNLOCK;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.URL;
 
@@ -81,9 +86,13 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
         v.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // Start a new activity on a phone or replace a detail fragment on tablets.
+                 //Start a new activity on a phone or replace a detail fragment on tablets.
                 if (isUnLocked(viewHolder.point_id, viewHolder.tour_id)) {
                     if (!(mContext.getResources().getBoolean(R.bool.isTablet))) {
+                        // Start an activity for the quiz
+                        Intent quizIntent = new Intent(mContext, QuizActivity.class);
+                        mContext.startActivity(quizIntent);
+
                         Intent intent = new Intent(mContext, DetailActivity.class)
                                 .putExtra(DetailActivity.EXTRA_POINT_ID, viewHolder.point_id);
                         Log.e("TEST_Awesome", "" + viewHolder.point_id);
@@ -104,6 +113,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
                     viewHolder.getView().findViewById(R.id.fllock).setVisibility(View.GONE);
 
                 }
+
             }
         });
         return viewHolder;

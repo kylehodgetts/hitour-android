@@ -1,4 +1,4 @@
-package uk.ac.kcl.stranders.hitour.activity;
+package uk.ac.kcl.stranders.hitour.fragment;
 
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -11,9 +11,9 @@ import uk.ac.kcl.stranders.hitour.R;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class QuizActivityFragment extends Fragment {
+public class QuizFragment extends Fragment {
 
-    public QuizActivityFragment() {
+    public QuizFragment() {
     }
 
     @Override
