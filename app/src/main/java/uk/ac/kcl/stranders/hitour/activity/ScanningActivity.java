@@ -160,6 +160,8 @@ public class ScanningActivity extends AppCompatActivity {
             isTour = true;
         }
 
+        etCodePinEntry.setText(result);
+
         // Check if user wants to add a session or a point
         if (isTour) {
             // For when the user attempts to add a session
