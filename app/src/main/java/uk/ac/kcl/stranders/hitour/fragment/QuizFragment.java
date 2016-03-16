@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -62,6 +63,8 @@ public class QuizFragment extends Fragment {
             // Enable Javascript
             WebSettings webSettings = mWebView.getSettings();
             webSettings.setJavaScriptEnabled(true);
+            webSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
+            mWebView.setWebViewClient(new WebViewClient());
             mWebView.loadUrl(quizURL);
 
         } catch (NotInSchemaException e) {
