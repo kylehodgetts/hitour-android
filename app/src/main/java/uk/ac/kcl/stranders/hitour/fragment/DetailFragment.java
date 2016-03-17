@@ -18,6 +18,7 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -113,6 +114,11 @@ public class DetailFragment extends Fragment {
      * Stores the current position of the videos
      */
     private long[] currentPositionArray;
+
+    /**
+     * Store the display sizes
+     */
+    static DisplayMetrics displaymetrics;
 
     /**
      * Default empty required public constructor
@@ -327,6 +333,10 @@ public class DetailFragment extends Fragment {
             if(currentVideosArrayList == null) {
                 currentVideosArrayList = new ArrayList<>();
             }
+
+            displaymetrics = new DisplayMetrics();
+            getActivity().getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+
             final EMVideoView videoView = (EMVideoView) linearLayout.findViewById(R.id.video);
             currentVideosArrayList.add(videoView);
             videoView.setId(Integer.parseInt(mItemId + rank + ""));
@@ -334,6 +344,10 @@ public class DetailFragment extends Fragment {
             videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 @Override
                 public void onPrepared(MediaPlayer mp) {
+
+                    int displayHeight = displaymetrics.heightPixels;
+                    int displayWidth = displaymetrics.widthPixels;
+
                     // Calculations to make video player in a 16:9 aspect ratio
                     int intWidth = linearLayout.getWidth();
                     float floatWidth = (float) intWidth;
@@ -341,6 +355,16 @@ public class DetailFragment extends Fragment {
                     int intHeight = Math.round(floatHeight);
                     LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(intWidth, intHeight);
                     videoView.setLayoutParams(layoutParams);
+
+                    // if the video is in landscape mode, make the video the right size
+                    if (displayHeight < displayWidth && !(getContext().getResources().getBoolean(R.bool.isTablet))) {
+                        int toolbarSize = mRootView.findViewById(R.id.toolbar).getHeight();
+                        toolbarSize += toolbarSize/2;
+                        Log.d ("____HITOUR____", "toolbar's bottom is at " + toolbarSize);
+                        layoutParams = new LinearLayout.LayoutParams(intWidth, displayHeight - toolbarSize);
+                        videoView.setLayoutParams(layoutParams);
+                    }
+
 
                     // Resumes video in same play if device rotated or fragment is paused
                     if (currentPositionArray != null) {
