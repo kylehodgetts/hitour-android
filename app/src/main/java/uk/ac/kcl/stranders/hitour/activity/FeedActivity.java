@@ -212,10 +212,16 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
             populateFeedAdapter(currentTourId);
         } else {
             try {
-                Cursor sessionCursor = database.getAll(SESSION_TABLE);
+                final Cursor sessionCursor = database.getAll(SESSION_TABLE);
                 if(sessionCursor.getCount() > 0) {
                     sessionCursor.moveToFirst();
                     populateFeedAdapter(sessionCursor.getString(sessionCursor.getColumnIndex(TOUR_ID)));
+                    mDrawerLayout.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            updateHeader(sessionCursor, 0);
+                        }
+                    });
                 }
             } catch (NotInSchemaException e) {
                 Log.e("DATABASE_FAIL",Log.getStackTraceString(e));
@@ -229,22 +235,6 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         if (supportActionBar != null) {
             supportActionBar.setHomeAsUpIndicator(R.drawable.ic_action_menu);
             supportActionBar.setDisplayHomeAsUpEnabled(true);
-        }
-
-        try {
-            final Cursor sessionCursor = database.getAll(SESSION_TABLE);
-            if(sessionCursor.getCount() > 0) {
-                sessionCursor.moveToFirst();
-                populateFeedAdapter(sessionCursor.getString(sessionCursor.getColumnIndex(TOUR_ID)));
-                mDrawerLayout.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        updateHeader(sessionCursor, 0);
-                    }
-                });
-            }
-        } catch (NotInSchemaException e) {
-            Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
         }
 
         navigationView.setNavigationItemSelectedListener(
@@ -265,6 +255,9 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
                                 if(sessionCursor.getCount() > 0) {
                                     sessionCursor.moveToPosition(item.getItemId());
                                     if (!sessionCursor.getString(sessionCursor.getColumnIndex(TOUR_ID)).equals(currentTourId)) {
+                                        // Clear the fragment on change so point from previous tour does not show on tablet
+                                        if(currentFeedAdapter != null)
+                                            currentFeedAdapter.clearFragment();
                                         populateFeedAdapter(sessionCursor.getString(sessionCursor.getColumnIndex(TOUR_ID)));
                                         updateHeader(sessionCursor, item.getItemId());
                                     }
@@ -629,10 +622,6 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         Map<String,String> partialPrimaryMap = new HashMap<>();
         partialPrimaryMap.put("TOUR_ID", tourId);
         try {
-            // Clear the fragment on change so point from previous tour does not show on tablet
-            if(currentFeedAdapter != null)
-                currentFeedAdapter.clearFragment();
-
             Cursor feedCursor = database.getWholeByPrimaryPartialSorted(POINT_TOUR_TABLE, partialPrimaryMap, RANK);
             FeedAdapter adapter = new FeedAdapter(feedCursor, this);
             mFeed.setAdapter(adapter);
@@ -709,6 +698,9 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                    // Clear the fragment on change so point from previous tour does not show on tablet
+                    if(currentFeedAdapter != null)
+                        currentFeedAdapter.clearFragment();
                     populateFeedAdapter(currentTourId);
                     setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER);
                     progressDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
