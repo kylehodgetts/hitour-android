@@ -7,6 +7,9 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.TouchUtils;
+import android.view.KeyEvent;
+import android.widget.Button;
+import android.widget.EditText;
 
 import uk.ac.kcl.stranders.hitour.activity.DetailActivity;
 import uk.ac.kcl.stranders.hitour.activity.FeedActivity;
@@ -17,6 +20,12 @@ import uk.ac.kcl.stranders.hitour.fragment.DetailFragment;
  * Front-end instrumentation tests for the {@link uk.ac.kcl.stranders.hitour.activity.FeedActivity}.
  */
 public class FeedActivityTest extends ActivityInstrumentationTestCase2<FeedActivity> {
+    /**
+     * How to test:
+     * -Delete application if installed
+     * -Enter manually the tour :Penguins123 , ensure that all points are locked.
+     * -Run the test.
+     */
 
     public FeedActivityTest() {
         super(FeedActivity.class);
@@ -70,10 +79,52 @@ public class FeedActivityTest extends ActivityInstrumentationTestCase2<FeedActiv
     }
 
     /**
+     * Enters the point's number via the scanner
+     * and returns to the FeedActivity.
+     */
+    public void testOpenLockedFragment() {
+
+        FloatingActionButton floatingActionButton = (FloatingActionButton) getActivity().findViewById(R.id.fab);
+        Instrumentation.ActivityMonitor activityMonitor =
+                    getInstrumentation().addMonitor(ScanningActivity.class.getName(), null, false);
+        getInstrumentation().waitForIdleSync();
+        TouchUtils.clickView(this, floatingActionButton);
+        getInstrumentation().waitForIdleSync();
+
+        ScanningActivity scanningActivity = (ScanningActivity)
+                getInstrumentation().waitForMonitorWithTimeout(activityMonitor, 5000);
+
+        getInstrumentation().waitForIdleSync();
+        final EditText etCodePinEntry = (EditText) scanningActivity.findViewById(R.id.etCodePinEntry);
+        getInstrumentation().runOnMainSync(new Runnable() {
+            @Override
+            public void run() {
+                etCodePinEntry.requestFocus();
+            }
+        });
+        getInstrumentation().sendStringSync(4 + "");
+        getInstrumentation().sendCharacterSync(KeyEvent.KEYCODE_ENTER);
+        getInstrumentation().waitForIdleSync();
+        Button btnSubmit = (Button) scanningActivity.findViewById(R.id.btnSubmit);
+        TouchUtils.clickView(this, btnSubmit);
+
+        getInstrumentation().waitForIdleSync();
+
+
+        FeedActivity feedActivity = getActivity();
+        getInstrumentation().waitForIdleSync();
+        getInstrumentation().sendCharacterSync(KeyEvent.KEYCODE_BACK);
+        getInstrumentation().waitForIdleSync();
+        assertNotNull(feedActivity);
+        feedActivity.finish();
+
+    }
+
+    /**
      * Test that checks whether the {@link uk.ac.kcl.stranders.hitour.fragment.DetailFragment}
      * exists after selecting the list item from the {@link FeedAdapter}.
      */
-    public void testListItemSelection() {
+    public void testlistItemSelection() {
         int ITEM_ID = 0;
         Instrumentation.ActivityMonitor activityMonitor =
                 getInstrumentation().addMonitor(DetailActivity.class.getName(), null, false);
@@ -104,5 +155,4 @@ public class FeedActivityTest extends ActivityInstrumentationTestCase2<FeedActiv
         }
 
     }
-
 }
