@@ -24,13 +24,21 @@ import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TOUR_
 
 public class QuizActivity extends AppCompatActivity {
 
+    /**
+     * Stores the web view shown in the fragment
+     */
     private WebView mWebView;
 
+    /**
+     * Initializes and populates {@link QuizActivity}
+     * @param savedInstanceState {@link Bundle}
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_quiz);
 
+        // Get the cursor that will get the quiz url from the database
         Map<String, String> partialPrimaryMap = new HashMap<>();
         partialPrimaryMap.put("TOUR_ID", FeedActivity.currentTourId);
         Cursor tourCursor = null;
@@ -39,6 +47,8 @@ public class QuizActivity extends AppCompatActivity {
             tourCursor = FeedActivity.database.getWholeByPrimary(TOUR_TABLE, partialPrimaryMap);
             tourCursor.moveToFirst();
             String quizURL = tourCursor.getString(tourCursor.getColumnIndex(QUIZ_URL));
+
+            // The web view to be displayed
             mWebView = (WebView) findViewById(R.id.activity_quiz_webview);
 
             // Enable Javascript
@@ -49,12 +59,13 @@ public class QuizActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
+        // While browsing the quiz, if the network is turned off, stop the activity
         mWebView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if (!Utilities.isNetworkAvailable(getApplicationContext())) {
                     finish();
-                    Toast.makeText(getApplicationContext(), "No internet connection", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "@string/no_network_quiz", Toast.LENGTH_SHORT).show();
                 }
                 return false;
             }

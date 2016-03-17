@@ -121,23 +121,27 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
                                 .commit();
                     }
                     viewHolder.getView().findViewById(R.id.fllock).setVisibility(View.GONE);
-                    // Only unlock the quiz once the last unlocked item is viewed (clicked)
 
+                // Only unlock the quiz once the last unlocked item is viewed (clicked)
                 } else if (viewHolder.quiz && allUnlocked(viewHolder.tour_id)) {
                     if (!(mContext.getResources().getBoolean(R.bool.isTablet))) {
+                        // If the device is a phone, start a new activity
                         Intent quizIntent = new Intent(mContext, QuizActivity.class);
+
+                        // If there is no internet connection, do not start the activity
                         if (!Utilities.isNetworkAvailable(mContext)) {
-                            Toast.makeText(mContext, "No internet connection", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(mContext, "@string/no_network_quiz", Toast.LENGTH_SHORT).show();
                         } else {
                             mContext.startActivity(quizIntent);
                         }
+                    // If the device is a tablet, start a new fragment
                     } else {
+                        // If there is no internet connection, do not start the fragment
                         if (!Utilities.isNetworkAvailable(mContext)) {
-                            Toast.makeText(( mContext), "No internet connection", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(( mContext), "@string/no_network_quiz", Toast.LENGTH_SHORT).show();
                         } else {
                             Bundle bundle = new Bundle();
                             bundle.putString(QuizFragment.ARG_ITEM_POSITION, "" + viewHolder.point_id);
-                            // Start a new activity on a phone or replace a detail fragment on tablets if unlocked.
                             QuizFragment fragment = new QuizFragment();
                             fragment.setArguments(bundle);
 
@@ -145,8 +149,9 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
                                     .replace(R.id.point_detail_container, fragment, QuizFragment.FRAGMENT_TAG).addToBackStack(null).commit();
                         }
                     }
+                // If the tour has not been completed yet, let them know why they cannot access the quiz
                 } else if(viewHolder.quiz && !allUnlocked(viewHolder.tour_id)){
-                    Toast.makeText(mContext, "You need to complete the tour before starting the quiz.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mContext, "@string/tour_not_complete", Toast.LENGTH_SHORT).show();
                 }
             }
         });
