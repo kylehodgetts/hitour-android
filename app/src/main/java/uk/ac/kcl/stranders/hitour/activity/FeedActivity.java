@@ -15,12 +15,10 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.util.Log;
@@ -77,12 +75,11 @@ import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.PASSP
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_DATA_TABLE;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_ID;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_TABLE;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_TOUR_TABLE;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.RANK;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.QUIZ_URL;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.SESSION_ID;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.SESSION_TABLE;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.START_DATE;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_TOUR_TABLE;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.RANK;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TOUR_ID;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TOUR_TABLE;
 
@@ -90,11 +87,6 @@ import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TOUR_
  * The main activity that displays all available points for a given tour.
  */
 public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.CallbackRetrofit {
-
-    /**
-     * Static String to name to store in a bundle the currently selected tour's id
-     */
-    public static final String CURRENT_TOUR_ID = "CURRENT_TOUR_ID";
 
     /**
      * The list of all available points.
@@ -155,13 +147,6 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        if(savedInstanceState != null) {
-            if(savedInstanceState.containsKey(CURRENT_TOUR_ID)) {
-                currentTourId = savedInstanceState.getString(CURRENT_TOUR_ID);
-            }
-        }
-
         database = new DBWrap(this, new HiSchema(1));
         setContentView(R.layout.activity_feed);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -197,18 +182,14 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
 
         mFeed.setLayoutManager(mLayoutManager);
 
-        if(currentTourId != null) {
-            populateFeedAdapter(currentTourId);
-        } else {
-            try {
-                Cursor sessionCursor = database.getAll(SESSION_TABLE);
-                if(sessionCursor.getCount() > 0) {
-                    sessionCursor.moveToFirst();
-                    populateFeedAdapter(sessionCursor.getString(sessionCursor.getColumnIndex(TOUR_ID)));
-                }
-            } catch (NotInSchemaException e) {
-                Log.e("DATABASE_FAIL",Log.getStackTraceString(e));
+        try {
+            Cursor tourCursor = database.getAll("TOUR");
+            if(tourCursor.getCount() > 0) {
+                tourCursor.moveToFirst();
+                populateFeedAdapter(tourCursor.getString(tourCursor.getColumnIndex(TOUR_ID)));
             }
+        } catch (NotInSchemaException e) {
+            Log.e("DATABASE_FAIL",Log.getStackTraceString(e));
         }
 
         mMenu = navigationView.getMenu();
@@ -220,46 +201,11 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
             supportActionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        try {
-            Cursor sessionCursor = database.getAll(SESSION_TABLE);
-            if(sessionCursor.getCount() > 0) {
-                sessionCursor.moveToFirst();
-                populateFeedAdapter(sessionCursor.getString(sessionCursor.getColumnIndex(TOUR_ID)));
-            }
-        } catch (NotInSchemaException e) {
-            Log.e("DATABASE_FAIL",Log.getStackTraceString(e));
-        }
-
-        ActionBarDrawerToggle drawerToggle = new ActionBarDrawerToggle(
-                this,
-                mDrawerLayout,
-                toolbar,
-                R.string.open_drawer,
-                R.string.close_drawer) {
-            @Override
-            public void onDrawerStateChanged(int newState) {
-                if(newState == DrawerLayout.STATE_SETTLING) {
-                    try {
-                        Cursor sessionCursor = database.getAll(SESSION_TABLE);
-                        for (int i = 0; i < sessionCursor.getCount(); i++) {
-                            sessionCursor.moveToPosition(i);
-                            if (sessionCursor.getString(sessionCursor.getColumnIndex(TOUR_ID)).equals(currentTourId)) {
-                                updateHeader(sessionCursor, i);
-                            }
-                        }
-                    } catch (NotInSchemaException e) {
-                        Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
-                    }
-                }
-            }
-        };
-        mDrawerLayout.setDrawerListener(drawerToggle);
-
         navigationView.setNavigationItemSelectedListener(
                 new NavigationView.OnNavigationItemSelectedListener() {
                     @Override
                     public boolean onNavigationItemSelected(MenuItem item) {
-
+                           
                         // TODO: Refactor this block of code
 
                         // If the "about" section is clicked, the DialogFragment shows up
@@ -269,11 +215,12 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
                             appInfoFragment.show(fm, "app_info_fragment");
                         } else {
                             try {
-                                Cursor sessionCursor = database.getAll(SESSION_TABLE);
-                                if(sessionCursor.getCount() > 0) {
-                                    sessionCursor.moveToPosition(item.getItemId());
-                                    if (!sessionCursor.getString(sessionCursor.getColumnIndex(TOUR_ID)).equals(currentTourId)) {
-                                        populateFeedAdapter(sessionCursor.getString(sessionCursor.getColumnIndex(TOUR_ID)));
+                                Cursor tourCursor = database.getAll("TOUR");
+                                if(tourCursor.getCount() > 0) {
+                                    tourCursor.moveToFirst();
+                                    tourCursor.move(item.getItemId());
+                                    if (!tourCursor.getString(tourCursor.getColumnIndex(TOUR_ID)).equals(FeedActivity.this.currentTourId)) {
+                                        populateFeedAdapter(tourCursor.getString(tourCursor.getColumnIndex(TOUR_ID)));
                                     }
                                 }
                             } catch (NotInSchemaException e) {
@@ -297,14 +244,6 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
             }
         });
 
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle savedInstanceState) {
-        // Save the currently selected tour's ID
-        savedInstanceState.putString(CURRENT_TOUR_ID, currentTourId);
-
-        super.onSaveInstanceState(savedInstanceState);
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -386,7 +325,6 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         tourSessionColumnsMap.put("START_DATE", tourSession.getStartDate());
         tourSessionColumnsMap.put("DURATION", tourSession.getDuration().toString());
         tourSessionColumnsMap.put("PASSPHRASE", tourSession.getPassphrase());
-        tourSessionColumnsMap.put(NAME, tourSession.getName());
         Map<String,String> tourSessionPrimaryKeysMap = new HashMap<>();
         tourSessionPrimaryKeysMap.put("SESSION_ID", tourSession.getId().toString());
         try {
@@ -401,7 +339,6 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         Map<String,String> tourColumnsMap = new HashMap<>();
         tourColumnsMap.put("NAME", tour.getName());
         tourColumnsMap.put("AUDIENCE_ID", tour.getAudienceId().toString());
-        tourColumnsMap.put(QUIZ_URL, tour.getQuizUrl());
         Map<String, String> tourPrimaryKeysMap = new HashMap<>();
         tourPrimaryKeysMap.put("TOUR_ID", tour.getId().toString());
         try {
@@ -514,15 +451,13 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         }
 
         updateMenu();
-
         currentTourId = tourSession.getTourId().toString();
         try {
-            Cursor sessionCursor = database.getAll(SESSION_TABLE);
-            for(int i = 0; i < sessionCursor.getCount(); i++) {
-                sessionCursor.moveToPosition(i);
-                if(sessionCursor.getString(sessionCursor.getColumnIndex(DatabaseConstants.TOUR_ID)).equals(currentTourId)) {
+            Cursor tourCursor = database.getAll("TOUR");
+            for(int i = 0; i < tourCursor.getCount(); i++) {
+                tourCursor.moveToPosition(i);
+                if(tourCursor.getString(tourCursor.getColumnIndex(DatabaseConstants.TOUR_ID)).equals(currentTourId)) {
                     mMenu.getItem(i).setChecked(true);
-                    break;
                 }
             }
         } catch (NotInSchemaException e) {
@@ -551,18 +486,16 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
     }
 
     /**
-     * Invoked to fill drawer with list of tour sessions saved on the device's database
+     * Invoked to fill drawer with list of tours saved on the device's database.
      */
     private void updateMenu() {
         mMenu.clear();
+        int i = 0;
         try {
-            Cursor sessionCursor = database.getAll(SESSION_TABLE);
-            for(int i = 0; i < sessionCursor.getCount(); i++) {
-                sessionCursor.moveToPosition(i);
-                Map<String, String> primaryKeysMap = new HashMap<>();
-                primaryKeysMap.put(TOUR_ID, sessionCursor.getString(sessionCursor.getColumnIndex(TOUR_ID)));
-                Cursor tourCursor = database.getWholeByPrimary(TOUR_TABLE, primaryKeysMap);
-                tourCursor.moveToFirst();
+            Cursor tourCursor = database.getAll("TOUR");
+            tourCursor.moveToFirst();
+            for(i = 0; i < tourCursor.getCount(); i++) {
+                tourCursor.moveToPosition(i);
                 mMenu.add(0, i, Menu.NONE, tourCursor.getString(tourCursor.getColumnIndex(NAME))).setIcon(R.drawable.ic_action_local_hospital);
                 // TODO: Fix content description
 //                mMenu.getItem(i).getActionView().setContentDescription(getString(R.string.content_description_tour_selection, mMenu.getItem(i).getTitle()));
@@ -579,47 +512,10 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
 //        mMenu.getItem(i).getActionView().setContentDescription(getString(R.string.content_description_tour_selection, mMenu.getItem(i).getTitle()));
     }
 
-    /**
-     * Update the header portion of the drawer layout for a different session
-     * @param sessionCursor cursor of the whole SESSION table
-     * @param position position in the cursor of the session we want
-     */
-    private void updateHeader(Cursor sessionCursor, int position) {
-        sessionCursor.moveToPosition(position);
-
-        TextView nameTextView = (TextView) findViewById(R.id.nav_tour_info);
-        TextView startDateTextView = (TextView) findViewById(R.id.tour_date);
-        TextView expirationDateTextView = (TextView) findViewById(R.id.expiration_date);
-
-        SimpleDateFormat sdfStart = new SimpleDateFormat("yyyy-MM-dd");
-        SimpleDateFormat sdfFinish = new SimpleDateFormat("dd-MM-yyyy");
-
-        String name = sessionCursor.getString(sessionCursor.getColumnIndex(NAME));
-        String startDate = sessionCursor.getString(sessionCursor.getColumnIndex(START_DATE));
-        String duration = sessionCursor.getString(sessionCursor.getColumnIndex(DURATION));
-
-        nameTextView.setText(name);
-
-        Calendar expirationDateCalendar = getFinishDate(startDate, duration);
-        String expirationDate = sdfFinish.format(expirationDateCalendar.getTime());
-        expirationDateTextView.setText(Html.fromHtml("<b>" + FeedActivity.this.getString(R.string.expiration_date) + "</b><br/>" + expirationDate));
-
-        try {
-            startDate = sdfFinish.format(sdfStart.parse(startDate));
-        } catch (ParseException e) {
-            Log.e("PARSE_FAIL", Log.getStackTraceString(e));
-        }
-        startDateTextView.setText(Html.fromHtml("<b>" + FeedActivity.this.getString(R.string.start_date) + "</b><br/>" + startDate));
-    }
-
     private void populateFeedAdapter(String tourId) {
         Map<String,String> partialPrimaryMap = new HashMap<>();
         partialPrimaryMap.put("TOUR_ID", tourId);
         try {
-            // Clear the fragment on change so point from previous tour does not show on tablet
-            if(currentFeedAdapter != null)
-                currentFeedAdapter.clearFragment();
-
             Cursor feedCursor = database.getWholeByPrimaryPartialSorted(POINT_TOUR_TABLE, partialPrimaryMap, RANK);
             FeedAdapter adapter = new FeedAdapter(feedCursor, this);
             mFeed.setAdapter(adapter);
@@ -815,25 +711,19 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
     }
 
     private boolean sessionExistsOffline(String startDate, String duration) {
-        Calendar calendarFinish = getFinishDate(startDate, duration);
-        Calendar calendarNow = Calendar.getInstance();
-        if (calendarNow.after(calendarFinish)) {
-            return false;
-        }
-        return true;
-    }
-
-    private Calendar getFinishDate(String startDate, String duration) {
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             Calendar calendarFinish = Calendar.getInstance();
             calendarFinish.setTime(sdf.parse(startDate));
             calendarFinish.add(Calendar.DATE, Integer.parseInt(duration));
-            return calendarFinish;
+            Calendar calendarNow = Calendar.getInstance();
+            if(calendarNow.after(calendarFinish)) {
+                return false;
+            }
         } catch (ParseException e) {
             Log.e("PARSE_FAIL", Log.getStackTraceString(e));
         }
-        return null;
+        return true;
     }
 
     private void removeSession(String sessionId) {

@@ -19,7 +19,6 @@ public class HiSchema extends DatabaseSchema {
         TableSchema tour = new TableSchema(TOUR_ID, TOUR_TABLE);
         tour.addValue(NAME, DataType.Text);
         tour.addValue(AUDIENCE_ID, DataType.Text);
-        tour.addValue(QUIZ_URL, DataType.Text);
         addTable(tour);
 
         TableSchema session = new TableSchema(SESSION_ID, SESSION_TABLE);
@@ -27,7 +26,6 @@ public class HiSchema extends DatabaseSchema {
         session.addValue(START_DATE, DataType.Text);
         session.addValue(DURATION, DataType.Text);
         session.addValue(TOUR_ID, DataType.Text);
-        session.addValue(NAME, DataType.Text);
         addTable(session);
 
         TableSchema audience = new TableSchema(AUDIENCE_ID,AUDIENCE_TABLE);
