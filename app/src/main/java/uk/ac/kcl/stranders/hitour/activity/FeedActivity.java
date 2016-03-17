@@ -209,12 +209,24 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
 
         mFeed.setLayoutManager(mLayoutManager);
 
-        if(currentTourId != null) {
-            populateFeedAdapter(currentTourId);
-        } else {
-            try {
-                final Cursor sessionCursor = database.getAll(SESSION_TABLE);
-                if(sessionCursor.getCount() > 0) {
+        try {
+            final Cursor sessionCursor = database.getAll(SESSION_TABLE);
+            if (currentTourId != null) {
+                populateFeedAdapter(currentTourId);
+                for(int i = 0; i < sessionCursor.getCount(); i++) {
+                    sessionCursor.moveToPosition(i);
+                    if(sessionCursor.getString(sessionCursor.getColumnIndex(TOUR_ID)).equals(currentTourId)) {
+                        mDrawerLayout.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                updateHeader(sessionCursor, 0);
+                            }
+                        });
+                        break;
+                    }
+                }
+            } else {
+                if (sessionCursor.getCount() > 0) {
                     sessionCursor.moveToFirst();
                     populateFeedAdapter(sessionCursor.getString(sessionCursor.getColumnIndex(TOUR_ID)));
                     mDrawerLayout.post(new Runnable() {
@@ -224,9 +236,10 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
                         }
                     });
                 }
-            } catch (NotInSchemaException e) {
-                Log.e("DATABASE_FAIL",Log.getStackTraceString(e));
+
             }
+        } catch (NotInSchemaException e) {
+            Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
         }
 
         mMenu = navigationView.getMenu();
