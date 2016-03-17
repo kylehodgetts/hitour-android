@@ -18,6 +18,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -125,17 +126,27 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
                 } else if (viewHolder.quiz && allUnlocked(viewHolder.tour_id)) {
                     if (!(mContext.getResources().getBoolean(R.bool.isTablet))) {
                         Intent quizIntent = new Intent(mContext, QuizActivity.class);
-                        mContext.startActivity(quizIntent);
+                        if (!Utilities.isNetworkAvailable(mContext)) {
+                            Toast.makeText(mContext, "No internet connection", Toast.LENGTH_SHORT).show();
+                        } else {
+                            mContext.startActivity(quizIntent);
+                        }
                     } else {
-                        Bundle bundle = new Bundle();
-                        bundle.putString(QuizFragment.ARG_ITEM_POSITION, "" + viewHolder.point_id);
-                        // Start a new activity on a phone or replace a detail fragment on tablets if unlocked.
-                        QuizFragment fragment = new QuizFragment();
-                        fragment.setArguments(bundle);
+                        if (!Utilities.isNetworkAvailable(mContext)) {
+                            Toast.makeText(( mContext), "No internet connection", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Bundle bundle = new Bundle();
+                            bundle.putString(QuizFragment.ARG_ITEM_POSITION, "" + viewHolder.point_id);
+                            // Start a new activity on a phone or replace a detail fragment on tablets if unlocked.
+                            QuizFragment fragment = new QuizFragment();
+                            fragment.setArguments(bundle);
 
-                        ((AppCompatActivity) mContext).getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.point_detail_container, fragment, QuizFragment.FRAGMENT_TAG).addToBackStack(null).commit();
+                            ((AppCompatActivity) mContext).getSupportFragmentManager().beginTransaction()
+                                    .replace(R.id.point_detail_container, fragment, QuizFragment.FRAGMENT_TAG).addToBackStack(null).commit();
+                        }
                     }
+                } else if(viewHolder.quiz && !allUnlocked(viewHolder.tour_id)){
+                    Toast.makeText(mContext, "You need to complete the tour before starting the quiz.", Toast.LENGTH_SHORT).show();
                 }
             }
         });
