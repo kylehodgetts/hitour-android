@@ -4,12 +4,18 @@ import android.app.Instrumentation;
 import android.content.pm.ActivityInfo;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.TouchUtils;
+import android.util.Log;
 import android.view.KeyEvent;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 
 import uk.ac.kcl.stranders.hitour.activity.DetailActivity;
 import uk.ac.kcl.stranders.hitour.activity.FeedActivity;
@@ -79,43 +85,47 @@ public class FeedActivityTest extends ActivityInstrumentationTestCase2<FeedActiv
     }
 
     /**
-     * Enters the point's number via the scanner
-     * and returns to the FeedActivity.
+     * Enters the point's number via the scanner and unlock's the quiz
+     * Returns to the FeedActivity.
      */
     public void testOpenLockedFragment() {
-
-        FloatingActionButton floatingActionButton = (FloatingActionButton) getActivity().findViewById(R.id.fab);
-        Instrumentation.ActivityMonitor activityMonitor =
-                    getInstrumentation().addMonitor(ScanningActivity.class.getName(), null, false);
-        getInstrumentation().waitForIdleSync();
-        TouchUtils.clickView(this, floatingActionButton);
-        getInstrumentation().waitForIdleSync();
-
-        ScanningActivity scanningActivity = (ScanningActivity)
-                getInstrumentation().waitForMonitorWithTimeout(activityMonitor, 5000);
-
-        getInstrumentation().waitForIdleSync();
-        final EditText etCodePinEntry = (EditText) scanningActivity.findViewById(R.id.etCodePinEntry);
-        getInstrumentation().runOnMainSync(new Runnable() {
-            @Override
-            public void run() {
-                etCodePinEntry.requestFocus();
-            }
-        });
-        getInstrumentation().sendStringSync(4 + "");
-        getInstrumentation().sendCharacterSync(KeyEvent.KEYCODE_ENTER);
-        getInstrumentation().waitForIdleSync();
-        Button btnSubmit = (Button) scanningActivity.findViewById(R.id.btnSubmit);
-        TouchUtils.clickView(this, btnSubmit);
-
-        getInstrumentation().waitForIdleSync();
-
-
+        int pointsOfTour [] = {4,5,2};
         FeedActivity feedActivity = getActivity();
-        getInstrumentation().waitForIdleSync();
-        getInstrumentation().sendCharacterSync(KeyEvent.KEYCODE_BACK);
-        getInstrumentation().waitForIdleSync();
-        assertNotNull(feedActivity);
+        for(int i = 0 ; i < pointsOfTour.length ; i++) {
+            FloatingActionButton floatingActionButton = (FloatingActionButton) getActivity().findViewById(R.id.fab);
+            Instrumentation.ActivityMonitor activityMonitor =
+                    getInstrumentation().addMonitor(ScanningActivity.class.getName(), null, false);
+            getInstrumentation().waitForIdleSync();
+
+            TouchUtils.clickView(this, floatingActionButton);
+            getInstrumentation().waitForIdleSync();
+
+            ScanningActivity scanningActivity = (ScanningActivity)
+                    getInstrumentation().waitForMonitorWithTimeout(activityMonitor, 9000);
+
+            getInstrumentation().waitForIdleSync();
+            final EditText etCodePinEntry = (EditText) scanningActivity.findViewById(R.id.etCodePinEntry);
+            getInstrumentation().runOnMainSync(new Runnable() {
+                @Override
+                public void run() {
+                    etCodePinEntry.requestFocus();
+                }
+            });
+            getInstrumentation().sendStringSync(pointsOfTour[i] + "");
+            getInstrumentation().sendCharacterSync(KeyEvent.KEYCODE_ENTER);
+            getInstrumentation().waitForIdleSync();
+            Button btnSubmit = (Button) scanningActivity.findViewById(R.id.btnSubmit);
+            TouchUtils.clickView(this, btnSubmit);
+
+            getInstrumentation().waitForIdleSync();
+
+
+             feedActivity = getActivity();
+            getInstrumentation().waitForIdleSync();
+            getInstrumentation().sendCharacterSync(KeyEvent.KEYCODE_BACK);
+            getInstrumentation().waitForIdleSync();
+            assertNotNull(feedActivity);
+        }
         feedActivity.finish();
 
     }
@@ -155,4 +165,45 @@ public class FeedActivityTest extends ActivityInstrumentationTestCase2<FeedActiv
         }
 
     }
+    /* Attempt to scroll down nb9
+    public void testOpenQuiz() {
+
+        int ITEM_ID = 1;
+        Instrumentation.ActivityMonitor activityMonitor =
+                getInstrumentation().addMonitor(DetailActivity.class.getName(), null, false);
+
+        RecyclerView recyclerView = (RecyclerView) getActivity().findViewById(R.id.rv_feed);
+        getInstrumentation().waitForIdleSync();
+        // Select the first list item.
+
+        Log.i("Number of Layouts",""+recyclerView.getAdapter().getItemCount());
+        RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
+        int mScrollPosition = 0;
+        if(layoutManager != null && layoutManager instanceof LinearLayoutManager){
+            mScrollPosition = ((LinearLayoutManager) layoutManager).findLastVisibleItemPosition();
+        }
+        layoutManager.scrollToPosition(mScrollPosition);
+        TouchUtils.clickView(this, recyclerView.getChildAt(ITEM_ID));
+        getInstrumentation().waitForIdleSync();
+
+        FeedActivity feedActivity = getActivity();
+        Boolean isTablet = feedActivity.getResources().getBoolean(R.bool.isTablet);
+
+        if(isTablet) {
+            Fragment detailFragment =
+                    feedActivity.getSupportFragmentManager().findFragmentByTag(DetailFragment.FRAGMENT_TAG);
+
+            assertNotNull(detailFragment);
+        } else {
+            DetailActivity detailActivity = (DetailActivity)
+                    getInstrumentation().waitForMonitorWithTimeout(activityMonitor, 5000);
+
+            Fragment detailFragment = detailActivity.getSupportFragmentManager().getFragments().get(0);
+            assertNotNull(detailFragment);
+            detailActivity.finish();
+
+        }
+
+    }
+    */
 }

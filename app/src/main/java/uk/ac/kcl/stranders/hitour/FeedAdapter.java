@@ -67,7 +67,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
      */
     private HashMap<Pair<Integer, Integer>, View> views;
 
-    private HashMap<Integer,ViewHolder> viewHolderQuiz;
+    private HashMap<Integer,View> viewQuizzes;
     /**
      * Stores the current {@link DetailFragment} that is being shown
      */
@@ -83,7 +83,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
         pointTourCursor = cursor;
         mContext = context;
         views = new HashMap<>();
-        viewHolderQuiz = new HashMap<>();
+        viewQuizzes = new HashMap<>();
     }
 
     /**
@@ -170,7 +170,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
             holder.ivThumbnail.setImageDrawable(ContextCompat.getDrawable(mContext,R.drawable.profile));
             holder.quiz = true;
             holder.tour_id = Integer.parseInt(FeedActivity.currentTourId);
-            viewHolderQuiz.put(holder.tour_id,holder);
+            viewQuizzes.put(holder.tour_id,holder.getView());
             if (allUnlocked(holder.tour_id)) {
                     holder.getView().findViewById(R.id.fllock).setVisibility(View.GONE);
 
@@ -230,8 +230,8 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
             getView(point_id, tour_id).findViewById(R.id.fllock).setVisibility(View.GONE);
         }
         if (allUnlocked(tour_id)) {
-            if(viewHolderQuiz.get(tour_id) != null) {
-                viewHolderQuiz.get(tour_id).getView().findViewById(R.id.fllock).setVisibility(View.GONE);
+            if(viewQuizzes.get(tour_id) != null) {
+                viewQuizzes.get(tour_id).findViewById(R.id.fllock).setVisibility(View.GONE);
             }
         }
     }
@@ -323,6 +323,15 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
     private View getView(Integer point_id, Integer tour_id) {
 
         return views.get(new Pair<>(point_id, tour_id));
+    }
+
+    /**
+     * Method to retrieve the quiz/Feedback view.
+     * @param tour_id
+     * @return the quiz view
+     */
+    public View getQuizView(Integer tour_id){
+       return viewQuizzes.get(tour_id);
     }
 
     public void clearFragment() {
