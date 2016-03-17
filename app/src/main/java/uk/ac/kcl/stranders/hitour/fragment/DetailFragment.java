@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import uk.ac.kcl.stranders.hitour.R;
+import uk.ac.kcl.stranders.hitour.activity.DetailActivity;
 import uk.ac.kcl.stranders.hitour.activity.FeedActivity;
 import uk.ac.kcl.stranders.hitour.database.NotInSchemaException;
 import uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants;
@@ -71,7 +72,7 @@ public class DetailFragment extends Fragment {
     /**
      * Stores the integer ID of the current item selected to view
      */
-    private int mItemId;
+    private static int mItemId;
 
     /**
      * Stores the root view where the fragment is inflated to
@@ -120,6 +121,7 @@ public class DetailFragment extends Fragment {
         Bundle arguments = new Bundle();
         arguments.putString(ARG_ITEM_POSITION, itemId);
         DetailFragment fragment = new DetailFragment();
+        mItemId = Integer.parseInt(itemId);
         fragment.setArguments(arguments);
         return fragment;
     }
@@ -316,6 +318,7 @@ public class DetailFragment extends Fragment {
             final EMVideoView videoView = (EMVideoView) linearLayout.findViewById(R.id.video);
             currentVideosArrayList.add(videoView);
             videoView.setId(Integer.parseInt(mItemId + rank + ""));
+            DetailActivity.addToVideoCollection(mItemId,videoView);
             videoView.setLayoutParams(new LinearLayout.LayoutParams(1000, 1000));
             videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 @Override
@@ -386,6 +389,8 @@ public class DetailFragment extends Fragment {
         }
     }
 
+
+
     private boolean checkDataAudience(String dataId) {
         try {
             Map<String, String> partialPrimaryMap = new HashMap<>();
@@ -407,6 +412,14 @@ public class DetailFragment extends Fragment {
             Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
         }
         return false;
+    }
+
+    public static void pauseAll(ArrayList<EMVideoView> collectionOfVideos){
+        if (collectionOfVideos != null) {
+            for (EMVideoView video : collectionOfVideos) {
+                video.pause();
+            }
+        }
     }
 
 }

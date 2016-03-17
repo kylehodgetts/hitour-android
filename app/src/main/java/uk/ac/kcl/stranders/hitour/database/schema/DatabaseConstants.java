@@ -17,7 +17,6 @@ public class DatabaseConstants {
     public static final String POINT_ID = "POINT_ID";
     public static final String DATA_ID = "DATA_ID";
     public static final String URL = "URL";
-    public static final String QUIZ_URL = "QUIZ_URL";
     public static final String DESCRIPTION = "DESCRIPTION";
     public static final String TITLE = "TITLE";
     public static final String RANK = "RANK";
