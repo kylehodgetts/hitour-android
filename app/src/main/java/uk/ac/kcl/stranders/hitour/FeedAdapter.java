@@ -240,10 +240,4 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
         return views.get(new Pair<>(point_id, tour_id));
     }
 
-    public void clearFragment() {
-        if(fragment != null)
-            ((AppCompatActivity) mContext).getSupportFragmentManager().beginTransaction().remove(fragment).commit();
-    }
-
-
 }

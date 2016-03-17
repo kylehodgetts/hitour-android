@@ -1,8 +1,11 @@
 package uk.ac.kcl.stranders.hitour.activity;
 
+import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Typeface;
@@ -11,12 +14,14 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -27,6 +32,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.TextView;
 
 import com.google.zxing.integration.android.IntentIntegrator;
@@ -50,6 +56,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import uk.ac.kcl.stranders.hitour.CustomTypefaceSpan;
 import uk.ac.kcl.stranders.hitour.FeedAdapter;
@@ -90,6 +97,11 @@ import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TOUR_
  * The main activity that displays all available points for a given tour.
  */
 public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.CallbackRetrofit {
+
+    /**
+     * Int value for result of requesting camera permission
+     */
+    public static final int MY_PERMISSIONS_REQUEST_CAMERA = 1;
 
     /**
      * Static String to name to store in a bundle the currently selected tour's id
@@ -197,18 +209,37 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
 
         mFeed.setLayoutManager(mLayoutManager);
 
-        if(currentTourId != null) {
-            populateFeedAdapter(currentTourId);
-        } else {
-            try {
-                Cursor sessionCursor = database.getAll(SESSION_TABLE);
-                if(sessionCursor.getCount() > 0) {
+        try {
+            final Cursor sessionCursor = database.getAll(SESSION_TABLE);
+            if (currentTourId != null) {
+                populateFeedAdapter(currentTourId);
+                for(int i = 0; i < sessionCursor.getCount(); i++) {
+                    sessionCursor.moveToPosition(i);
+                    if(sessionCursor.getString(sessionCursor.getColumnIndex(TOUR_ID)).equals(currentTourId)) {
+                        mDrawerLayout.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                updateHeader(sessionCursor, 0);
+                            }
+                        });
+                        break;
+                    }
+                }
+            } else {
+                if (sessionCursor.getCount() > 0) {
                     sessionCursor.moveToFirst();
                     populateFeedAdapter(sessionCursor.getString(sessionCursor.getColumnIndex(TOUR_ID)));
+                    mDrawerLayout.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            updateHeader(sessionCursor, 0);
+                        }
+                    });
                 }
-            } catch (NotInSchemaException e) {
-                Log.e("DATABASE_FAIL",Log.getStackTraceString(e));
+
             }
+        } catch (NotInSchemaException e) {
+            Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
         }
 
         mMenu = navigationView.getMenu();
@@ -219,41 +250,6 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
             supportActionBar.setHomeAsUpIndicator(R.drawable.ic_action_menu);
             supportActionBar.setDisplayHomeAsUpEnabled(true);
         }
-
-        try {
-            Cursor sessionCursor = database.getAll(SESSION_TABLE);
-            if(sessionCursor.getCount() > 0) {
-                sessionCursor.moveToFirst();
-                populateFeedAdapter(sessionCursor.getString(sessionCursor.getColumnIndex(TOUR_ID)));
-            }
-        } catch (NotInSchemaException e) {
-            Log.e("DATABASE_FAIL",Log.getStackTraceString(e));
-        }
-
-        ActionBarDrawerToggle drawerToggle = new ActionBarDrawerToggle(
-                this,
-                mDrawerLayout,
-                toolbar,
-                R.string.open_drawer,
-                R.string.close_drawer) {
-            @Override
-            public void onDrawerStateChanged(int newState) {
-                if(newState == DrawerLayout.STATE_SETTLING) {
-                    try {
-                        Cursor sessionCursor = database.getAll(SESSION_TABLE);
-                        for (int i = 0; i < sessionCursor.getCount(); i++) {
-                            sessionCursor.moveToPosition(i);
-                            if (sessionCursor.getString(sessionCursor.getColumnIndex(TOUR_ID)).equals(currentTourId)) {
-                                updateHeader(sessionCursor, i);
-                            }
-                        }
-                    } catch (NotInSchemaException e) {
-                        Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
-                    }
-                }
-            }
-        };
-        mDrawerLayout.setDrawerListener(drawerToggle);
 
         navigationView.setNavigationItemSelectedListener(
                 new NavigationView.OnNavigationItemSelectedListener() {
@@ -273,7 +269,10 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
                                 if(sessionCursor.getCount() > 0) {
                                     sessionCursor.moveToPosition(item.getItemId());
                                     if (!sessionCursor.getString(sessionCursor.getColumnIndex(TOUR_ID)).equals(currentTourId)) {
+                                        CardView cardView = (CardView) findViewById(R.id.point_detail_container);
+                                        cardView.removeAllViews();
                                         populateFeedAdapter(sessionCursor.getString(sessionCursor.getColumnIndex(TOUR_ID)));
+                                        updateHeader(sessionCursor, item.getItemId());
                                     }
                                 }
                             } catch (NotInSchemaException e) {
@@ -293,7 +292,14 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                scanCode();
+                //Request camera permissions on Android 6.0 +
+                if(ContextCompat.checkSelfPermission(FeedActivity.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(FeedActivity.this,
+                            new String[]{Manifest.permission.CAMERA},
+                            MY_PERMISSIONS_REQUEST_CAMERA);
+                } else {
+                    scanCode();
+                }
             }
         });
 
@@ -331,7 +337,9 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
                 // Instructions for when a tour is entered
                 if(Utilities.isNetworkAvailable(this)) {
                     // Set ProgressDialog so user knows data is being downloaded
+                    setRequestedOrientation(getResources().getConfiguration().orientation);
                     progressDialog = new ProgressDialog(this);
+                    progressDialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                     progressDialog.setMessage("Downloading data");
                     progressDialog.show();
                     progressDialog.setCancelable(false);
@@ -354,6 +362,15 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         integrator.setOrientationLocked(true);
         integrator.setBeepEnabled(false);
         integrator.initiateScan();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_CAMERA: {
+                scanCode();
+            }
+        }
     }
 
     @Override
@@ -503,6 +520,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
 
         // Download all data that us not already on the device
         downloadItemCount = urlArrayList.size();
+        progressDialog.setMessage("Downloading data: 0 of " + downloadItemCount + " files downloaded");
         for(String url : urlArrayList) {
             try {
                 DownloadToStorage downloadToStorage = new DownloadToStorage(url);
@@ -522,6 +540,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
                 sessionCursor.moveToPosition(i);
                 if(sessionCursor.getString(sessionCursor.getColumnIndex(DatabaseConstants.TOUR_ID)).equals(currentTourId)) {
                     mMenu.getItem(i).setChecked(true);
+                    updateHeader(sessionCursor, i);
                     break;
                 }
             }
@@ -575,7 +594,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
             Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
         }
         mMenu.addSubMenu("s");
-        mMenu.add(R.id.end_padder, R.id.app_info_item, Menu.NONE, getString(R.string.about)).setIcon(R.drawable.ic_action_local_hospital);
+        mMenu.add(R.id.end_padder, R.id.app_info_item, Menu.NONE, getString(R.string.about)).setIcon(R.drawable.ic_action_live_help);
 //        mMenu.getItem(i).getActionView().setContentDescription(getString(R.string.content_description_tour_selection, mMenu.getItem(i).getTitle()));
     }
 
@@ -616,10 +635,6 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         Map<String,String> partialPrimaryMap = new HashMap<>();
         partialPrimaryMap.put("TOUR_ID", tourId);
         try {
-            // Clear the fragment on change so point from previous tour does not show on tablet
-            if(currentFeedAdapter != null)
-                currentFeedAdapter.clearFragment();
-
             Cursor feedCursor = database.getWholeByPrimaryPartialSorted(POINT_TOUR_TABLE, partialPrimaryMap, RANK);
             FeedAdapter adapter = new FeedAdapter(feedCursor, this);
             mFeed.setAdapter(adapter);
@@ -637,6 +652,9 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
 
         private DownloadToStorage(String url) {
             this.url = url;
+            client.setConnectTimeout(5, TimeUnit.SECONDS);
+            client.setWriteTimeout(5, TimeUnit.SECONDS);
+            client.setReadTimeout(5, TimeUnit.SECONDS);
         }
 
         public void run() throws Exception {
@@ -680,6 +698,12 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
 
     private void onDownloadFinish() {
         downloadPosition++;
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                progressDialog.setMessage("Downloading data: " + downloadPosition + " of " + downloadItemCount + " files downloaded");
+            }
+        });
         if(downloadPosition == downloadItemCount) {
             progressDialog.dismiss();
             downloadItemCount = 0;
@@ -687,7 +711,11 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                    CardView cardView = (CardView) findViewById(R.id.point_detail_container);
+                    cardView.removeAllViews();
                     populateFeedAdapter(currentTourId);
+                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER);
+                    progressDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                 }
             });
         }
