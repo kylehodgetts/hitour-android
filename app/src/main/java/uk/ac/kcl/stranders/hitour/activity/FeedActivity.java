@@ -21,6 +21,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -255,9 +256,8 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
                                 if(sessionCursor.getCount() > 0) {
                                     sessionCursor.moveToPosition(item.getItemId());
                                     if (!sessionCursor.getString(sessionCursor.getColumnIndex(TOUR_ID)).equals(currentTourId)) {
-                                        // Clear the fragment on change so point from previous tour does not show on tablet
-                                        if(currentFeedAdapter != null)
-                                            currentFeedAdapter.clearFragment();
+                                        CardView cardView = (CardView) findViewById(R.id.point_detail_container);
+                                        cardView.removeAllViews();
                                         populateFeedAdapter(sessionCursor.getString(sessionCursor.getColumnIndex(TOUR_ID)));
                                         updateHeader(sessionCursor, item.getItemId());
                                     }
@@ -698,9 +698,8 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    // Clear the fragment on change so point from previous tour does not show on tablet
-                    if(currentFeedAdapter != null)
-                        currentFeedAdapter.clearFragment();
+                    CardView cardView = (CardView) findViewById(R.id.point_detail_container);
+                    cardView.removeAllViews();
                     populateFeedAdapter(currentTourId);
                     setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER);
                     progressDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
