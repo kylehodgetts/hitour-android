@@ -15,6 +15,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
 
+import com.devbrackets.android.exomedia.EMVideoView;
+
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -60,6 +64,8 @@ public class DetailActivity extends AppCompatActivity {
      */
     private DetailPagerAdapter mPagerAdapter;
 
+    private static HashMap<Integer,ArrayList<EMVideoView>> allVideos;
+
     /**
      * Initializes and populates {@link DetailActivity#mPager}.
      *
@@ -69,7 +75,7 @@ public class DetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
-
+        allVideos = new HashMap<>();
         Map<String,String> partialPrimaryMap = new HashMap<>();
         partialPrimaryMap.put("TOUR_ID", FeedActivity.currentTourId);
         try {
@@ -92,9 +98,14 @@ public class DetailActivity extends AppCompatActivity {
                 super.onPageScrollStateChanged(state);
             }
 
+            //Pauses all videos of the current view and changes the cursor position
             @Override
             public void onPageSelected(int position) {
-                if (mCursor != null) {
+                if (mCursor != null ) {
+                    Integer itemId = Integer.parseInt(mCursor.getString(mCursor.getColumnIndex(DatabaseConstants.POINT_ID)));
+                    if (pointVideoCollection(itemId,allVideos) != null && allVideos != null){
+                        DetailFragment.pauseAll(pointVideoCollection(itemId,allVideos));
+                    }
                     mCursor.moveToPosition(position);
                 }
             }
@@ -172,4 +183,42 @@ public class DetailActivity extends AppCompatActivity {
             return (mCursor != null) ? mCursor.getCount() : 0;
         }
     }
+
+    /**
+     * Method to add a video to a collection of videos associated with a DetailFragment's itemId.
+     * @param itemId itemId of the DetailFragment
+     * @param video a video from the collection of videos of the DetailFragment
+     */
+    public static void addToVideoCollection(Integer itemId,EMVideoView video){
+        if(allVideos.get(itemId) != null){
+            if(!allVideos.get(itemId).contains(video)){
+                allVideos.get(itemId).add(video);
+            }
+        }
+        else {
+            ArrayList<EMVideoView> arraylist = new ArrayList<>();
+            arraylist.add(video);
+            allVideos.put(itemId, arraylist);
+        }
+    }
+
+    /**
+     * Method that returns the videos associated to a particular point
+     * @param itemId point ID
+     * @param hashMap of key point and of a value arraylist
+     * @return ArrayList of videos belonging to a specific point
+     */
+    private ArrayList<EMVideoView> pointVideoCollection(Integer itemId,HashMap<Integer,ArrayList<EMVideoView>> hashMap) {
+        if (mCursor.getPosition() != -1) {
+            if (itemId != -1) {
+                if(hashMap.get(itemId) != null) {
+                    if (!hashMap.get(itemId).isEmpty()) {
+                        return hashMap.get(itemId);
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
 }
