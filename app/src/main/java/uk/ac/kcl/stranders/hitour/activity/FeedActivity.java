@@ -270,7 +270,9 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
                                     sessionCursor.moveToPosition(item.getItemId());
                                     if (!sessionCursor.getString(sessionCursor.getColumnIndex(TOUR_ID)).equals(currentTourId)) {
                                         CardView cardView = (CardView) findViewById(R.id.point_detail_container);
-                                        cardView.removeAllViews();
+                                        if(cardView != null) {
+                                            cardView.removeAllViews();
+                                        }
                                         populateFeedAdapter(sessionCursor.getString(sessionCursor.getColumnIndex(TOUR_ID)));
                                         updateHeader(sessionCursor, item.getItemId());
                                     }
@@ -712,7 +714,9 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
                 @Override
                 public void run() {
                     CardView cardView = (CardView) findViewById(R.id.point_detail_container);
-                    cardView.removeAllViews();
+                    if(cardView != null) {
+                        cardView.removeAllViews();
+                    }
                     populateFeedAdapter(currentTourId);
                     setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER);
                     progressDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
