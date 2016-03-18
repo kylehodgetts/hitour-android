@@ -125,7 +125,7 @@ public class DetailFragment extends Fragment {
     }
 
     /**
-     * Set's up the {@link Fragment}'s data ready for it's views to be created
+     * Sets up the {@link Fragment}'s data ready for it's views to be created
      * @param savedInstanceState {@link Bundle} with all the saved state variables
      */
     @Override
@@ -177,7 +177,7 @@ public class DetailFragment extends Fragment {
     }
 
     /**
-     * Creates and inflates the view's on the {@link Fragment} from the data for the selected point
+     * Creates and inflates the views on the {@link Fragment} from the data for the selected point
      * including its images, text and videos.
      *
      * @param inflater {@link LayoutInflater}
