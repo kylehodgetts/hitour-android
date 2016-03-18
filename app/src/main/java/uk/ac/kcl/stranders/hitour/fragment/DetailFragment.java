@@ -386,6 +386,21 @@ public class DetailFragment extends Fragment {
         }
     }
 
+    /**
+     * Pauses the video when the ViewPager page changes to another page
+     * @param isVisibleToUser if this DetailFragment is currently visible
+     */
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        // Check if the DetailFragment is currently visible and is becoming invisible to user
+        if (this.isVisible() && !isVisibleToUser && currentVideosArrayList != null) {
+            for (EMVideoView video : currentVideosArrayList) {
+                video.pause();
+            }
+        }
+    }
+
     private boolean checkDataAudience(String dataId) {
         try {
             Map<String, String> partialPrimaryMap = new HashMap<>();

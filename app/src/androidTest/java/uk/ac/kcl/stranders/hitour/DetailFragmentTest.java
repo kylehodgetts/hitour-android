@@ -93,4 +93,5 @@ public class DetailFragmentTest extends InstrumentationTestCase {
         assertNotNull(currentActivity.findViewById(R.id.description));
     }
 
+
 }
