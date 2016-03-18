@@ -327,5 +327,5 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
         if(fragment != null)
             ((AppCompatActivity) mContext).getSupportFragmentManager().beginTransaction().remove(fragment).commit();
     }
-
+    
 }
