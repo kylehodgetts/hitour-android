@@ -3,11 +3,7 @@ package uk.ac.kcl.stranders.hitour.retrofit;
 
 import android.test.AndroidTestCase;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import uk.ac.kcl.stranders.hitour.Utilities;
-import uk.ac.kcl.stranders.hitour.model.DataType;
+import uk.ac.kcl.stranders.hitour.utilities.Utilities;
 
 /**
  * Tests for the {@link HiTourRetrofit} class.

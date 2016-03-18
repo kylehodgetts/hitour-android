@@ -25,6 +25,7 @@ import uk.ac.kcl.stranders.hitour.activity.DetailActivity;
 import uk.ac.kcl.stranders.hitour.activity.FeedActivity;
 import uk.ac.kcl.stranders.hitour.database.NotInSchemaException;
 import uk.ac.kcl.stranders.hitour.fragment.DetailFragment;
+import uk.ac.kcl.stranders.hitour.utilities.Utilities;
 
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.DESCRIPTION;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.NAME;
@@ -132,7 +133,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
             String url = pointCursor.getString(pointCursor.getColumnIndex(URL));
             holder.point_id = Integer.parseInt(pointTourCursor.getString(pointTourCursor.getColumnIndex(POINT_ID)));
             holder.tour_id = Integer.parseInt(pointTourCursor.getString(pointTourCursor.getColumnIndex(TOUR_ID)));
-            url = FeedActivity.createFilename(url);
+            url = Utilities.createFilename(url);
             String localFilesAddress = mContext.getFilesDir().toString();
             url = localFilesAddress + "/" + url;
             Bitmap bitmap = BitmapFactory.decodeFile(url);

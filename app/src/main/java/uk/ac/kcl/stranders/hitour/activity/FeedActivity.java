@@ -58,10 +58,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import uk.ac.kcl.stranders.hitour.CustomTypefaceSpan;
+import uk.ac.kcl.stranders.hitour.utilities.CustomTypefaceSpan;
 import uk.ac.kcl.stranders.hitour.FeedAdapter;
 import uk.ac.kcl.stranders.hitour.R;
-import uk.ac.kcl.stranders.hitour.Utilities;
+import uk.ac.kcl.stranders.hitour.utilities.Utilities;
 import uk.ac.kcl.stranders.hitour.database.DBWrap;
 import uk.ac.kcl.stranders.hitour.database.NotInSchemaException;
 import uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants;
@@ -313,7 +313,14 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         super.onSaveInstanceState(savedInstanceState);
     }
 
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    /**
+     * Method called when {@link ScanningActivity} returns a result
+     * @param requestCode which request we're responding to
+     * @param resultCode whether a successful result returned
+     * @param data the information of the result
+     */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(resultCode == RESULT_OK) {
             if(data.getExtras().getString("mode").equals("point")) {
                 // Instructions for when a point is entered
@@ -364,12 +371,17 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         integrator.initiateScan();
     }
 
+    /**
+     * Called when request for permissions returns a result
+     * @param requestCode the request code that was passed in
+     * @param permissions list of requested permissions
+     * @param grantResults result of permissions that were requested
+     */
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case MY_PERMISSIONS_REQUEST_CAMERA: {
-                scanCode();
-            }
+        if(requestCode == MY_PERMISSIONS_REQUEST_CAMERA) {
+            // Launch the ScanningActivity
+            scanCode();
         }
     }
 
@@ -509,7 +521,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         // Remove any URLs of data that should not be downloaded again
         ArrayList<String> toRemove = new ArrayList<>();
         for(String url : urlArrayList) {
-            String filename = createFilename(url);
+            String filename = Utilities.createFilename(url);
             String localPath = this.getFilesDir().toString();
             File tempFile = new File(localPath + "/" + filename);
             if (tempFile.exists()) {
@@ -673,7 +685,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
                     if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
 
                     InputStream inputStream = response.body().byteStream();
-                    url = createFilename(url);
+                    url = Utilities.createFilename(url);
 
                     BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream, 1024 * 5);
                     FileOutputStream fileOutputStream = openFileOutput(url, Context.MODE_WORLD_READABLE);
@@ -693,7 +705,6 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
                 }
             });
         }
-
     }
 
     private void onDownloadFinish() {
@@ -719,23 +730,6 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
                 }
             });
         }
-    }
-
-    public static String createFilename(String url) {
-        url = url.replace("/","");
-        url = url.replace(":","");
-        url = url.replace("%","");
-        String filename = url.substring(0, url.lastIndexOf("."));
-        String extension = url.substring(url.lastIndexOf("."));
-        filename = filename.replace(".","");
-        url = filename + extension;
-        return url;
-    }
-
-    public static String getFileExtension(String url) {
-        String extension = url.substring(url.lastIndexOf(".") + 1);
-        extension = extension.toLowerCase();
-        return extension;
     }
 
     private void checkSessionDates() {
@@ -1109,7 +1103,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
     }
 
     private void deleteDataFile(String url) {
-        String filename = createFilename(url);
+        String filename = Utilities.createFilename(url);
         filename = this.getFilesDir().toString() + "/" + filename;
         File file = new File(filename);
         file.delete();

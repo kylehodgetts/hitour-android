@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 
-import uk.ac.kcl.stranders.hitour.CustomTypefaceSpan;
+import uk.ac.kcl.stranders.hitour.utilities.CustomTypefaceSpan;
 import uk.ac.kcl.stranders.hitour.R;
 import uk.ac.kcl.stranders.hitour.database.NotInSchemaException;
 import uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants;

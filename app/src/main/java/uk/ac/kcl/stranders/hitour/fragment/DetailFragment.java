@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import uk.ac.kcl.stranders.hitour.R;
+import uk.ac.kcl.stranders.hitour.utilities.Utilities;
 import uk.ac.kcl.stranders.hitour.activity.FeedActivity;
 import uk.ac.kcl.stranders.hitour.database.NotInSchemaException;
 import uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants;
@@ -220,7 +221,7 @@ public class DetailFragment extends Fragment {
                     bodyView.setText(pointCursor.getString(pointCursor.getColumnIndex(DESCRIPTION)));
 
                     String url = pointCursor.getString(pointCursor.getColumnIndex(URL));
-                    url = FeedActivity.createFilename(url);
+                    url = Utilities.createFilename(url);
                     String localFilesAddress = getContext().getFilesDir().toString();
                     url = localFilesAddress + "/" + url;
                     Bitmap bitmap = BitmapFactory.decodeFile(url);
@@ -257,10 +258,10 @@ public class DetailFragment extends Fragment {
                     Cursor dataCursor = FeedActivity.database.getWholeByPrimary("DATA", pointMap);
                     dataCursor.moveToFirst();
                     String url = dataCursor.getString(dataCursor.getColumnIndex(URL));
-                    url = FeedActivity.createFilename(url);
+                    url = Utilities.createFilename(url);
                     String localFilesAddress = getContext().getFilesDir().toString();
                     url = localFilesAddress + "/" + url;
-                    String fileExtension = FeedActivity.getFileExtension(dataCursor.getString(dataCursor.getColumnIndex(URL)));
+                    String fileExtension = Utilities.getFileExtension(dataCursor.getString(dataCursor.getColumnIndex(URL)));
 
                     StringBuilder text = new StringBuilder();
                     if (fileExtension.matches("jpg|jpeg|png|gif")) {
