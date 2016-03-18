@@ -52,7 +52,6 @@ public class DetailActivity extends AppCompatActivity {
      * Stores the initial position of a page in {@link ViewPager}.
      */
     private int mStartPosition;
-
     /**
      * {@link ViewPager} to navigate between instances of {@link DetailFragment}.
      */
@@ -64,11 +63,14 @@ public class DetailActivity extends AppCompatActivity {
      */
     private DetailPagerAdapter mPagerAdapter;
 
-    private static HashMap<Integer,ArrayList<EMVideoView>> allVideos;
+    /**
+     * All the videos belonging to a point.
+     */
+    private static HashMap<Integer, ArrayList<EMVideoView>> allVideos;
 
     /**
      * Initializes and populates {@link DetailActivity#mPager}.
-     *
+     * <p/>
      * {@inheritDoc}
      */
     @Override
@@ -76,7 +78,7 @@ public class DetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
         allVideos = new HashMap<>();
-        Map<String,String> partialPrimaryMap = new HashMap<>();
+        Map<String, String> partialPrimaryMap = new HashMap<>();
         partialPrimaryMap.put("TOUR_ID", FeedActivity.currentTourId);
         try {
             mCursor = FeedActivity.database.getUnlocked(DatabaseConstants.UNLOCK_STATE_UNLOCKED, FeedActivity.currentTourId);
@@ -92,27 +94,41 @@ public class DetailActivity extends AppCompatActivity {
                 .applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1, getResources().getDisplayMetrics()));
         mPager.setPageMarginDrawable(new ColorDrawable(ContextCompat.getColor(this, R.color.colorDivider)));
 
-        mPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+        //Used to track the neighbour fragments and pause them and itself when there is a change in the page selection.
+        mPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
-            public void onPageScrollStateChanged(int state) {
-                super.onPageScrollStateChanged(state);
-            }
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {}
 
-            //Pauses all videos of the current view and changes the cursor position
             @Override
             public void onPageSelected(int position) {
-                if (mCursor != null ) {
-                    Integer itemId = Integer.parseInt(mCursor.getString(mCursor.getColumnIndex(DatabaseConstants.POINT_ID)));
-                    if (pointVideoCollection(itemId,allVideos) != null && allVideos != null){
-                        DetailFragment.pauseAll(pointVideoCollection(itemId,allVideos));
+                if (mCursor != null) {
+                    mCursor.moveToPosition(0);
+                    for (int i = 0; i < 3; i++) {
+
+                        switch (i) {
+                            case 0:
+                                mCursor.moveToPosition(position - 1); break;
+                            case 1:
+                                mCursor.moveToPosition(position); break;
+                            case 2:
+                                mCursor.moveToPosition(position + 1); break;
+                        }
+                        if (mCursor.getPosition() != mCursor.getCount() && mCursor.getPosition() != -1) {
+                            Integer itemId = Integer.parseInt(mCursor.getString(mCursor.getColumnIndex(DatabaseConstants.POINT_ID)));
+                            if (pointVideoCollection(itemId, allVideos) != null && allVideos != null) {
+                                DetailFragment.pauseAll(pointVideoCollection(itemId, allVideos));
+                            }
+                        }
                     }
                     mCursor.moveToPosition(position);
                 }
             }
-        });
 
+            @Override
+            public void onPageScrollStateChanged(int state) {}
+        });
         if (savedInstanceState == null) {
-            if (getIntent() != null && getIntent().getIntExtra(EXTRA_POINT_ID, -1) != - 1) {
+            if (getIntent() != null && getIntent().getIntExtra(EXTRA_POINT_ID, -1) != -1) {
                 findStartPosition("" + getIntent().getIntExtra(EXTRA_POINT_ID, 0));
             } else if (getIntent() != null && getIntent().getStringExtra(EXTRA_PIN) != null) {
                 findStartPosition(getIntent().getStringExtra(EXTRA_PIN));
@@ -145,7 +161,7 @@ public class DetailActivity extends AppCompatActivity {
 
     /**
      * Overrides the Up button to prevent a previous activity from being recreated.
-     *
+     * <p/>
      * {@inheritDoc}
      */
     @Override
@@ -186,32 +202,37 @@ public class DetailActivity extends AppCompatActivity {
 
     /**
      * Method to add a video to a collection of videos associated with a DetailFragment's itemId.
+     *
      * @param itemId itemId of the DetailFragment
-     * @param video a video from the collection of videos of the DetailFragment
+     * @param video  a video from the collection of videos of the DetailFragment
      */
-    public static void addToVideoCollection(Integer itemId,EMVideoView video){
-        if(allVideos.get(itemId) != null){
-            if(!allVideos.get(itemId).contains(video)){
+    public static void addToVideoCollection(Integer itemId, EMVideoView video) {
+        if (allVideos == null) {
+            allVideos = new HashMap<>();
+        }
+        if (allVideos.get(itemId) != null) {
+            if (!allVideos.get(itemId).contains(video)) {
                 allVideos.get(itemId).add(video);
             }
-        }
-        else {
+        } else {
             ArrayList<EMVideoView> arraylist = new ArrayList<>();
             arraylist.add(video);
             allVideos.put(itemId, arraylist);
         }
+
     }
 
     /**
      * Method that returns the videos associated to a particular point
-     * @param itemId point ID
+     *
+     * @param itemId  point ID
      * @param hashMap of key point and of a value arraylist
      * @return ArrayList of videos belonging to a specific point
      */
-    private ArrayList<EMVideoView> pointVideoCollection(Integer itemId,HashMap<Integer,ArrayList<EMVideoView>> hashMap) {
+    private ArrayList<EMVideoView> pointVideoCollection(Integer itemId, HashMap<Integer, ArrayList<EMVideoView>> hashMap) {
         if (mCursor.getPosition() != -1) {
             if (itemId != -1) {
-                if(hashMap.get(itemId) != null) {
+                if (hashMap.get(itemId) != null) {
                     if (!hashMap.get(itemId).isEmpty()) {
                         return hashMap.get(itemId);
                     }

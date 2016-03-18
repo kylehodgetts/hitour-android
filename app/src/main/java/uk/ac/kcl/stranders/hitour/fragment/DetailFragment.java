@@ -310,6 +310,7 @@ public class DetailFragment extends Fragment {
             final EMVideoView videoView = (EMVideoView) linearLayout.findViewById(R.id.video);
             currentVideosArrayList.add(videoView);
             videoView.setId(Integer.parseInt(mItemId + rank + ""));
+
             DetailActivity.addToVideoCollection(mItemId,videoView);
             videoView.setLayoutParams(new LinearLayout.LayoutParams(1000, 1000));
             videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
