@@ -85,8 +85,8 @@ import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_ID;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_TABLE;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_TOUR_TABLE;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.RANK;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.QUIZ_URL;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.RANK;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.SESSION_ID;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.SESSION_TABLE;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.START_DATE;
@@ -646,7 +646,11 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
             Cursor feedCursor = database.getWholeByPrimaryPartialSorted(POINT_TOUR_TABLE, partialPrimaryMap, RANK);
             tourCursor.moveToFirst();feedCursor.moveToFirst();
             FeedAdapter adapter = new FeedAdapter(feedCursor, this);
+            adapter.setEmptyView(findViewById(R.id.empty_feed));
+            adapter.setEmptyViewVisibility(View.VISIBLE);
             mFeed.setAdapter(adapter);
+            adapter.setEmptyView(findViewById(R.id.empty_feed));
+            adapter.setEmptyViewVisibility(View.GONE);
             currentTourId = tourId;
             setCurrentFeedAdapter(adapter);
         } catch (NotInSchemaException e) {
@@ -810,7 +814,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
     }
 
     private void setCurrentFeedAdapter(FeedAdapter adapter){
-        currentFeedAdapter= adapter;
+        currentFeedAdapter = adapter;
     }
 
     /**

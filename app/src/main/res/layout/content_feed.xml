@@ -16,10 +16,12 @@
         android:layout_height="match_parent"
         android:clipToPadding="false"
         android:paddingBottom="72dp"
+        android:paddingEnd="@dimen/list_side_margin"
         android:paddingLeft="@dimen/list_side_margin"
         android:paddingRight="@dimen/list_side_margin"
         android:paddingStart="@dimen/list_side_margin"
-        android:paddingEnd="@dimen/list_side_margin"
         android:scrollbarStyle="outsideOverlay" />
+
+    <include layout="@layout/empty_feed" />
 
 </RelativeLayout>
