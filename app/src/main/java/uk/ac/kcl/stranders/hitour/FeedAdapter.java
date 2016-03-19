@@ -67,6 +67,8 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
      */
     private DetailFragment fragment;
 
+    private View emptyView;
+
     /**
      * Public constructor.
      *
@@ -116,7 +118,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
                     }
                     viewHolder.getView().findViewById(R.id.fllock).setVisibility(View.GONE);
 
-                // Only unlock the quiz once the last unlocked item is viewed (clicked)
+                    // Only unlock the quiz once the last unlocked item is viewed (clicked)
                 } else if (viewHolder.quiz && allUnlocked(viewHolder.tour_id)) {
                     if (!(mContext.getResources().getBoolean(R.bool.isTablet))) {
                         // If the device is a phone, start a new activity
@@ -128,11 +130,11 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
                         } else {
                             mContext.startActivity(quizIntent);
                         }
-                    // If the device is a tablet, start a new fragment
+                        // If the device is a tablet, start a new fragment
                     } else {
                         // If there is no internet connection, do not start the fragment
                         if (!Utilities.isNetworkAvailable(mContext)) {
-                            Toast.makeText(( mContext), R.string.no_network_quiz, Toast.LENGTH_SHORT).show();
+                            Toast.makeText((mContext), R.string.no_network_quiz, Toast.LENGTH_SHORT).show();
                         } else {
                             Bundle bundle = new Bundle();
                             bundle.putString(QuizFragment.ARG_ITEM_POSITION, "" + viewHolder.point_id);
@@ -143,8 +145,8 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
                                     .replace(R.id.point_detail_container, fragment, QuizFragment.FRAGMENT_TAG).addToBackStack(null).commit();
                         }
                     }
-                // If the tour has not been completed yet, let them know why they cannot access the quiz
-                } else if(viewHolder.quiz && !allUnlocked(viewHolder.tour_id)){
+                    // If the tour has not been completed yet, let them know why they cannot access the quiz
+                } else if (viewHolder.quiz && !allUnlocked(viewHolder.tour_id)) {
                     Toast.makeText(mContext, R.string.tour_not_complete, Toast.LENGTH_SHORT).show();
                 }
             }
@@ -319,6 +321,16 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
     public void clearFragment() {
         if(fragment != null)
             ((AppCompatActivity) mContext).getSupportFragmentManager().beginTransaction().remove(fragment).commit();
+    }
+
+    public void setEmptyView(View emptyView) {
+        this.emptyView = emptyView;
+    }
+
+    public void setEmptyViewVisibility(int visibility) {
+        if (visibility == View.GONE || visibility == View.VISIBLE) {
+            emptyView.setVisibility(visibility);
+        }
     }
 
 }

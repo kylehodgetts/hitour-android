@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="empty_feed_hint">You can start a Tour by pressing the scanner button.</string>
+</resources>

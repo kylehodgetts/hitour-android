@@ -23,6 +23,7 @@
         android:textStyle="bold" />
 
     <TextView
+        android:id="@+id/tv_empty_hint"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
         android:paddingTop="8dp"

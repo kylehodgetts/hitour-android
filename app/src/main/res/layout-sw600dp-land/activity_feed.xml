@@ -47,8 +47,8 @@
                 android:layout_gravity="center_vertical"
                 android:layout_marginLeft="@dimen/abc_list_item_padding_horizontal_material"
                 android:layout_marginStart="@dimen/abc_list_item_padding_horizontal_material"
-                android:layout_toRightOf="@id/spaceLogo"
                 android:layout_toEndOf="@id/spaceLogo"
+                android:layout_toRightOf="@id/spaceLogo"
                 android:contentDescription="@string/app_name"
                 android:text="@string/app_name"
                 android:textColor="@color/colorIcons"
@@ -84,8 +84,7 @@
             android:layout_marginTop="?attr/actionBarSize"
             android:elevation="4dp" />
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/rv_feed"
+        <RelativeLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_alignParentLeft="true"
@@ -93,21 +92,31 @@
             android:layout_below="@id/appbar"
             android:layout_toLeftOf="@+id/layout_center"
             android:layout_toStartOf="@+id/layout_center"
+            android:orientation="vertical"
+            android:paddingEnd="12dp"
             android:paddingLeft="12dp"
             android:paddingRight="12dp"
-            android:paddingEnd="12dp"
             android:paddingStart="12dp"
-            android:paddingTop="8dp" />
+            android:paddingTop="8dp">
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/rv_feed"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <include layout="@layout/empty_feed" />
+
+        </RelativeLayout>
 
         <android.support.v7.widget.CardView
             android:id="@+id/point_detail_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_alignBottom="@id/pointDetailSpace"
+            android:layout_alignEnd="@id/pointDetailSpace"
             android:layout_alignLeft="@id/pointDetailSpace"
             android:layout_alignRight="@id/pointDetailSpace"
             android:layout_alignStart="@id/pointDetailSpace"
-            android:layout_alignEnd="@id/pointDetailSpace"
             android:layout_alignTop="@id/pointDetailSpace"
             android:layout_marginBottom="@dimen/abc_list_item_padding_horizontal_material"
             android:layout_marginEnd="@dimen/abc_list_item_padding_horizontal_material"

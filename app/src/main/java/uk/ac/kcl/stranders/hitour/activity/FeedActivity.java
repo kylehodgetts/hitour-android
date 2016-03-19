@@ -646,7 +646,11 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
             Cursor feedCursor = database.getWholeByPrimaryPartialSorted(POINT_TOUR_TABLE, partialPrimaryMap, RANK);
             tourCursor.moveToFirst();feedCursor.moveToFirst();
             FeedAdapter adapter = new FeedAdapter(feedCursor, this);
+            adapter.setEmptyView(findViewById(R.id.empty_feed));
+            adapter.setEmptyViewVisibility(View.VISIBLE);
             mFeed.setAdapter(adapter);
+            adapter.setEmptyView(findViewById(R.id.empty_feed));
+            adapter.setEmptyViewVisibility(View.GONE);
             currentTourId = tourId;
             setCurrentFeedAdapter(adapter);
         } catch (NotInSchemaException e) {
@@ -810,7 +814,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
     }
 
     private void setCurrentFeedAdapter(FeedAdapter adapter){
-        currentFeedAdapter= adapter;
+        currentFeedAdapter = adapter;
     }
 
     /**
