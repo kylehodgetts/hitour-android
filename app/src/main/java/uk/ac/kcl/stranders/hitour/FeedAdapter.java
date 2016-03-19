@@ -124,7 +124,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
 
                         // If there is no internet connection, do not start the activity
                         if (!Utilities.isNetworkAvailable(mContext)) {
-                            Toast.makeText(mContext, "@string/no_network_quiz", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(mContext, R.string.no_network_quiz, Toast.LENGTH_SHORT).show();
                         } else {
                             mContext.startActivity(quizIntent);
                         }
@@ -132,7 +132,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
                     } else {
                         // If there is no internet connection, do not start the fragment
                         if (!Utilities.isNetworkAvailable(mContext)) {
-                            Toast.makeText(( mContext), "@string/no_network_quiz", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(( mContext), R.string.no_network_quiz, Toast.LENGTH_SHORT).show();
                         } else {
                             Bundle bundle = new Bundle();
                             bundle.putString(QuizFragment.ARG_ITEM_POSITION, "" + viewHolder.point_id);
@@ -145,7 +145,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
                     }
                 // If the tour has not been completed yet, let them know why they cannot access the quiz
                 } else if(viewHolder.quiz && !allUnlocked(viewHolder.tour_id)){
-                    Toast.makeText(mContext, "@string/tour_not_complete", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mContext, R.string.tour_not_complete, Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -297,7 +297,6 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
         pointTourCursor.moveToPosition(0);
         do {
             Integer unlocked = Integer.parseInt(pointTourCursor.getString(pointTourCursor.getColumnIndex(DatabaseConstants.UNLOCK)));
-            Log.e("unlocked",""+unlocked);
             if(unlocked == 0){
                 return false;
             }
