@@ -126,7 +126,7 @@
             android:layout_marginLeft="22dp"
             android:layout_marginStart="22dp"
             android:layout_marginTop="35dp"
-            android:src="@drawable/ic_queue_white_24dp" />
+            android:src="@drawable/scanner_icon" />
 
     </RelativeLayout>
 

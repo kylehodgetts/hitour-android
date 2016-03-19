@@ -85,8 +85,8 @@ import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_ID;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_TABLE;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_TOUR_TABLE;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.RANK;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.QUIZ_URL;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.RANK;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.SESSION_ID;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.SESSION_TABLE;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.START_DATE;

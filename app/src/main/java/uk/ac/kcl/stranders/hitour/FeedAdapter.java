@@ -7,8 +7,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -28,7 +26,6 @@ import java.util.Observer;
 import uk.ac.kcl.stranders.hitour.activity.DetailActivity;
 import uk.ac.kcl.stranders.hitour.activity.FeedActivity;
 import uk.ac.kcl.stranders.hitour.activity.QuizActivity;
-import uk.ac.kcl.stranders.hitour.database.DBWrap;
 import uk.ac.kcl.stranders.hitour.database.NotInSchemaException;
 import uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants;
 import uk.ac.kcl.stranders.hitour.fragment.DetailFragment;
@@ -38,11 +35,8 @@ import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.DESCR
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.NAME;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_ID;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_TOUR_TABLE;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.QUIZ_URL;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.SESSION_TABLE;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.RANK;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TOUR_ID;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TOUR_TABLE;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.UNLOCK;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.URL;
 
@@ -210,7 +204,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
      */
     @Override
     public int getItemCount() {
-               return pointTourCursor.getCount() + 1;
+        return pointTourCursor.getCount() + 1;
     }
 
     /**
