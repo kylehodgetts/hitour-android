@@ -14,6 +14,7 @@
 
     <string name="empty_feed_title">Your feed is empty.</string>
     <string name="empty_feed_hint">You can start a Tour by pressing the scanner button bellow.</string>
+    <string name="empty_tours_header">There are no available tours.</string>
 
     <string name="content_description_submits">Submit</string>
     <string name="content_description_item_feed">Item Feed %1$s</string>
