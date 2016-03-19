@@ -173,7 +173,6 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
             viewQuizzes.put(holder.tour_id,holder.getView());
             if (allUnlocked(holder.tour_id)) {
                     holder.getView().findViewById(R.id.fllock).setVisibility(View.GONE);
-
             }
             return;
         }
@@ -310,7 +309,6 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
             }
 
         } while (pointTourCursor.moveToNext());
-//        allUnlocked.put(""+tour_id,true);
         return true;
     }
     /**
