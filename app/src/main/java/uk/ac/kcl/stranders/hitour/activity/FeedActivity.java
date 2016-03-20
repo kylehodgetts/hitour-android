@@ -1,8 +1,11 @@
 package uk.ac.kcl.stranders.hitour.activity;
 
+import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Typeface;
@@ -11,20 +14,25 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.TextView;
 
 import com.google.zxing.integration.android.IntentIntegrator;
@@ -48,6 +56,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import uk.ac.kcl.stranders.hitour.CustomTypefaceSpan;
 import uk.ac.kcl.stranders.hitour.FeedAdapter;
@@ -75,11 +84,12 @@ import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.PASSP
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_DATA_TABLE;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_ID;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_TABLE;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_TOUR_TABLE;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.QUIZ_URL;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.RANK;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.SESSION_ID;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.SESSION_TABLE;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.START_DATE;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_TOUR_TABLE;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.RANK;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TOUR_ID;
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TOUR_TABLE;
 
@@ -87,6 +97,16 @@ import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TOUR_
  * The main activity that displays all available points for a given tour.
  */
 public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.CallbackRetrofit {
+
+    /**
+     * Int value for result of requesting camera permission
+     */
+    public static final int MY_PERMISSIONS_REQUEST_CAMERA = 1;
+
+    /**
+     * Static String to name to store in a bundle the currently selected tour's id
+     */
+    public static final String CURRENT_TOUR_ID = "CURRENT_TOUR_ID";
 
     /**
      * The list of all available points.
@@ -147,6 +167,13 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if(savedInstanceState != null) {
+            if(savedInstanceState.containsKey(CURRENT_TOUR_ID)) {
+                currentTourId = savedInstanceState.getString(CURRENT_TOUR_ID);
+            }
+        }
+
         database = new DBWrap(this, new HiSchema(1));
         setContentView(R.layout.activity_feed);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -183,13 +210,36 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         mFeed.setLayoutManager(mLayoutManager);
 
         try {
-            Cursor tourCursor = database.getAll("TOUR");
-            if(tourCursor.getCount() > 0) {
-                tourCursor.moveToFirst();
-                populateFeedAdapter(tourCursor.getString(tourCursor.getColumnIndex(TOUR_ID)));
+            final Cursor sessionCursor = database.getAll(SESSION_TABLE);
+            if (currentTourId != null) {
+                populateFeedAdapter(currentTourId);
+                for(int i = 0; i < sessionCursor.getCount(); i++) {
+                    sessionCursor.moveToPosition(i);
+                    if(sessionCursor.getString(sessionCursor.getColumnIndex(TOUR_ID)).equals(currentTourId)) {
+                        mDrawerLayout.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                updateHeader(sessionCursor, 0);
+                            }
+                        });
+                        break;
+                    }
+                }
+            } else {
+                if (sessionCursor.getCount() > 0) {
+                    sessionCursor.moveToFirst();
+                    populateFeedAdapter(sessionCursor.getString(sessionCursor.getColumnIndex(TOUR_ID)));
+                    mDrawerLayout.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            updateHeader(sessionCursor, 0);
+                        }
+                    });
+                }
+
             }
         } catch (NotInSchemaException e) {
-            Log.e("DATABASE_FAIL",Log.getStackTraceString(e));
+            Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
         }
 
         mMenu = navigationView.getMenu();
@@ -205,7 +255,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
                 new NavigationView.OnNavigationItemSelectedListener() {
                     @Override
                     public boolean onNavigationItemSelected(MenuItem item) {
-                           
+
                         // TODO: Refactor this block of code
 
                         // If the "about" section is clicked, the DialogFragment shows up
@@ -215,12 +265,16 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
                             appInfoFragment.show(fm, "app_info_fragment");
                         } else {
                             try {
-                                Cursor tourCursor = database.getAll("TOUR");
-                                if(tourCursor.getCount() > 0) {
-                                    tourCursor.moveToFirst();
-                                    tourCursor.move(item.getItemId());
-                                    if (!tourCursor.getString(tourCursor.getColumnIndex(TOUR_ID)).equals(FeedActivity.this.currentTourId)) {
-                                        populateFeedAdapter(tourCursor.getString(tourCursor.getColumnIndex(TOUR_ID)));
+                                Cursor sessionCursor = database.getAll(SESSION_TABLE);
+                                if(sessionCursor.getCount() > 0) {
+                                    sessionCursor.moveToPosition(item.getItemId());
+                                    if (!sessionCursor.getString(sessionCursor.getColumnIndex(TOUR_ID)).equals(currentTourId)) {
+                                        CardView cardView = (CardView) findViewById(R.id.point_detail_container);
+                                        if(cardView != null) {
+                                            cardView.removeAllViews();
+                                        }
+                                        populateFeedAdapter(sessionCursor.getString(sessionCursor.getColumnIndex(TOUR_ID)));
+                                        updateHeader(sessionCursor, item.getItemId());
                                     }
                                 }
                             } catch (NotInSchemaException e) {
@@ -240,10 +294,25 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                scanCode();
+                //Request camera permissions on Android 6.0 +
+                if(ContextCompat.checkSelfPermission(FeedActivity.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(FeedActivity.this,
+                            new String[]{Manifest.permission.CAMERA},
+                            MY_PERMISSIONS_REQUEST_CAMERA);
+                } else {
+                    scanCode();
+                }
             }
         });
 
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        // Save the currently selected tour's ID
+        savedInstanceState.putString(CURRENT_TOUR_ID, currentTourId);
+
+        super.onSaveInstanceState(savedInstanceState);
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -270,7 +339,9 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
                 // Instructions for when a tour is entered
                 if(Utilities.isNetworkAvailable(this)) {
                     // Set ProgressDialog so user knows data is being downloaded
+                    setRequestedOrientation(getResources().getConfiguration().orientation);
                     progressDialog = new ProgressDialog(this);
+                    progressDialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                     progressDialog.setMessage("Downloading data");
                     progressDialog.show();
                     progressDialog.setCancelable(false);
@@ -293,6 +364,15 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         integrator.setOrientationLocked(true);
         integrator.setBeepEnabled(false);
         integrator.initiateScan();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_CAMERA: {
+                scanCode();
+            }
+        }
     }
 
     @Override
@@ -325,6 +405,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         tourSessionColumnsMap.put("START_DATE", tourSession.getStartDate());
         tourSessionColumnsMap.put("DURATION", tourSession.getDuration().toString());
         tourSessionColumnsMap.put("PASSPHRASE", tourSession.getPassphrase());
+        tourSessionColumnsMap.put(NAME, tourSession.getName());
         Map<String,String> tourSessionPrimaryKeysMap = new HashMap<>();
         tourSessionPrimaryKeysMap.put("SESSION_ID", tourSession.getId().toString());
         try {
@@ -339,6 +420,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         Map<String,String> tourColumnsMap = new HashMap<>();
         tourColumnsMap.put("NAME", tour.getName());
         tourColumnsMap.put("AUDIENCE_ID", tour.getAudienceId().toString());
+        tourColumnsMap.put(QUIZ_URL, tour.getQuizUrl());
         Map<String, String> tourPrimaryKeysMap = new HashMap<>();
         tourPrimaryKeysMap.put("TOUR_ID", tour.getId().toString());
         try {
@@ -440,6 +522,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
 
         // Download all data that us not already on the device
         downloadItemCount = urlArrayList.size();
+        progressDialog.setMessage("Downloading data: 0 of " + downloadItemCount + " files downloaded");
         for(String url : urlArrayList) {
             try {
                 DownloadToStorage downloadToStorage = new DownloadToStorage(url);
@@ -451,13 +534,16 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         }
 
         updateMenu();
+
         currentTourId = tourSession.getTourId().toString();
         try {
-            Cursor tourCursor = database.getAll("TOUR");
-            for(int i = 0; i < tourCursor.getCount(); i++) {
-                tourCursor.moveToPosition(i);
-                if(tourCursor.getString(tourCursor.getColumnIndex(DatabaseConstants.TOUR_ID)).equals(currentTourId)) {
+            Cursor sessionCursor = database.getAll(SESSION_TABLE);
+            for(int i = 0; i < sessionCursor.getCount(); i++) {
+                sessionCursor.moveToPosition(i);
+                if(sessionCursor.getString(sessionCursor.getColumnIndex(DatabaseConstants.TOUR_ID)).equals(currentTourId)) {
                     mMenu.getItem(i).setChecked(true);
+                    updateHeader(sessionCursor, i);
+                    break;
                 }
             }
         } catch (NotInSchemaException e) {
@@ -486,16 +572,18 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
     }
 
     /**
-     * Invoked to fill drawer with list of tours saved on the device's database.
+     * Invoked to fill drawer with list of tour sessions saved on the device's database
      */
     private void updateMenu() {
         mMenu.clear();
-        int i = 0;
         try {
-            Cursor tourCursor = database.getAll("TOUR");
-            tourCursor.moveToFirst();
-            for(i = 0; i < tourCursor.getCount(); i++) {
-                tourCursor.moveToPosition(i);
+            Cursor sessionCursor = database.getAll(SESSION_TABLE);
+            for(int i = 0; i < sessionCursor.getCount(); i++) {
+                sessionCursor.moveToPosition(i);
+                Map<String, String> primaryKeysMap = new HashMap<>();
+                primaryKeysMap.put(TOUR_ID, sessionCursor.getString(sessionCursor.getColumnIndex(TOUR_ID)));
+                Cursor tourCursor = database.getWholeByPrimary(TOUR_TABLE, primaryKeysMap);
+                tourCursor.moveToFirst();
                 mMenu.add(0, i, Menu.NONE, tourCursor.getString(tourCursor.getColumnIndex(NAME))).setIcon(R.drawable.ic_action_local_hospital);
                 // TODO: Fix content description
 //                mMenu.getItem(i).getActionView().setContentDescription(getString(R.string.content_description_tour_selection, mMenu.getItem(i).getTitle()));
@@ -508,17 +596,61 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
             Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
         }
         mMenu.addSubMenu("s");
-        mMenu.add(R.id.end_padder, R.id.app_info_item, Menu.NONE, getString(R.string.about)).setIcon(R.drawable.ic_action_local_hospital);
+        mMenu.add(R.id.end_padder, R.id.app_info_item, Menu.NONE, getString(R.string.about)).setIcon(R.drawable.ic_action_live_help);
 //        mMenu.getItem(i).getActionView().setContentDescription(getString(R.string.content_description_tour_selection, mMenu.getItem(i).getTitle()));
+    }
+
+    /**
+     * Update the header portion of the drawer layout for a different session
+     * @param sessionCursor cursor of the whole SESSION table
+     * @param position position in the cursor of the session we want
+     */
+    private void updateHeader(Cursor sessionCursor, int position) {
+        sessionCursor.moveToPosition(position);
+
+        TextView nameTextView = (TextView) findViewById(R.id.nav_tour_info);
+        TextView startDateTextView = (TextView) findViewById(R.id.tour_date);
+        TextView expirationDateTextView = (TextView) findViewById(R.id.expiration_date);
+
+        SimpleDateFormat sdfStart = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat sdfFinish = new SimpleDateFormat("dd-MM-yyyy");
+
+        String name = sessionCursor.getString(sessionCursor.getColumnIndex(NAME));
+        String startDate = sessionCursor.getString(sessionCursor.getColumnIndex(START_DATE));
+        String duration = sessionCursor.getString(sessionCursor.getColumnIndex(DURATION));
+
+        nameTextView.setText(name);
+
+        Calendar expirationDateCalendar = getFinishDate(startDate, duration);
+        String expirationDate = sdfFinish.format(expirationDateCalendar.getTime());
+        expirationDateTextView.setText(Html.fromHtml("<b>" + FeedActivity.this.getString(R.string.expiration_date) + "</b><br/>" + expirationDate));
+
+        try {
+            startDate = sdfFinish.format(sdfStart.parse(startDate));
+        } catch (ParseException e) {
+            Log.e("PARSE_FAIL", Log.getStackTraceString(e));
+        }
+        startDateTextView.setText(Html.fromHtml("<b>" + FeedActivity.this.getString(R.string.start_date) + "</b><br/>" + startDate));
     }
 
     private void populateFeedAdapter(String tourId) {
         Map<String,String> partialPrimaryMap = new HashMap<>();
         partialPrimaryMap.put("TOUR_ID", tourId);
         try {
+            Cursor tourCursor = database.getWholeByPrimary(TOUR_TABLE,partialPrimaryMap);
+            // Clear the fragment on change so point from previous tour does not show on tablet
+            if(currentFeedAdapter != null)
+                currentFeedAdapter.clearFragment();
+
+
             Cursor feedCursor = database.getWholeByPrimaryPartialSorted(POINT_TOUR_TABLE, partialPrimaryMap, RANK);
+            tourCursor.moveToFirst();feedCursor.moveToFirst();
             FeedAdapter adapter = new FeedAdapter(feedCursor, this);
+            adapter.setEmptyView(findViewById(R.id.empty_feed));
+            adapter.setEmptyViewVisibility(View.VISIBLE);
             mFeed.setAdapter(adapter);
+            adapter.setEmptyView(findViewById(R.id.empty_feed));
+            adapter.setEmptyViewVisibility(View.GONE);
             currentTourId = tourId;
             setCurrentFeedAdapter(adapter);
         } catch (NotInSchemaException e) {
@@ -533,6 +665,9 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
 
         private DownloadToStorage(String url) {
             this.url = url;
+            client.setConnectTimeout(5, TimeUnit.SECONDS);
+            client.setWriteTimeout(5, TimeUnit.SECONDS);
+            client.setReadTimeout(5, TimeUnit.SECONDS);
         }
 
         public void run() throws Exception {
@@ -576,6 +711,12 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
 
     private void onDownloadFinish() {
         downloadPosition++;
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                progressDialog.setMessage("Downloading data: " + downloadPosition + " of " + downloadItemCount + " files downloaded");
+            }
+        });
         if(downloadPosition == downloadItemCount) {
             progressDialog.dismiss();
             downloadItemCount = 0;
@@ -583,7 +724,13 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                    CardView cardView = (CardView) findViewById(R.id.point_detail_container);
+                    if(cardView != null) {
+                        cardView.removeAllViews();
+                    }
                     populateFeedAdapter(currentTourId);
+                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER);
+                    progressDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                 }
             });
         }
@@ -667,7 +814,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
     }
 
     private void setCurrentFeedAdapter(FeedAdapter adapter){
-        currentFeedAdapter= adapter;
+        currentFeedAdapter = adapter;
     }
 
     /**
@@ -711,19 +858,25 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
     }
 
     private boolean sessionExistsOffline(String startDate, String duration) {
+        Calendar calendarFinish = getFinishDate(startDate, duration);
+        Calendar calendarNow = Calendar.getInstance();
+        if (calendarNow.after(calendarFinish)) {
+            return false;
+        }
+        return true;
+    }
+
+    private Calendar getFinishDate(String startDate, String duration) {
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             Calendar calendarFinish = Calendar.getInstance();
             calendarFinish.setTime(sdf.parse(startDate));
             calendarFinish.add(Calendar.DATE, Integer.parseInt(duration));
-            Calendar calendarNow = Calendar.getInstance();
-            if(calendarNow.after(calendarFinish)) {
-                return false;
-            }
+            return calendarFinish;
         } catch (ParseException e) {
             Log.e("PARSE_FAIL", Log.getStackTraceString(e));
         }
-        return true;
+        return null;
     }
 
     private void removeSession(String sessionId) {

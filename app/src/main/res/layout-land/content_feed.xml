@@ -22,4 +22,6 @@
         android:paddingStart="@dimen/list_side_margin"
         android:scrollbarStyle="outsideOverlay" />
 
+    <include layout="@layout/empty_feed" />
+
 </RelativeLayout>

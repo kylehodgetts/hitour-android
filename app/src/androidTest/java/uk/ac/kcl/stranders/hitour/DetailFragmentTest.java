@@ -1,159 +1,97 @@
 package uk.ac.kcl.stranders.hitour;
 
-import android.content.pm.ActivityInfo;
-import android.database.Cursor;
-import android.test.ActivityInstrumentationTestCase2;
+import android.app.Activity;
+import android.app.Instrumentation;
+import android.content.Intent;
+import android.support.design.widget.FloatingActionButton;
+import android.test.InstrumentationTestCase;
 import android.test.TouchUtils;
+import android.view.KeyEvent;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-import android.widget.VideoView;
+import android.widget.Button;
+import android.widget.EditText;
 
 import uk.ac.kcl.stranders.hitour.activity.DetailActivity;
+import uk.ac.kcl.stranders.hitour.activity.FeedActivity;
+import uk.ac.kcl.stranders.hitour.activity.ScanningActivity;
 import uk.ac.kcl.stranders.hitour.fragment.DetailFragment;
 
 /**
  * Front end instrumentation test for the {@link DetailFragment} ensuring that its content is correctly
  * populated and the video behaves as it should when interacted with.
  */
-public class DetailFragmentTest extends ActivityInstrumentationTestCase2<DetailActivity> {
+public class DetailFragmentTest extends InstrumentationTestCase {
 
-    /**
-     * Default constructor to set up the test for the {@link DetailActivity} which hosts the
-     * {@link DetailFragment}
-     */
-    public DetailFragmentTest() {
-        super(DetailActivity.class);
-    }
-
-    /**
-     * Test to check the activity is correctly started and exists.
-     */
-    public void testActivityExists() {
-        assertNotNull(getActivity());
-    }
-
-    /**
-     * Test that all of the content for the point has been loaded correctly on the fragment and
-     * that they all exist.
-     */
-    public void testFragmentViewsExist() {
-        TextView titleView = (TextView) getActivity().findViewById(R.id.text_title);
-        ImageView imageView = (ImageView) getActivity().findViewById(R.id.photo);
-
-        VideoView videoView = (VideoView) getActivity().findViewById(Integer.parseInt(0+""+0));
-        TextView videoTitle = (TextView) getActivity().findViewById(R.id.title);
-        TextView videoDescription = (TextView) getActivity().findViewById(R.id.description);
-
-        assertNotNull(titleView);
-        assertNotNull(imageView);
-        assertNotNull(videoView);
-        assertNotNull(videoTitle);
-        assertNotNull(videoDescription);
-    }
-
-    /**
-     * Tests that the video is correctly sized and positioned to be the whole width of the the
-     * {@link DetailFragment} and the height wrapped to its content.
-     */
-    public void testVideoSize() {
-        VideoView videoView = (VideoView) getActivity().findViewById(Integer.parseInt(0+""+0));
-        LinearLayout linearLayout = (LinearLayout) getActivity().findViewById(R.id.detail_body);
-
-        getInstrumentation().waitForIdleSync();
-        assertEquals(linearLayout.getWidth(), videoView.getWidth());
-    }
-
-    /**
-     * Tests that the video behaves as it should when playing and pausing. Which checks on a touch if
-     * the video is playing it will pause. If it is touched and the video is not playing then it will
-     * start to play.
-     */
-    public void testVideoPlayPause() {
-        VideoView videoView = (VideoView) getActivity().findViewById(Integer.parseInt(0+""+0));
-        getInstrumentation().waitForIdleSync();
-
-        TouchUtils.clickView(this, videoView);
-        assertEquals(true, videoView.isPlaying());
-
-        getInstrumentation().waitForIdleSync();
-
-        TouchUtils.clickView(this, videoView);
-        assertEquals(false, videoView.isPlaying());
-    }
-
-    /**
-     * Tests that that video when resumed, starts playing from the last point it left off and
-     * not returning back to the beginning.
-     */
-    public void testVideoResume() {
-        VideoView videoView = (VideoView) getActivity().findViewById(Integer.parseInt(0+""+0));
-        getInstrumentation().waitForIdleSync();
-
-        TouchUtils.clickView(this, videoView);
-        try {
-            Thread.sleep(300);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        TouchUtils.clickView(this, videoView);
-        assertTrue(videoView.getCurrentPosition() > 0);
-    }
-
-    /**
-     * Tests that if the device is rotated the video will resume playing from the last point
-     * it left off before the rotation occurred rather than start again from the beginning.
-     */
-    public void testVideoResumeOnRotation() {
-        VideoView videoView = (VideoView) getActivity().findViewById(Integer.parseInt(0+""+0));
-        TouchUtils.clickView(this, videoView);
-        try {
-            Thread.sleep(300);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        TouchUtils.clickView(this, videoView);
-
-        getInstrumentation().waitForIdleSync();
-        getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-        assertTrue(videoView.getCurrentPosition() > 0);
-    }
 
     /**
      * Tests the dynamic content on the loaded Detail Fragment matches the data that is returned by
-     * the cursor containing the data for that point.
+     * the data for that point.
      *
      * This also checks the correct {@link View}'s are present for the correct item.
      */
     public void testDynamicContent() {
+        Instrumentation instrumentation = getInstrumentation();
+        Instrumentation.ActivityMonitor activityMonitor = instrumentation.addMonitor(FeedActivity.class.getName(), null, false);
 
-        Cursor contentCursor = PrototypeData.getContentCursor(0);
-        contentCursor.moveToFirst();
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.setClassName(instrumentation.getTargetContext(), FeedActivity.class.getName());
+        instrumentation.startActivitySync(intent);
 
-        for(int i = 0; i < contentCursor.getCount(); ++i) {
+        Activity currentActivity = getInstrumentation().waitForMonitorWithTimeout(activityMonitor, 500);
+        FloatingActionButton fab = (FloatingActionButton) currentActivity.findViewById(R.id.fab);
 
-            LinearLayout itemLayout = (LinearLayout) getActivity().findViewById(i + 100);
-            getInstrumentation().waitForIdleSync();
-            TextView videoTitle = (TextView) itemLayout.findViewById(R.id.title);
-            TextView videoDescription = (TextView) itemLayout.findViewById(R.id.description);
+        instrumentation.removeMonitor(activityMonitor);
+        activityMonitor = instrumentation.addMonitor(ScanningActivity.class.getName(), null, false);
 
-            if(i == 0) {
-                getInstrumentation().waitForIdleSync();
-                assertNotNull(itemLayout.findViewById(Integer.parseInt(0+""+0)));
+        TouchUtils.clickView(this, fab);
+
+        currentActivity = getInstrumentation().waitForMonitorWithTimeout(activityMonitor, 500);
+
+        final EditText etPasscodeEntry = (EditText) currentActivity.findViewById(R.id.etCodePinEntry);
+        getInstrumentation().runOnMainSync(new Runnable() {
+            @Override
+            public void run() {
+                etPasscodeEntry.requestFocus();
             }
-            else {
-                assertNotNull(itemLayout.findViewById(R.id.image));
+        });
+        getInstrumentation().sendStringSync("SNPenguins123");
+        getInstrumentation().sendCharacterSync(KeyEvent.KEYCODE_ENTER);
+
+        Button btnSubmit = (Button) currentActivity.findViewById(R.id.btnSubmit);
+
+        instrumentation.removeMonitor(activityMonitor);
+        activityMonitor = instrumentation.addMonitor(FeedActivity.class.getName(), null, false);
+        TouchUtils.clickView(this, btnSubmit);
+
+        currentActivity = getInstrumentation().waitForMonitorWithTimeout(activityMonitor, 10000);
+
+        instrumentation.removeMonitor(activityMonitor);
+        activityMonitor = instrumentation.addMonitor(ScanningActivity.class.getName(), null, false);
+
+        TouchUtils.clickView(this, fab);
+
+        currentActivity = getInstrumentation().waitForMonitorWithTimeout(activityMonitor, 500);
+
+        getInstrumentation().runOnMainSync(new Runnable() {
+            @Override
+            public void run() {
+                etPasscodeEntry.requestFocus();
             }
+        });
+        getInstrumentation().sendStringSync("POINT-2");
+        getInstrumentation().sendCharacterSync(KeyEvent.KEYCODE_ENTER);
 
-            assertNotNull(videoTitle);
-            assertNotNull(videoDescription);
+        instrumentation.removeMonitor(activityMonitor);
+        activityMonitor = instrumentation.addMonitor(DetailActivity.class.getName(), null, false);
+        TouchUtils.clickView(this, btnSubmit);
 
-            assertEquals(videoTitle.getText(), contentCursor.getString(PrototypeData.DATA_TITLE));
-            assertEquals(videoDescription.getText().toString(), contentCursor.getString(PrototypeData.DATA_DESCRIPTION));
-            contentCursor.moveToNext();
-        }
+        currentActivity = getInstrumentation().waitForMonitorWithTimeout(activityMonitor, 500);
 
+        assertNotNull(currentActivity.findViewById(R.id.title));
+        assertNotNull(currentActivity.findViewById(R.id.image));
+        assertNotNull(currentActivity.findViewById(R.id.description));
     }
+
 
 }

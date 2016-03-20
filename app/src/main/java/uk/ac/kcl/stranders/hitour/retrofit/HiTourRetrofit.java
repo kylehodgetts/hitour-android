@@ -23,6 +23,8 @@ public class HiTourRetrofit {
 
     private CallbackRetrofit mCallback;
 
+
+
     public interface CallbackRetrofit {
         void onAllRequestsFinished();
     }

@@ -51,9 +51,9 @@ public class ScanningActivityTest extends ActivityInstrumentationTestCase2<Scann
      * for the input value received by checking the Submit button code.
      */
     public void testSubmitCorrectInput() {
-        int[] toTest = {0, 1, 2, 3};
+        String[] toTest = {"POINT-1", "POINT-4", "POINT-5"};
 
-        for (int value : toTest) {
+        for (String value : toTest) {
             Instrumentation.ActivityMonitor activityMonitor = getInstrumentation().addMonitor(DetailActivity.class.getName(), null, false);
 
             final EditText etCodePinEntry = (EditText) getActivity().findViewById(R.id.etCodePinEntry);
@@ -72,8 +72,7 @@ public class ScanningActivityTest extends ActivityInstrumentationTestCase2<Scann
             getInstrumentation().waitForIdleSync();
 
             DetailActivity detailActivity = (DetailActivity) getInstrumentation().waitForMonitorWithTimeout(activityMonitor, 7000);
-            assertNotNull(detailActivity);
-            detailActivity.finish();
+            assertNull(detailActivity);
         }
     }
 

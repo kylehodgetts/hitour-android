@@ -22,6 +22,8 @@ public class Tour implements Parcelable {
     private Integer audienceId;
     @SerializedName("points")
     private List<Point> points;
+    @SerializedName("quiz_url")
+    private String quizUrl;
 
     /**
      *
@@ -131,6 +133,24 @@ public class Tour implements Parcelable {
         this.points = points;
     }
 
+    /**
+     *
+     * @return
+     * The quizUrl
+     */
+    public String getQuizUrl() {
+        return quizUrl;
+    }
+
+    /**
+     *
+     * @param quizUrl
+     * The quiz_url
+     */
+    public void setQuizUrl(String quizUrl) {
+        this.quizUrl = quizUrl;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -144,6 +164,7 @@ public class Tour implements Parcelable {
         dest.writeString(name);
         dest.writeInt(audienceId);
         dest.writeList(points);
+        dest.writeString(quizUrl);
     }
 
     public static final Parcelable.Creator<Tour> CREATOR
@@ -165,5 +186,6 @@ public class Tour implements Parcelable {
         audienceId = in.readInt();
         points = new ArrayList<Point>();
         in.readList(points, Point.class.getClassLoader());
+        quizUrl = in.readString();
     }
 }

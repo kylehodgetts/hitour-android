@@ -142,7 +142,7 @@ public class DetailFragment extends Fragment {
     }
 
     /**
-     * Set's up the {@link Fragment}'s data ready for it's views to be created
+     * Sets up the {@link Fragment}'s data ready for it's views to be created
      * @param savedInstanceState {@link Bundle} with all the saved state variables
      */
     @Override
@@ -157,23 +157,26 @@ public class DetailFragment extends Fragment {
             Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
         }
 
-        // Find the relevant data in a cursor
-        int position = 0;
-        if (getArguments().containsKey(ARG_ITEM_POSITION)) {
-            // Get a cursor position if the detail fragment was launched from the feed
-            position = findStartPosition(getArguments().getString(ARG_ITEM_POSITION));
-        } else if (getArguments().containsKey(ARG_ITEM_ID)){
-            // Get a cursor position if the detail fragment was launched from the scanner
-            position = findStartPosition(getArguments().getString(ARG_ITEM_ID));
-        }
-        pointTourCursor.moveToPosition(position);
+        if(pointTourCursor.getCount() > 0) {
 
-        try {
-            Map<String, String> partialPrimaryMapPoint = new HashMap<>();
-            partialPrimaryMapPoint.put("POINT_ID", pointTourCursor.getString(pointTourCursor.getColumnIndex(POINT_ID)));
-            pointDataCursor = FeedActivity.database.getWholeByPrimaryPartialSorted("POINT_DATA", partialPrimaryMapPoint, RANK);
-        } catch (Exception e) {
-            Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
+            // Find the relevant data in a cursor
+            int position = 0;
+            if (getArguments().containsKey(ARG_ITEM_POSITION)) {
+                // Get a cursor position if the detail fragment was launched from the feed
+                position = findStartPosition(getArguments().getString(ARG_ITEM_POSITION));
+            } else if (getArguments().containsKey(ARG_ITEM_ID)) {
+                // Get a cursor position if the detail fragment was launched from the scanner
+                position = findStartPosition(getArguments().getString(ARG_ITEM_ID));
+            }
+            pointTourCursor.moveToPosition(position);
+
+            try {
+                Map<String, String> partialPrimaryMapPoint = new HashMap<>();
+                partialPrimaryMapPoint.put("POINT_ID", pointTourCursor.getString(pointTourCursor.getColumnIndex(POINT_ID)));
+                pointDataCursor = FeedActivity.database.getWholeByPrimaryPartialSorted("POINT_DATA", partialPrimaryMapPoint, RANK);
+            } catch (Exception e) {
+                Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
+            }
         }
     }
 
@@ -191,7 +194,7 @@ public class DetailFragment extends Fragment {
     }
 
     /**
-     * Creates and inflates the view's on the {@link Fragment} from the data for the selected point
+     * Creates and inflates the views on the {@link Fragment} from the data for the selected point
      * including its images, text and videos.
      *
      * @param inflater {@link LayoutInflater}
@@ -202,49 +205,54 @@ public class DetailFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        mRootView = inflater.inflate(R.layout.fragment_detail, container, false);
 
-        if(!(getResources().getBoolean(R.bool.isTablet))) {
-            android.support.v7.widget.Toolbar toolbar = (android.support.v7.widget.Toolbar)
-                    mRootView.findViewById(R.id.toolbar);
-            ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
-            ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayShowTitleEnabled(false);
-        }
+        if(pointTourCursor.getCount() > 0) {
 
-        TextView titleView = (TextView) mRootView.findViewById(R.id.text_title);
-        TextView bodyView = (TextView) mRootView.findViewById(R.id.text_body);
-        mImageView = (ImageView) mRootView.findViewById(R.id.photo);
+            // Inflate the layout for this fragment
+            mRootView = inflater.inflate(R.layout.fragment_detail, container, false);
 
-        if (pointTourCursor != null && pointDataCursor != null) {
-            mRootView.setAlpha(0);
-            mRootView.setVisibility(View.VISIBLE);
-            mRootView.animate().alpha(1);
-            try {
-                Map<String,String> primaryMap = new HashMap<>();
-                primaryMap.put("POINT_ID", pointTourCursor.getString(pointTourCursor.getColumnIndex(POINT_ID)));
-                Cursor pointCursor = FeedActivity.database.getWholeByPrimary("POINT",primaryMap);
-                pointCursor.moveToFirst();
-
-                titleView.setText(pointCursor.getString(pointCursor.getColumnIndex(NAME)));
-                bodyView.setText(pointCursor.getString(pointCursor.getColumnIndex(DESCRIPTION)));
-
-                String url = pointCursor.getString(pointCursor.getColumnIndex(URL));
-                url = FeedActivity.createFilename(url);
-                String localFilesAddress = getContext().getFilesDir().toString();
-                url = localFilesAddress + "/" + url;
-                Bitmap bitmap = BitmapFactory.decodeFile(url);
-                mImageView.setImageBitmap(bitmap);
-                mImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-            } catch (NotInSchemaException e) {
-                Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
+            if (!(getResources().getBoolean(R.bool.isTablet))) {
+                android.support.v7.widget.Toolbar toolbar = (android.support.v7.widget.Toolbar)
+                        mRootView.findViewById(R.id.toolbar);
+                ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
+                ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayShowTitleEnabled(false);
             }
 
-            LinearLayout linearLayout = (LinearLayout) mRootView.findViewById(R.id.detail_body);
-            addContent(inflater, linearLayout, savedInstanceState);
+            TextView titleView = (TextView) mRootView.findViewById(R.id.text_title);
+            TextView bodyView = (TextView) mRootView.findViewById(R.id.text_body);
+            mImageView = (ImageView) mRootView.findViewById(R.id.photo);
+
+            if (pointTourCursor != null && pointDataCursor != null) {
+                mRootView.setAlpha(0);
+                mRootView.setVisibility(View.VISIBLE);
+                mRootView.animate().alpha(1);
+                try {
+                    Map<String, String> primaryMap = new HashMap<>();
+                    primaryMap.put("POINT_ID", pointTourCursor.getString(pointTourCursor.getColumnIndex(POINT_ID)));
+                    Cursor pointCursor = FeedActivity.database.getWholeByPrimary("POINT", primaryMap);
+                    pointCursor.moveToFirst();
+
+                    titleView.setText(pointCursor.getString(pointCursor.getColumnIndex(NAME)));
+                    bodyView.setText(pointCursor.getString(pointCursor.getColumnIndex(DESCRIPTION)));
+
+                    String url = pointCursor.getString(pointCursor.getColumnIndex(URL));
+                    url = FeedActivity.createFilename(url);
+                    String localFilesAddress = getContext().getFilesDir().toString();
+                    url = localFilesAddress + "/" + url;
+                    Bitmap bitmap = BitmapFactory.decodeFile(url);
+                    mImageView.setImageBitmap(bitmap);
+                    mImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                } catch (NotInSchemaException e) {
+                    Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
+                }
+
+                LinearLayout linearLayout = (LinearLayout) mRootView.findViewById(R.id.detail_body);
+                addContent(inflater, linearLayout, savedInstanceState);
+            }
+            return mRootView;
         }
-        return mRootView;
+        return null;
     }
 
     /**
@@ -272,7 +280,7 @@ public class DetailFragment extends Fragment {
                     String fileExtension = FeedActivity.getFileExtension(dataCursor.getString(dataCursor.getColumnIndex(URL)));
 
                     StringBuilder text = new StringBuilder();
-                    if (fileExtension.matches("jpg|jpeg|png")) {
+                    if (fileExtension.matches("jpg|jpeg|png|gif")) {
                         layoutDetail = (LinearLayout) inflater.inflate(R.layout.image_detail, container, false);
                         final ImageView imageView = (ImageView) layoutDetail.findViewById(R.id.image);
                         final Bitmap bitmap = BitmapFactory.decodeFile(url);
@@ -420,6 +428,21 @@ public class DetailFragment extends Fragment {
             for(int i = 0; i < currentVideosArrayList.size(); i++) {
                 currentPositionArray[i] = currentVideosArrayList.get(i).getCurrentPosition();
                 currentVideosArrayList.get(i).pause();
+            }
+        }
+    }
+
+    /**
+     * Pauses the video when the ViewPager page changes to another page
+     * @param isVisibleToUser if this DetailFragment is currently visible
+     */
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        // Check if the DetailFragment is currently visible and is becoming invisible to user
+        if (this.isVisible() && !isVisibleToUser && currentVideosArrayList != null) {
+            for (EMVideoView video : currentVideosArrayList) {
+                video.pause();
             }
         }
     }
