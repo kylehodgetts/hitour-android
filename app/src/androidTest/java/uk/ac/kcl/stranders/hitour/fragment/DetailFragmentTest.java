@@ -1,4 +1,4 @@
-package uk.ac.kcl.stranders.hitour;
+package uk.ac.kcl.stranders.hitour.fragment;
 
 import android.app.Activity;
 import android.app.Instrumentation;
@@ -11,17 +11,16 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import uk.ac.kcl.stranders.hitour.R;
 import uk.ac.kcl.stranders.hitour.activity.DetailActivity;
 import uk.ac.kcl.stranders.hitour.activity.FeedActivity;
 import uk.ac.kcl.stranders.hitour.activity.ScanningActivity;
-import uk.ac.kcl.stranders.hitour.fragment.DetailFragment;
 
 /**
  * Front end instrumentation test for the {@link DetailFragment} ensuring that its content is correctly
  * populated and the video behaves as it should when interacted with.
  */
 public class DetailFragmentTest extends InstrumentationTestCase {
-
 
     /**
      * Tests the dynamic content on the loaded Detail Fragment matches the data that is returned by
@@ -92,5 +91,6 @@ public class DetailFragmentTest extends InstrumentationTestCase {
         assertNotNull(currentActivity.findViewById(R.id.image));
         assertNotNull(currentActivity.findViewById(R.id.description));
     }
+
 
 }

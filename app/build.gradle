@@ -41,4 +41,7 @@ dependencies {
     compile 'com.squareup.okhttp:okhttp:2.3.0'
     compile 'com.devbrackets.android:exomedia:2.5.5'
 
+    androidTestCompile 'junit:junit:4.12'
+
+
 }
