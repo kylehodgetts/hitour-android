@@ -18,6 +18,8 @@ import uk.ac.kcl.stranders.hitour.R;
 
 public class ImageDialogFragment extends DialogFragment {
 
+    public static String FRAGMENT_TAG = "IMAGE_DIALOG_FRAGMENT";
+
     private ImageView mImageView;
     private static Bitmap mBitmap;
 
@@ -49,9 +51,7 @@ public class ImageDialogFragment extends DialogFragment {
     /**
      * Empty constructor required
      */
-    public ImageDialogFragment() {
-
-    }
+    public ImageDialogFragment() { }
 
     /**
      * Get a new intance of the dialog fragment with an image in it

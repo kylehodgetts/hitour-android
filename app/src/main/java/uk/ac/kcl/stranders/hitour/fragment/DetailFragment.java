@@ -1,13 +1,5 @@
 package uk.ac.kcl.stranders.hitour.fragment;
 
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.AUDIENCE_ID;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.DATA_ID;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.DESCRIPTION;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.NAME;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_ID;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TITLE;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.URL;
-
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -21,7 +13,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -292,7 +283,7 @@ public class DetailFragment extends Fragment {
                                 FragmentManager fm = getActivity().getSupportFragmentManager();
                                 ImageDialogFragment imageDialogFragment = new ImageDialogFragment().newInstance(getArguments().describeContents(), bitmap, getActivity());
                                 imageDialogFragment.setStyle(DialogFragment.STYLE_NO_FRAME, R.style.MyDialog);
-                                imageDialogFragment.show(fm, "image_dialog_fragment");
+                                imageDialogFragment.show(fm, ImageDialogFragment.FRAGMENT_TAG);
                             }
                         });
 
