@@ -1,12 +1,9 @@
-package uk.ac.kcl.stranders.hitour;
+package uk.ac.kcl.stranders.hitour.activity;
 
 import android.app.Instrumentation;
 import android.content.pm.ActivityInfo;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.TouchUtils;
@@ -16,16 +13,12 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import retrofit2.http.GET;
-import uk.ac.kcl.stranders.hitour.activity.DetailActivity;
-import uk.ac.kcl.stranders.hitour.activity.FeedActivity;
-import uk.ac.kcl.stranders.hitour.activity.ScanningActivity;
+import uk.ac.kcl.stranders.hitour.FeedAdapter;
+import uk.ac.kcl.stranders.hitour.R;
 import uk.ac.kcl.stranders.hitour.database.NotInSchemaException;
 import uk.ac.kcl.stranders.hitour.fragment.DetailFragment;
 
@@ -33,12 +26,6 @@ import uk.ac.kcl.stranders.hitour.fragment.DetailFragment;
  * Front-end instrumentation tests for the {@link uk.ac.kcl.stranders.hitour.activity.FeedActivity}.
  */
 public class FeedActivityTest extends ActivityInstrumentationTestCase2<FeedActivity> {
-    /**
-     * How to test:
-     * -Delete application if installed
-     * -Enter manually the tour :Penguins123 , ensure that all points are locked.
-     * -Run the test.
-     */
 
     public FeedActivityTest() {
         super(FeedActivity.class);
@@ -90,8 +77,6 @@ public class FeedActivityTest extends ActivityInstrumentationTestCase2<FeedActiv
         assertNotNull(scanningActivity);
         scanningActivity.finish();
     }
-
-    //Issue occurs when loaded with all the other tests however not when ran individually.
 
     /**
      * Enters the point's number via the scanner and unlock's the quiz

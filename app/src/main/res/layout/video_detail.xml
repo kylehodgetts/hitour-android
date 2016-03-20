@@ -9,8 +9,8 @@
 
     <com.devbrackets.android.exomedia.EMVideoView
         android:id="@+id/video"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
         EMVideoView:defaultControlsEnabled="true" />
 
 </LinearLayout>
