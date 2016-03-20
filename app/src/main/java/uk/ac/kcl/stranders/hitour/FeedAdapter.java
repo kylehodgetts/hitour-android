@@ -61,7 +61,8 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
      */
     private HashMap<Pair<Integer, Integer>, View> views;
 
-    private HashMap<Integer,View> viewQuizzes;
+    private HashMap<Integer,View> viewHolderQuiz;
+
     /**
      * Stores the current {@link DetailFragment} that is being shown
      */
@@ -79,7 +80,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
         pointTourCursor = cursor;
         mContext = context;
         views = new HashMap<>();
-        viewQuizzes = new HashMap<>();
+        viewHolderQuiz = new HashMap<>();
     }
 
     /**
@@ -166,7 +167,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
             holder.ivThumbnail.setImageDrawable(ContextCompat.getDrawable(mContext,R.drawable.profile));
             holder.quiz = true;
             holder.tour_id = Integer.parseInt(FeedActivity.currentTourId);
-            viewQuizzes.put(holder.tour_id,holder.getView());
+            viewHolderQuiz.put(holder.tour_id, holder.getView());
             if (allUnlocked(holder.tour_id)) {
                     holder.getView().findViewById(R.id.fllock).setVisibility(View.GONE);
             }
@@ -225,8 +226,8 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
             getView(point_id, tour_id).findViewById(R.id.fllock).setVisibility(View.GONE);
         }
         if (allUnlocked(tour_id)) {
-            if(viewQuizzes.get(tour_id) != null) {
-                viewQuizzes.get(tour_id).findViewById(R.id.fllock).setVisibility(View.GONE);
+            if(viewHolderQuiz.get(tour_id) != null) {
+                viewHolderQuiz.get(tour_id).findViewById(R.id.fllock).setVisibility(View.GONE);
             }
         }
     }
@@ -306,6 +307,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
         } while (pointTourCursor.moveToNext());
         return true;
     }
+
     /**
      * Method to retrieve a specific ViewHolder
      *
@@ -316,15 +318,6 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
     private View getView(Integer point_id, Integer tour_id) {
 
         return views.get(new Pair<>(point_id, tour_id));
-    }
-
-    /**
-     * Method to retrieve the quiz/Feedback view.
-     * @param tour_id
-     * @return the quiz view
-     */
-    public View getQuizView(Integer tour_id){
-       return viewQuizzes.get(tour_id);
     }
 
     public void clearFragment() {
