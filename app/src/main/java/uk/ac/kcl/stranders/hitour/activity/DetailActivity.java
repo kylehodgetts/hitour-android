@@ -172,4 +172,8 @@ public class DetailActivity extends AppCompatActivity {
             return (mCursor != null) ? mCursor.getCount() : 0;
         }
     }
+
+    public int getCurrentPosition() {
+        return mCursor.getPosition();
+    }
 }
