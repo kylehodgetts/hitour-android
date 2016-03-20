@@ -1,4 +1,4 @@
-package uk.ac.kcl.stranders.hitour;
+package uk.ac.kcl.stranders.hitour.activity;
 
 import android.app.Activity;
 import android.app.Instrumentation;
@@ -9,8 +9,7 @@ import android.view.KeyEvent;
 import android.widget.Button;
 import android.widget.EditText;
 
-import uk.ac.kcl.stranders.hitour.activity.DetailActivity;
-import uk.ac.kcl.stranders.hitour.activity.ScanningActivity;
+import uk.ac.kcl.stranders.hitour.R;
 
 /**
  * Front End Instrumentation test class to test the {@link ScanningActivity} to ensure that

@@ -6,8 +6,11 @@ import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -102,6 +105,11 @@ public class DetailFragment extends Fragment {
      * Stores the current position of the videos
      */
     private long[] currentPositionArray;
+
+    /**
+     * Store the display sizes
+     */
+    static DisplayMetrics displaymetrics;
 
     /**
      * Default empty required public constructor
@@ -265,9 +273,20 @@ public class DetailFragment extends Fragment {
                     StringBuilder text = new StringBuilder();
                     if (fileExtension.matches("jpg|jpeg|png|gif")) {
                         layoutDetail = (LinearLayout) inflater.inflate(R.layout.image_detail, container, false);
-                        ImageView imageView = (ImageView) layoutDetail.findViewById(R.id.image);
-                        Bitmap bitmap = BitmapFactory.decodeFile(url);
+                        final ImageView imageView = (ImageView) layoutDetail.findViewById(R.id.image);
+                        final Bitmap bitmap = BitmapFactory.decodeFile(url);
                         imageView.setImageBitmap(bitmap);
+
+                        imageView.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                FragmentManager fm = getActivity().getSupportFragmentManager();
+                                ImageDialogFragment imageDialogFragment = new ImageDialogFragment().newInstance(getArguments().describeContents(), bitmap, getActivity());
+                                imageDialogFragment.setStyle(DialogFragment.STYLE_NO_FRAME, R.style.MyDialog);
+                                imageDialogFragment.show(fm, ImageDialogFragment.FRAGMENT_TAG);
+                            }
+                        });
+
                     } else if (fileExtension.matches("mp4")) {
                         layoutDetail = (LinearLayout) inflater.inflate(R.layout.video_detail, container, false);
                         addVideo(savedInstanceState, layoutDetail, i, url);
@@ -313,6 +332,10 @@ public class DetailFragment extends Fragment {
             if(currentVideosArrayList == null) {
                 currentVideosArrayList = new ArrayList<>();
             }
+
+            displaymetrics = new DisplayMetrics();
+            getActivity().getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+
             final EMVideoView videoView = (EMVideoView) linearLayout.findViewById(R.id.video);
             currentVideosArrayList.add(videoView);
             videoView.setId(Integer.parseInt(mItemId + rank + ""));
@@ -320,6 +343,10 @@ public class DetailFragment extends Fragment {
             videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 @Override
                 public void onPrepared(MediaPlayer mp) {
+
+                    int displayHeight = displaymetrics.heightPixels;
+                    int displayWidth = displaymetrics.widthPixels;
+
                     // Calculations to make video player in a 16:9 aspect ratio
                     int intWidth = linearLayout.getWidth();
                     float floatWidth = (float) intWidth;
@@ -327,6 +354,16 @@ public class DetailFragment extends Fragment {
                     int intHeight = Math.round(floatHeight);
                     LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(intWidth, intHeight);
                     videoView.setLayoutParams(layoutParams);
+
+                    // if the video is in landscape mode, make the video the right size
+                    if (displayHeight < displayWidth && !(getContext().getResources().getBoolean(R.bool.isTablet))) {
+                        int toolbarSize = mRootView.findViewById(R.id.toolbar).getHeight();
+                        toolbarSize += toolbarSize/2;
+                        Log.d ("____HITOUR____", "toolbar's bottom is at " + toolbarSize);
+                        layoutParams = new LinearLayout.LayoutParams(intWidth, displayHeight - toolbarSize);
+                        videoView.setLayoutParams(layoutParams);
+                    }
+
 
                     // Resumes video in same play if device rotated or fragment is paused
                     if (currentPositionArray != null) {
@@ -423,5 +460,4 @@ public class DetailFragment extends Fragment {
         }
         return false;
     }
-
 }

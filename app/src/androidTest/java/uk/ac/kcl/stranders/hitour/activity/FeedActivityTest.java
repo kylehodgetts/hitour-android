@@ -1,4 +1,4 @@
-package uk.ac.kcl.stranders.hitour;
+package uk.ac.kcl.stranders.hitour.activity;
 
 import android.app.Instrumentation;
 import android.content.pm.ActivityInfo;
@@ -8,9 +8,8 @@ import android.support.v7.widget.RecyclerView;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.TouchUtils;
 
-import uk.ac.kcl.stranders.hitour.activity.DetailActivity;
-import uk.ac.kcl.stranders.hitour.activity.FeedActivity;
-import uk.ac.kcl.stranders.hitour.activity.ScanningActivity;
+import uk.ac.kcl.stranders.hitour.FeedAdapter;
+import uk.ac.kcl.stranders.hitour.R;
 import uk.ac.kcl.stranders.hitour.fragment.DetailFragment;
 
 /**

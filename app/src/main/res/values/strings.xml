@@ -25,4 +25,5 @@
 
     <string name="no_network_quiz">There is no network connection. The quiz cannot be accessed.</string>
     <string name="tour_not_complete">You need to complete the tour before starting the quiz.</string>
+
 </resources>
