@@ -167,7 +167,7 @@ public class Data implements Parcelable {
      * @param rank
      * The rank
      */
-    public void rank(Integer rank) {
+    public void setRank(Integer rank) {
         this.rank = rank;
     }
 
@@ -210,4 +210,7 @@ public class Data implements Parcelable {
         in.readList(audiences, Audience.class.getClassLoader());
         rank = in.readInt();
     }
+
+    public Data() {}
+
 }

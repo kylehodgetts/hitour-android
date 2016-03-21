@@ -209,4 +209,7 @@ public class Point implements Parcelable {
         data = new ArrayList<Data>();
         in.readList(data, Data.class.getClassLoader());
     }
+
+    public Point() {}
+
 }

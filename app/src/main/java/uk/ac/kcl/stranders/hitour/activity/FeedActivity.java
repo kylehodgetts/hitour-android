@@ -43,7 +43,6 @@ import com.squareup.okhttp.Response;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -407,7 +406,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
 
         TourSession tourSession = hiTourRetrofit.getTourSession();
         Tour tour = hiTourRetrofit.getTour();
-        ArrayList<String> urlArrayList = DataManipulation.addSession(tourSession, tour, this);
+        ArrayList<String> urlArrayList = DataManipulation.addSession(tourSession, tour, this, database);
 
         // Download all data that us not already on the device
         downloadItemCount = urlArrayList.size();
@@ -526,7 +525,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         Map<String,String> partialPrimaryMap = new HashMap<>();
         partialPrimaryMap.put("TOUR_ID", tourId);
         try {
-            Cursor tourCursor = database.getWholeByPrimary(TOUR_TABLE,partialPrimaryMap);
+            Cursor tourCursor = database.getWholeByPrimary(TOUR_TABLE, partialPrimaryMap);
             // Clear the fragment on change so point from previous tour does not show on tablet
             if(currentFeedAdapter != null)
                 currentFeedAdapter.clearFragment();
@@ -613,7 +612,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
                 @Override
                 public void run() {
                     CardView cardView = (CardView) findViewById(R.id.point_detail_container);
-                    if(cardView != null) {
+                    if (cardView != null) {
                         cardView.removeAllViews();
                     }
                     populateFeedAdapter(currentTourId);
@@ -659,7 +658,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         }
         protected void onPostExecute(ArrayList<String> result) {
             for (int i = 0; i < result.size(); i++) {
-                DataManipulation.removeSession(result.get(i), FeedActivity.this);
+                DataManipulation.removeSession(result.get(i), FeedActivity.this, database);
             }
         }
     }
@@ -686,6 +685,14 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
 
     private void setCurrentFeedAdapter(FeedAdapter adapter){
         currentFeedAdapter = adapter;
+    }
+
+    /**
+     * Method used by testing to get the database
+     * @return database
+     */
+    public DBWrap getDatabase() {
+        return database;
     }
 
     /**
@@ -722,7 +729,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         protected void onPostExecute(ArrayList<String> result) {
             if(result != null) {
                 for (int i = 0; i < result.size(); i++) {
-                    DataManipulation.removeSession(result.get(i), FeedActivity.this);
+                    DataManipulation.removeSession(result.get(i), FeedActivity.this, database);
                 }
             }
         }

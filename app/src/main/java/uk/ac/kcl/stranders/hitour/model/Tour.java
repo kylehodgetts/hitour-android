@@ -188,4 +188,7 @@ public class Tour implements Parcelable {
         in.readList(points, Point.class.getClassLoader());
         quizUrl = in.readString();
     }
+
+    public Tour() {}
+
 }

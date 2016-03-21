@@ -211,4 +211,6 @@ public class TourSession implements Parcelable {
         name = in.readString();
     }
 
+    public TourSession() {}
+
 }
