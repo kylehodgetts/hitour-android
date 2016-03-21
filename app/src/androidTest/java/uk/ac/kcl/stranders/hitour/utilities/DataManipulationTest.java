@@ -249,9 +249,9 @@ public class DataManipulationTest extends ActivityInstrumentationTestCase2<FeedA
     }
 
     /**
-     * Test that the first tour session gets added correctly to the database
+     * Test that sessions get added and removed correctly in this order
      */
-    public void testAll() {
+    public void testOrderOne() {
 
         try {
             FeedActivity feedActivity = getActivity();
@@ -320,6 +320,82 @@ public class DataManipulationTest extends ActivityInstrumentationTestCase2<FeedA
             assertEquals(pointCursorSix.getCount(), 0);
             Cursor dataCursorSix = database.getAll(DATA_TABLE);
             assertEquals(dataCursorSix.getCount(), 0);
+
+        } catch (NotInSchemaException e) {
+            fail("Database threw a NotInSchemaException");
+        }
+
+    }
+
+    public void testOrderTwo() {
+
+        try {
+            FeedActivity feedActivity = getActivity();
+            // Test adding second tour session
+            DataManipulation.addSession(tourSessionTwo, tourTwo, feedActivity.getApplicationContext(), database);
+            Cursor sessionCursorTwo = database.getAll(SESSION_TABLE);
+            assertEquals(sessionCursorTwo.getCount(), 1);
+            Cursor tourCursorTwo = database.getAll(TOUR_TABLE);
+            assertEquals(tourCursorTwo.getCount(), 1);
+            Cursor pointCursorTwo = database.getAll(POINT_TABLE);
+            assertEquals(pointCursorTwo.getCount(), 4);
+            Cursor dataCursorTwo = database.getAll(DATA_TABLE);
+            assertEquals(dataCursorTwo.getCount(), 5);
+
+            // Test adding third tour session
+            DataManipulation.addSession(tourSessionThree, tourTwo, feedActivity.getApplicationContext(), database);
+            Cursor sessionCursorThree = database.getAll(SESSION_TABLE);
+            assertEquals(sessionCursorThree.getCount(), 2);
+            Cursor tourCursorThree = database.getAll(TOUR_TABLE);
+            assertEquals(tourCursorThree.getCount(), 1);
+            Cursor pointCursorThree = database.getAll(POINT_TABLE);
+            assertEquals(pointCursorThree.getCount(), 4);
+            Cursor dataCursorThree = database.getAll(DATA_TABLE);
+            assertEquals(dataCursorThree.getCount(), 5);
+
+            // Test adding first tour session
+            DataManipulation.addSession(tourSessionOne, tourOne, feedActivity.getApplicationContext(), database);
+            Cursor sessionCursorOne = database.getAll(SESSION_TABLE);
+            assertEquals(sessionCursorOne.getCount(), 3);
+            Cursor tourCursorOne = database.getAll(TOUR_TABLE);
+            assertEquals(tourCursorOne.getCount(),2);
+            Cursor pointCursorOne = database.getAll(POINT_TABLE);
+            assertEquals(pointCursorOne.getCount(), 5);
+            Cursor dataCursorOne = database.getAll(DATA_TABLE);
+            assertEquals(dataCursorOne.getCount(), 8);
+
+            // Test removing second tour session
+            DataManipulation.removeSession("2", feedActivity.getApplicationContext(), database);
+            Cursor sessionCursorSix = database.getAll(SESSION_TABLE);
+            assertEquals(sessionCursorSix.getCount(), 2);
+            Cursor tourCursorSix = database.getAll(TOUR_TABLE);
+            assertEquals(tourCursorSix.getCount(), 2);
+            Cursor pointCursorSix = database.getAll(POINT_TABLE);
+            assertEquals(pointCursorSix.getCount(), 5);
+            Cursor dataCursorSix = database.getAll(DATA_TABLE);
+            assertEquals(dataCursorSix.getCount(), 8);
+
+            // Test removing third tour session
+            DataManipulation.removeSession("3", feedActivity.getApplicationContext(), database);
+            Cursor sessionCursorFour = database.getAll(SESSION_TABLE);
+            assertEquals(sessionCursorFour.getCount(), 1);
+            Cursor tourCursorFour = database.getAll(TOUR_TABLE);
+            assertEquals(tourCursorFour.getCount(), 1);
+            Cursor pointCursorFour = database.getAll(POINT_TABLE);
+            assertEquals(pointCursorFour.getCount(), 3);
+            Cursor dataCursorFour = database.getAll(DATA_TABLE);
+            assertEquals(dataCursorFour.getCount(), 6);
+
+            // Test removing first tour session
+            DataManipulation.removeSession("1", feedActivity.getApplicationContext(), database);
+            Cursor sessionCursorFive = database.getAll(SESSION_TABLE);
+            assertEquals(sessionCursorFive.getCount(), 0);
+            Cursor tourCursorFive = database.getAll(TOUR_TABLE);
+            assertEquals(tourCursorFive.getCount(), 0);
+            Cursor pointCursorFive = database.getAll(POINT_TABLE);
+            assertEquals(pointCursorFive.getCount(), 0);
+            Cursor dataCursorFive = database.getAll(DATA_TABLE);
+            assertEquals(dataCursorFive.getCount(), 0);
 
         } catch (NotInSchemaException e) {
             fail("Database threw a NotInSchemaException");
