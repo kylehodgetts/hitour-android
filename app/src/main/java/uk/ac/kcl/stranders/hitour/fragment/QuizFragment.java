@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import uk.ac.kcl.stranders.hitour.R;
-import uk.ac.kcl.stranders.hitour.Utilities;
+import uk.ac.kcl.stranders.hitour.utilities.Utilities;
 import uk.ac.kcl.stranders.hitour.activity.FeedActivity;
 import uk.ac.kcl.stranders.hitour.database.NotInSchemaException;
 

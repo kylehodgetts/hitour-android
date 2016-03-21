@@ -104,4 +104,8 @@ public class FeedActivityTest extends ActivityInstrumentationTestCase2<FeedActiv
 
     }
 
+    public void testLayoutDrawerList() {
+        getActivity().findViewById(R.id.nav_view);
+    }
+
 }

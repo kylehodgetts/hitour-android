@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import uk.ac.kcl.stranders.hitour.R;
-import uk.ac.kcl.stranders.hitour.Utilities;
+import uk.ac.kcl.stranders.hitour.utilities.Utilities;
 import uk.ac.kcl.stranders.hitour.database.NotInSchemaException;
 
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.QUIZ_URL;
