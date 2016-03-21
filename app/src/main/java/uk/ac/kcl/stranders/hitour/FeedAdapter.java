@@ -61,7 +61,8 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
      */
     private HashMap<Pair<Integer, Integer>, View> views;
 
-    private HashMap<Integer,ViewHolder> viewHolderQuiz;
+    private HashMap<Integer,View> viewHolderQuiz;
+
     /**
      * Stores the current {@link DetailFragment} that is being shown
      */
@@ -166,7 +167,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
             holder.ivThumbnail.setImageDrawable(ContextCompat.getDrawable(mContext,R.drawable.profile));
             holder.quiz = true;
             holder.tour_id = Integer.parseInt(FeedActivity.currentTourId);
-            viewHolderQuiz.put(holder.tour_id,holder);
+            viewHolderQuiz.put(holder.tour_id, holder.getView());
             if (allUnlocked(holder.tour_id)) {
                     holder.getView().findViewById(R.id.fllock).setVisibility(View.GONE);
             }
@@ -226,7 +227,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
         }
         if (allUnlocked(tour_id)) {
             if(viewHolderQuiz.get(tour_id) != null) {
-                viewHolderQuiz.get(tour_id).getView().findViewById(R.id.fllock).setVisibility(View.GONE);
+                viewHolderQuiz.get(tour_id).findViewById(R.id.fllock).setVisibility(View.GONE);
             }
         }
     }
@@ -306,6 +307,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
         } while (pointTourCursor.moveToNext());
         return true;
     }
+
     /**
      * Method to retrieve a specific ViewHolder
      *
