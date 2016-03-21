@@ -36,14 +36,8 @@ import java.util.Observable;
 import uk.ac.kcl.stranders.hitour.utilities.CustomTypefaceSpan;
 import uk.ac.kcl.stranders.hitour.R;
 import uk.ac.kcl.stranders.hitour.database.NotInSchemaException;
-import uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants;
 
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.PASSPHRASE;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_ID;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_TOUR_TABLE;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.RANK;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TOUR_ID;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.UNLOCK;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.*;
 
 /**
  * {@link AppCompatActivity} class that is used to retrieve input by means of scanning a QR Code or
@@ -167,7 +161,7 @@ public class ScanningActivity extends AppCompatActivity {
             // For when the user attempts to add a session
             try {
                 // Checks to see if tour session is already on device
-                Cursor sessionCursor = FeedActivity.database.getAll("SESSION");
+                Cursor sessionCursor = FeedActivity.database.getAll(SESSION_TABLE);
                 boolean alreadyExists = false;
                 for (int i = 0; i < sessionCursor.getCount(); i++) {
                     sessionCursor.moveToPosition(i);
@@ -198,7 +192,7 @@ public class ScanningActivity extends AppCompatActivity {
 
                 //Replace unlock with a value of 1
                 Map<String, String> tourPointColumnsMap = new HashMap<>();
-                tourPointColumnsMap.put(UNLOCK, "1");
+                tourPointColumnsMap.put(UNLOCK, UNLOCK_STATE_UNLOCKED);
                 Map<String, String> tourPointPrimaryKeysMap = new HashMap<>();
                 Log.i("inScanning", "" + FeedActivity.currentTourId);
                 tourPointPrimaryKeysMap.put(TOUR_ID, "" + FeedActivity.currentTourId);
@@ -208,7 +202,7 @@ public class ScanningActivity extends AppCompatActivity {
                     cursorGetRank.moveToFirst();
                     String pointRank = cursorGetRank.getString(cursorGetRank.getColumnIndex(RANK));
                     tourPointColumnsMap.put(RANK, pointRank);
-                    FeedActivity.database.insert(tourPointColumnsMap, tourPointPrimaryKeysMap, "POINT_TOUR");
+                    FeedActivity.database.insert(tourPointColumnsMap, tourPointPrimaryKeysMap, POINT_TOUR_TABLE);
                 } catch (NotInSchemaException e) {
                     Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
                 }
@@ -238,13 +232,13 @@ public class ScanningActivity extends AppCompatActivity {
             return false;
         }
         Map<String, String> partialPrimaryMapTour = new HashMap<>();
-        partialPrimaryMapTour.put("TOUR_ID", FeedActivity.currentTourId);
+        partialPrimaryMapTour.put(TOUR_ID, FeedActivity.currentTourId);
         Cursor pointTourCursor;
         try {
-            pointTourCursor = FeedActivity.database.getWholeByPrimaryPartial("POINT_TOUR", partialPrimaryMapTour);
+            pointTourCursor = FeedActivity.database.getWholeByPrimaryPartial(POINT_TOUR_TABLE, partialPrimaryMapTour);
             pointTourCursor.moveToPosition(0);
             do {
-                String id = pointTourCursor.getString(pointTourCursor.getColumnIndex(DatabaseConstants.POINT_ID));
+                String id = pointTourCursor.getString(pointTourCursor.getColumnIndex(POINT_ID));
                 if (id.equals(passphrase)) {
                     return true;
                 }

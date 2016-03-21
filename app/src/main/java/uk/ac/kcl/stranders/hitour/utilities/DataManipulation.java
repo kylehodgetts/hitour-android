@@ -10,28 +10,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import uk.ac.kcl.stranders.hitour.activity.FeedActivity;
 import uk.ac.kcl.stranders.hitour.database.DBWrap;
 import uk.ac.kcl.stranders.hitour.database.NotInSchemaException;
-import uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants;
 import uk.ac.kcl.stranders.hitour.model.Data;
 import uk.ac.kcl.stranders.hitour.model.Point;
 import uk.ac.kcl.stranders.hitour.model.Tour;
 import uk.ac.kcl.stranders.hitour.model.TourSession;
 
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.AUDIENCE_DATA_TABLE;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.AUDIENCE_ID;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.DATA_ID;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.DATA_TABLE;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.NAME;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_DATA_TABLE;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_ID;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_TABLE;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.QUIZ_URL;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.SESSION_ID;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.SESSION_TABLE;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TOUR_ID;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TOUR_TABLE;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.*;
 
 public class DataManipulation {
 
@@ -41,29 +27,28 @@ public class DataManipulation {
 
         // Add the tour session to the local database
         Map<String,String> tourSessionColumnsMap = new HashMap<>();
-        tourSessionColumnsMap.put("TOUR_ID", tourSession.getTourId().toString());
-        tourSessionColumnsMap.put("START_DATE", tourSession.getStartDate());
-        tourSessionColumnsMap.put("DURATION", tourSession.getDuration().toString());
-        tourSessionColumnsMap.put("PASSPHRASE", tourSession.getPassphrase());
+        tourSessionColumnsMap.put(TOUR_ID, tourSession.getTourId().toString());
+        tourSessionColumnsMap.put(START_DATE, tourSession.getStartDate());
+        tourSessionColumnsMap.put(DURATION, tourSession.getDuration().toString());
+        tourSessionColumnsMap.put(PASSPHRASE, tourSession.getPassphrase());
         tourSessionColumnsMap.put(NAME, tourSession.getName());
         Map<String,String> tourSessionPrimaryKeysMap = new HashMap<>();
-        tourSessionPrimaryKeysMap.put("SESSION_ID", tourSession.getId().toString());
-        Log.i("INFO", tourSession.getId().toString());
+        tourSessionPrimaryKeysMap.put(SESSION_ID, tourSession.getId().toString());
         try {
-            database.insert(tourSessionColumnsMap, tourSessionPrimaryKeysMap, "SESSION");
+            database.insert(tourSessionColumnsMap, tourSessionPrimaryKeysMap, SESSION_TABLE);
         } catch (NotInSchemaException e) {
             Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
         }
 
         // Add the tour to the local database
         Map<String,String> tourColumnsMap = new HashMap<>();
-        tourColumnsMap.put("NAME", tour.getName());
-        tourColumnsMap.put("AUDIENCE_ID", tour.getAudienceId().toString());
+        tourColumnsMap.put(NAME, tour.getName());
+        tourColumnsMap.put(AUDIENCE_ID, tour.getAudienceId().toString());
         tourColumnsMap.put(QUIZ_URL, tour.getQuizUrl());
         Map<String, String> tourPrimaryKeysMap = new HashMap<>();
-        tourPrimaryKeysMap.put("TOUR_ID", tour.getId().toString());
+        tourPrimaryKeysMap.put(TOUR_ID, tour.getId().toString());
         try {
-            database.insert(tourColumnsMap, tourPrimaryKeysMap, "TOUR");
+            database.insert(tourColumnsMap, tourPrimaryKeysMap, TOUR_TABLE);
         } catch (NotInSchemaException e) {
             Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
         }
@@ -72,13 +57,13 @@ public class DataManipulation {
         List<Point> points = tour.getPoints();
         for(Point point : points) {
             Map<String,String> pointColumnMap = new HashMap<>();
-            pointColumnMap.put("NAME", point.getName());
-            pointColumnMap.put("URL", point.getUrl());
-            pointColumnMap.put("DESCRIPTION", point.getDescription());
+            pointColumnMap.put(NAME, point.getName());
+            pointColumnMap.put(URL, point.getUrl());
+            pointColumnMap.put(DESCRIPTION, point.getDescription());
             Map<String,String> pointPrimaryKeysMap = new HashMap<>();
-            pointPrimaryKeysMap.put("POINT_ID", point.getId().toString());
+            pointPrimaryKeysMap.put(POINT_ID, point.getId().toString());
             try {
-                database.insert(pointColumnMap, pointPrimaryKeysMap, "POINT");
+                database.insert(pointColumnMap, pointPrimaryKeysMap, POINT_TABLE);
             } catch(NotInSchemaException e) {
                 Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
             }
@@ -89,13 +74,13 @@ public class DataManipulation {
             for (int i = 0; i < data.size(); i ++) {
                 Data datum = data.get(i);
                 Map<String, String> datumColumnsMap = new HashMap<>();
-                datumColumnsMap.put("URL", datum.getUrl());
-                datumColumnsMap.put("DESCRIPTION", datum.getDescription());
-                datumColumnsMap.put("TITLE", datum.getTitle());
+                datumColumnsMap.put(URL, datum.getUrl());
+                datumColumnsMap.put(DESCRIPTION, datum.getDescription());
+                datumColumnsMap.put(TITLE, datum.getTitle());
                 Map<String, String> datumPrimaryKeysMap = new HashMap<>();
-                datumPrimaryKeysMap.put("DATA_ID", datum.getId().toString());
+                datumPrimaryKeysMap.put(DATA_ID, datum.getId().toString());
                 try {
-                    database.insert(datumColumnsMap, datumPrimaryKeysMap, "DATA");
+                    database.insert(datumColumnsMap, datumPrimaryKeysMap, DATA_TABLE);
                 } catch (NotInSchemaException e) {
                     Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
                 }
@@ -103,35 +88,35 @@ public class DataManipulation {
                 urlArrayList.add(datum.getUrl());
                 // Add point data to the local database
                 Map<String, String> pointDatumColumnsMap = new HashMap<>();
-                pointDatumColumnsMap.put("RANK", datum.getRank().toString());
+                pointDatumColumnsMap.put(RANK, datum.getRank().toString());
                 Map<String, String> pointDataPrimaryKeysMap = new HashMap<>();
-                pointDataPrimaryKeysMap.put("POINT_ID", point.getId().toString());
-                pointDataPrimaryKeysMap.put("DATA_ID", datum.getId().toString());
+                pointDataPrimaryKeysMap.put(POINT_ID, point.getId().toString());
+                pointDataPrimaryKeysMap.put(DATA_ID, datum.getId().toString());
                 try {
-                    database.insert(pointDatumColumnsMap, pointDataPrimaryKeysMap, "POINT_DATA");
+                    database.insert(pointDatumColumnsMap, pointDataPrimaryKeysMap, POINT_DATA_TABLE);
                 } catch (NotInSchemaException e) {
                     Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
                 }
                 // Add data audience to the local database
                 Map<String, String> dataAudienceColumnsMap = new HashMap<>();
                 Map<String, String> dataAudiencePrimaryKeysMap = new HashMap<>();
-                dataAudiencePrimaryKeysMap.put("DATA_ID", datum.getId().toString());
-                dataAudiencePrimaryKeysMap.put("AUDIENCE_ID", tour.getAudienceId().toString());
+                dataAudiencePrimaryKeysMap.put(DATA_ID, datum.getId().toString());
+                dataAudiencePrimaryKeysMap.put(AUDIENCE_ID, tour.getAudienceId().toString());
                 try {
-                    database.insert(dataAudienceColumnsMap, dataAudiencePrimaryKeysMap, "AUDIENCE_DATA");
+                    database.insert(dataAudienceColumnsMap, dataAudiencePrimaryKeysMap, AUDIENCE_DATA_TABLE);
                 } catch (NotInSchemaException e) {
                     Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
                 }
             }
             // Add tour points to the local database
             Map<String, String> tourPointColumnsMap = new HashMap<>();
-            tourPointColumnsMap.put("RANK", point.getRank().toString());
-            tourPointColumnsMap.put("UNLOCK","0");
+            tourPointColumnsMap.put(RANK, point.getRank().toString());
+            tourPointColumnsMap.put(UNLOCK, UNLOCK_STATE_LOCKED);
             Map<String, String> tourPointPrimaryKeysMap = new HashMap<>();
-            tourPointPrimaryKeysMap.put("TOUR_ID", tour.getId().toString());
-            tourPointPrimaryKeysMap.put("POINT_ID", point.getId().toString());
+            tourPointPrimaryKeysMap.put(TOUR_ID, tour.getId().toString());
+            tourPointPrimaryKeysMap.put(POINT_ID, point.getId().toString());
             try {
-                database.insert(tourPointColumnsMap, tourPointPrimaryKeysMap, "POINT_TOUR");
+                database.insert(tourPointColumnsMap, tourPointPrimaryKeysMap, POINT_TOUR_TABLE);
             } catch (NotInSchemaException e) {
                 Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
             }
@@ -140,9 +125,9 @@ public class DataManipulation {
         // Add audience to the local database
         Map<String, String> audienceColumnsMap = new HashMap<>();
         Map<String, String> audiencePrimaryKeysMap = new HashMap<>();
-        audiencePrimaryKeysMap.put("AUDIENCE_ID", tour.getAudienceId().toString());
+        audiencePrimaryKeysMap.put(AUDIENCE_ID, tour.getAudienceId().toString());
         try {
-            database.insert(audienceColumnsMap, audiencePrimaryKeysMap, "AUDIENCE");
+            database.insert(audienceColumnsMap, audiencePrimaryKeysMap, AUDIENCE_TABLE);
         } catch (NotInSchemaException e) {
             Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
         }
@@ -177,33 +162,33 @@ public class DataManipulation {
             primaryKeysMapSession.put(SESSION_ID, sessionId);
             Cursor exactSessionCursor = database.getWholeByPrimary(SESSION_TABLE, primaryKeysMapSession);
             exactSessionCursor.moveToFirst();
-            String completedTourId = exactSessionCursor.getString(exactSessionCursor.getColumnIndex(DatabaseConstants.TOUR_ID));
+            String completedTourId = exactSessionCursor.getString(exactSessionCursor.getColumnIndex(TOUR_ID));
             database.delete(columnsMapSession, primaryKeysMapSession, SESSION_TABLE);
 
             // Get the updated session table
-            Cursor sessionCursor = database.getAll("SESSION");
+            Cursor sessionCursor = database.getAll(SESSION_TABLE);
 
             // If no other sessions now exist remove all entries from all tables
             if (sessionCursor.getCount() == 0) {
-                database.deleteAll("TOUR");
-                database.deleteAll("POINT_TOUR");
+                database.deleteAll(TOUR_TABLE);
+                database.deleteAll(POINT_TOUR_TABLE);
                 Cursor pointCursor = database.getAll(POINT_TABLE);
                 for(int i = 0; i < pointCursor.getCount(); i++) {
                     pointCursor.moveToPosition(i);
-                    String url = pointCursor.getString(pointCursor.getColumnIndex(DatabaseConstants.URL));
+                    String url = pointCursor.getString(pointCursor.getColumnIndex(URL));
                     deleteDataFile(url, context);
                 }
-                database.deleteAll("POINT");
-                database.deleteAll("POINT_DATA");
+                database.deleteAll(POINT_TABLE);
+                database.deleteAll(POINT_DATA_TABLE);
                 Cursor dataCursor = database.getAll(DATA_TABLE);
                 for(int i = 0; i < dataCursor.getCount(); i++) {
                     dataCursor.moveToPosition(i);
-                    String url = dataCursor.getString(dataCursor.getColumnIndex(DatabaseConstants.URL));
+                    String url = dataCursor.getString(dataCursor.getColumnIndex(URL));
                     deleteDataFile(url, context);
                 }
-                database.deleteAll("DATA");
-                database.deleteAll("AUDIENCE_DATA");
-                database.deleteAll("AUDIENCE");
+                database.deleteAll(DATA_TABLE);
+                database.deleteAll(AUDIENCE_DATA_TABLE);
+                database.deleteAll(AUDIENCE_TABLE);
                 // No other checks needed, so exit the method
                 return;
             }
@@ -211,7 +196,7 @@ public class DataManipulation {
             // Check if other sessions use the same tour
             for (int i = 0; i < sessionCursor.getCount(); i++) {
                 sessionCursor.moveToPosition(i);
-                if (sessionCursor.getString(sessionCursor.getColumnIndex(DatabaseConstants.TOUR_ID)).equals(completedTourId)) {
+                if (sessionCursor.getString(sessionCursor.getColumnIndex(TOUR_ID)).equals(completedTourId)) {
                     // Nothing else should be deleted as tours use same data, so exit the method
                     return;
                 }
@@ -227,7 +212,7 @@ public class DataManipulation {
             database.delete(columnsMapTour, primaryKeysMapTour, TOUR_TABLE);
 
             // Check to see if other tours use same audience, if not remove the audience from the AUDIENCE table
-            Cursor updatedTourCursor = database.getAll("TOUR");
+            Cursor updatedTourCursor = database.getAll(TOUR_TABLE);
             boolean audienceStillNeeded = false;
             for(int i = 0; i < updatedTourCursor.getCount(); i++) {
                 updatedTourCursor.moveToPosition(i);
@@ -240,31 +225,31 @@ public class DataManipulation {
             if(!audienceStillNeeded) {
                 Map<String, String> columnsMapAudience = new HashMap<>();
                 Map<String, String> primaryKeysMapAudience = new HashMap<>();
-                primaryKeysMapAudience.put("AUDIENCE_ID", completedAudienceId);
-                database.delete(columnsMapAudience, primaryKeysMapAudience, "AUDIENCE");
-                database.delete(columnsMapAudience, primaryKeysMapAudience, "AUDIENCE_DATA");
+                primaryKeysMapAudience.put(AUDIENCE_ID, completedAudienceId);
+                database.delete(columnsMapAudience, primaryKeysMapAudience, AUDIENCE_TABLE);
+                database.delete(columnsMapAudience, primaryKeysMapAudience, AUDIENCE_DATA_TABLE);
             }
 
             // Get list of POINT_IDs that tour used and delete rows for tour from POINT_TOUR table
             ArrayList<String> forRemovingPointIdArrayList = new ArrayList<>();
             Map<String, String> columnsMapPointTour = new HashMap<>();
             Map<String, String> primaryKeysMapPointTour = new HashMap<>();
-            primaryKeysMapPointTour.put("TOUR_ID", completedTourId);
-            Cursor completedPointTourCursor = database.getWholeByPrimaryPartial("POINT_TOUR", primaryKeysMapPointTour);
+            primaryKeysMapPointTour.put(TOUR_ID, completedTourId);
+            Cursor completedPointTourCursor = database.getWholeByPrimaryPartial(POINT_TOUR_TABLE, primaryKeysMapPointTour);
             for(int i = 0; i < completedPointTourCursor.getCount(); i++) {
                 completedPointTourCursor.moveToPosition(i);
                 String tempPointId = completedPointTourCursor.getString(completedPointTourCursor.getColumnIndex(POINT_ID));
                 forRemovingPointIdArrayList.add(tempPointId);
             }
-            database.delete(columnsMapPointTour, primaryKeysMapPointTour, "POINT_TOUR");
+            database.delete(columnsMapPointTour, primaryKeysMapPointTour, POINT_TOUR_TABLE);
 
             // Go through POINT_TOUR table to find which, if any, other tours use same points
             ArrayList<String> stillNeededPointIdArrayList = new ArrayList<>();
             for(String pointId : forRemovingPointIdArrayList) {
                 // Get Cursor that shows other tours that use this POINT_ID
                 Map<String, String> primaryKeysMapUpdatedPointTour = new HashMap<>();
-                primaryKeysMapUpdatedPointTour.put("POINT_ID", pointId);
-                Cursor updatedPointTourCursor = database.getWholeByPrimaryPartial("POINT_TOUR", primaryKeysMapUpdatedPointTour);
+                primaryKeysMapUpdatedPointTour.put(POINT_ID, pointId);
+                Cursor updatedPointTourCursor = database.getWholeByPrimaryPartial(POINT_TOUR_TABLE, primaryKeysMapUpdatedPointTour);
                 if(updatedPointTourCursor.getCount() > 0) {
                     // Add to list of points that cannot be deleted as used by other tours
                     stillNeededPointIdArrayList.add(pointId);
@@ -279,23 +264,23 @@ public class DataManipulation {
             for(String pointId : forRemovingPointIdArrayList) {
                 Map<String, String> columnsMapRemoving = new HashMap<>();
                 Map<String, String> primaryKeysMapRemoving = new HashMap<>();
-                primaryKeysMapRemoving.put("POINT_ID", pointId);
-                database.delete(columnsMapRemoving, primaryKeysMapRemoving, "POINT");
-                Cursor pointDataRemovingCursor = database.getWholeByPrimaryPartial("POINT_DATA", primaryKeysMapRemoving);
+                primaryKeysMapRemoving.put(POINT_ID, pointId);
+                database.delete(columnsMapRemoving, primaryKeysMapRemoving, POINT_TABLE);
+                Cursor pointDataRemovingCursor = database.getWholeByPrimaryPartial(POINT_DATA_TABLE, primaryKeysMapRemoving);
                 for(int i = 0; i < pointDataRemovingCursor.getCount(); i++) {
                     pointDataRemovingCursor.moveToPosition(i);
                     String tempDataId = pointDataRemovingCursor.getString(pointDataRemovingCursor.getColumnIndex(DATA_ID));
                     if(!dataIdArrayList.contains(tempDataId))
                         dataIdArrayList.add(tempDataId);
                 }
-                database.delete(columnsMapRemoving, primaryKeysMapRemoving, "POINT_DATA");
+                database.delete(columnsMapRemoving, primaryKeysMapRemoving, POINT_DATA_TABLE);
             }
 
             // Make note of DATA_IDs of data from points that are still needed
             for(String pointId : stillNeededPointIdArrayList) {
                 Map<String, String> primaryKeysMapKeeping = new HashMap<>();
-                primaryKeysMapKeeping.put("POINT_ID", pointId);
-                Cursor pointDataKeepingCursor = database.getWholeByPrimaryPartial("POINT_DATA", primaryKeysMapKeeping);
+                primaryKeysMapKeeping.put(POINT_ID, pointId);
+                Cursor pointDataKeepingCursor = database.getWholeByPrimaryPartial(POINT_DATA_TABLE, primaryKeysMapKeeping);
                 for(int i = 0; i < pointDataKeepingCursor.getCount(); i++) {
                     pointDataKeepingCursor.moveToPosition(i);
                     String tempDataId = pointDataKeepingCursor.getString(pointDataKeepingCursor.getColumnIndex(DATA_ID));
@@ -308,8 +293,8 @@ public class DataManipulation {
             HashMap<String, ArrayList<String>> dataPointsMap = new HashMap<>();
             for(String dataId : dataIdArrayList) {
                 Map<String, String> primaryKeysMapPointData = new HashMap<>();
-                primaryKeysMapPointData.put("DATA_ID", dataId);
-                Cursor tempPointDataCursor = database.getWholeByPrimaryPartial("POINT_DATA", primaryKeysMapPointData);
+                primaryKeysMapPointData.put(DATA_ID, dataId);
+                Cursor tempPointDataCursor = database.getWholeByPrimaryPartial(POINT_DATA_TABLE, primaryKeysMapPointData);
                 ArrayList<String> tempPointIdArrayList = new ArrayList<>();
                 for(int i = 0; i < tempPointDataCursor.getCount(); i++) {
                     tempPointDataCursor.moveToPosition(i);
@@ -320,7 +305,7 @@ public class DataManipulation {
             }
 
             // Make note of all tours that use each point
-            Cursor pointCursor = database.getAll("POINT");
+            Cursor pointCursor = database.getAll(POINT_TABLE);
             Map<String, ArrayList<String>> pointToursMap = new HashMap<>();
             for(int i = 0; i < pointCursor.getCount(); i++) {
                 pointCursor.moveToPosition(i);
@@ -328,8 +313,8 @@ public class DataManipulation {
                 ArrayList<String> tourIds = new ArrayList<>();
 
                 Map<String, String> primaryKeysMapSpecificPoint = new HashMap<>();
-                primaryKeysMapSpecificPoint.put("POINT_ID", pointId);
-                Cursor pointTourCursor = database.getWholeByPrimaryPartial("POINT_TOUR", primaryKeysMapSpecificPoint);
+                primaryKeysMapSpecificPoint.put(POINT_ID, pointId);
+                Cursor pointTourCursor = database.getWholeByPrimaryPartial(POINT_TOUR_TABLE, primaryKeysMapSpecificPoint);
                 for(int j = 0; j < pointTourCursor.getCount(); j++) {
                     pointTourCursor.moveToPosition(j);
                     tourIds.add(pointTourCursor.getString(pointTourCursor.getColumnIndex(TOUR_ID)));
@@ -338,7 +323,7 @@ public class DataManipulation {
             }
 
             // Make connection between TOUR_ID and the AUDIENCE_ID of that tour
-            Cursor tourCursor = database.getAll("TOUR");
+            Cursor tourCursor = database.getAll(TOUR_TABLE);
             Map<String, String> tourAudienceMap = new HashMap<>();
             for(int i = 0; i < tourCursor.getCount(); i++) {
                 tourCursor.moveToPosition(i);
@@ -352,9 +337,9 @@ public class DataManipulation {
             for(int i = 0; i < dataIdArrayList.size(); i++) {
                 String dataId = dataIdArrayList.get(i);
                 Map<String, String> primaryKeysMapDataAudience = new HashMap<>();
-                primaryKeysMapDataAudience.put("DATA_ID", dataId);
+                primaryKeysMapDataAudience.put(DATA_ID, dataId);
                 ArrayList<String> audienceIdArrayList = new ArrayList<>();
-                Cursor dataAudienceCursor = database.getWholeByPrimaryPartial("AUDIENCE_DATA", primaryKeysMapDataAudience);
+                Cursor dataAudienceCursor = database.getWholeByPrimaryPartial(AUDIENCE_DATA_TABLE, primaryKeysMapDataAudience);
                 for(int j = 0; j < dataAudienceCursor.getCount(); j++) {
                     dataAudienceCursor.moveToPosition(j);
                     String audienceId = dataAudienceCursor.getString(dataAudienceCursor.getColumnIndex(AUDIENCE_ID));
@@ -404,7 +389,7 @@ public class DataManipulation {
         primaryKeysMap.put(DATA_ID, dataId);
         Cursor dataCursor = database.getWholeByPrimary(DATA_TABLE, primaryKeysMap);
         dataCursor.moveToFirst();
-        String url = dataCursor.getString(dataCursor.getColumnIndex(DatabaseConstants.URL));
+        String url = dataCursor.getString(dataCursor.getColumnIndex(URL));
         if(!usedByPoint(url, database)) {
             deleteDataFile(url, context);
         }
@@ -426,7 +411,7 @@ public class DataManipulation {
         Cursor pointCursor = database.getAll(POINT_TABLE);
         for(int i = 0; i < pointCursor.getCount(); i++) {
             pointCursor.moveToPosition(i);
-            String pointUrl = pointCursor.getString(pointCursor.getColumnIndex(DatabaseConstants.URL));
+            String pointUrl = pointCursor.getString(pointCursor.getColumnIndex(URL));
             if(dataUrl.equals(pointUrl))
                 return true;
         }

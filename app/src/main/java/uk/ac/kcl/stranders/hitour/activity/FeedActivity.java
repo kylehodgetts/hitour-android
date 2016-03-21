@@ -63,7 +63,6 @@ import uk.ac.kcl.stranders.hitour.R;
 import uk.ac.kcl.stranders.hitour.utilities.Utilities;
 import uk.ac.kcl.stranders.hitour.database.DBWrap;
 import uk.ac.kcl.stranders.hitour.database.NotInSchemaException;
-import uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants;
 import uk.ac.kcl.stranders.hitour.database.schema.HiSchema;
 import uk.ac.kcl.stranders.hitour.fragment.AppInfoFragment;
 import uk.ac.kcl.stranders.hitour.fragment.DetailFragment;
@@ -71,23 +70,7 @@ import uk.ac.kcl.stranders.hitour.model.Tour;
 import uk.ac.kcl.stranders.hitour.model.TourSession;
 import uk.ac.kcl.stranders.hitour.retrofit.HiTourRetrofit;
 
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.AUDIENCE_DATA_TABLE;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.AUDIENCE_ID;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.DATA_ID;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.DATA_TABLE;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.DURATION;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.NAME;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.PASSPHRASE;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_DATA_TABLE;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_ID;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_TABLE;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_TOUR_TABLE;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.RANK;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.SESSION_ID;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.SESSION_TABLE;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.START_DATE;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TOUR_ID;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TOUR_TABLE;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.*;
 
 /**
  * The main activity that displays all available points for a given tour.
@@ -428,7 +411,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
             Cursor sessionCursor = database.getAll(SESSION_TABLE);
             for(int i = 0; i < sessionCursor.getCount(); i++) {
                 sessionCursor.moveToPosition(i);
-                if(sessionCursor.getString(sessionCursor.getColumnIndex(DatabaseConstants.TOUR_ID)).equals(currentTourId)) {
+                if(sessionCursor.getString(sessionCursor.getColumnIndex(TOUR_ID)).equals(currentTourId)) {
                     mMenu.getItem(i).setChecked(true);
                     updateHeader(sessionCursor, i);
                     break;
@@ -625,7 +608,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
 
     private void checkSessionDates() {
         try {
-            Cursor sessionCursor = database.getAll("SESSION");
+            Cursor sessionCursor = database.getAll(SESSION_TABLE);
             Map<String, String> sessionIdPassphraseMap = new HashMap<>();
             for(int i = 0; i < sessionCursor.getCount(); i++) {
                 sessionCursor.moveToPosition(i);

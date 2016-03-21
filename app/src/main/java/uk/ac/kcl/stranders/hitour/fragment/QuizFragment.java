@@ -22,8 +22,7 @@ import uk.ac.kcl.stranders.hitour.utilities.Utilities;
 import uk.ac.kcl.stranders.hitour.activity.FeedActivity;
 import uk.ac.kcl.stranders.hitour.database.NotInSchemaException;
 
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.QUIZ_URL;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TOUR_TABLE;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.*;
 
 /**
  * A placeholder fragment containing a web view.
@@ -72,7 +71,7 @@ public class QuizFragment extends Fragment {
 
         // Get the cursor that will get the quiz url from the database
         Map<String, String> partialPrimaryMap = new HashMap<>();
-        partialPrimaryMap.put("TOUR_ID", FeedActivity.currentTourId);
+        partialPrimaryMap.put(TOUR_ID, FeedActivity.currentTourId);
         Cursor tourCursor = null;
 
         try {
