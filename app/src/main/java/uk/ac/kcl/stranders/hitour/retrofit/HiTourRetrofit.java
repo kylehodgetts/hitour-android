@@ -75,6 +75,7 @@ public class HiTourRetrofit {
             @Override
             public void onFailure(Call<TourResponse> call, Throwable t) {
                 t.printStackTrace();
+                onRequestFinished();
             }
         });
 

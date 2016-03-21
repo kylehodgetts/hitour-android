@@ -387,38 +387,46 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
      */
     public void onAllRequestsFinished() {
 
-        TourSession tourSession = hiTourRetrofit.getTourSession();
-        Tour tour = hiTourRetrofit.getTour();
-        ArrayList<String> urlArrayList = DataManipulation.addSession(tourSession, tour, this, database);
-
-        // Download all data that us not already on the device
-        downloadItemCount = urlArrayList.size();
-        progressDialog.setMessage("Downloading data: 0 of " + downloadItemCount + " files downloaded");
-        for(String url : urlArrayList) {
-            try {
-                DownloadToStorage downloadToStorage = new DownloadToStorage(url);
-                downloadToStorage.run();
-            } catch (Exception e) {
-                Log.e("STORAGE_FAIL", Log.getStackTraceString(e));
-                onDownloadFinish();
-            }
-        }
-
-        updateMenu();
-
-        currentTourId = tourSession.getTourId().toString();
         try {
-            Cursor sessionCursor = database.getAll(SESSION_TABLE);
-            for(int i = 0; i < sessionCursor.getCount(); i++) {
-                sessionCursor.moveToPosition(i);
-                if(sessionCursor.getString(sessionCursor.getColumnIndex(TOUR_ID)).equals(currentTourId)) {
-                    mMenu.getItem(i).setChecked(true);
-                    updateHeader(sessionCursor, i);
-                    break;
+            TourSession tourSession = hiTourRetrofit.getTourSession();
+            Tour tour = hiTourRetrofit.getTour();
+            ArrayList<String> urlArrayList = DataManipulation.addSession(tourSession, tour, this, database);
+
+            // Download all data that us not already on the device
+            downloadItemCount = urlArrayList.size();
+            progressDialog.setMessage("Downloading data: 0 of " + downloadItemCount + " files downloaded");
+            for(String url : urlArrayList) {
+                try {
+                    DownloadToStorage downloadToStorage = new DownloadToStorage(url);
+                    downloadToStorage.run();
+                } catch (Exception e) {
+                    Log.e("STORAGE_FAIL", Log.getStackTraceString(e));
+                    onDownloadFinish();
                 }
             }
-        } catch (NotInSchemaException e) {
-            Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
+
+            updateMenu();
+
+            currentTourId = tourSession.getTourId().toString();
+            try {
+                Cursor sessionCursor = database.getAll(SESSION_TABLE);
+                for(int i = 0; i < sessionCursor.getCount(); i++) {
+                    sessionCursor.moveToPosition(i);
+                    if(sessionCursor.getString(sessionCursor.getColumnIndex(TOUR_ID)).equals(currentTourId)) {
+                        mMenu.getItem(i).setChecked(true);
+                        updateHeader(sessionCursor, i);
+                        break;
+                    }
+                }
+            } catch (NotInSchemaException e) {
+                Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
+            }
+            
+        } catch (Exception e) {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER);
+            progressDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            progressDialog.dismiss();
+            Snackbar.make(mFeed, "Tour could not be downloaded, please try again.", Snackbar.LENGTH_LONG).show();
         }
     }
 

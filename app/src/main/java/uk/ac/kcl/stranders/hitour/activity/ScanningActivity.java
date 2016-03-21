@@ -1,8 +1,10 @@
 package uk.ac.kcl.stranders.hitour.activity;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Typeface;
@@ -18,6 +20,7 @@ import android.util.Log;
 import android.util.Pair;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -56,6 +59,8 @@ public class ScanningActivity extends AppCompatActivity {
      * Field that stores a reference to the {@link EditText} field on the Activity
      */
     private EditText etCodePinEntry;
+
+    private String entry;
 
     /**
      * Field to store a {@link BarcodeCallback} which handles what the barcode scanner should accept
@@ -154,7 +159,7 @@ public class ScanningActivity extends AppCompatActivity {
             isTour = true;
         }
 
-        etCodePinEntry.setText(result);
+        entry = result;
 
         // Check if user wants to add a session or a point
         if (isTour) {
@@ -170,7 +175,7 @@ public class ScanningActivity extends AppCompatActivity {
                     }
                 }
                 if (alreadyExists) {
-                    Log.d("FeedActivity", "Tour for " + etCodePinEntry.getText() + " already exists!");
+                    Log.d("FeedActivity", "Tour for " + entry + " already exists!");
                     Snackbar.make(barcodeScannerView, "Tour already downloaded on this device.", Snackbar.LENGTH_LONG).show();
                     barcodeScannerView.resume();
                     clearInput();
@@ -213,7 +218,7 @@ public class ScanningActivity extends AppCompatActivity {
                 setResult(RESULT_OK, data);
                 finish();
             } else {
-                Log.d("FeedActivity", "Point for " + etCodePinEntry.getText() + " not found!");
+                Log.d("FeedActivity", "Point for " + entry + " not found!");
                 Snackbar.make(barcodeScannerView, "Point not found, please try again.", Snackbar.LENGTH_LONG).show();
                 barcodeScannerView.resume();
                 clearInput();
@@ -250,19 +255,35 @@ public class ScanningActivity extends AppCompatActivity {
     }
 
         private class TourSubmit extends AsyncTask<String, Double, Boolean> {
+
+            ProgressDialog progressDialog = new ProgressDialog(ScanningActivity.this);
+
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+                setRequestedOrientation(getResources().getConfiguration().orientation);
+                progressDialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                progressDialog.setMessage("Checking if tour exists");
+                progressDialog.show();
+                progressDialog.setCancelable(false);
+            }
+
             protected Boolean doInBackground(String... params) {
                 return FeedActivity.sessionExistsOnline(params[0]);
             }
 
             protected void onPostExecute(Boolean result) {
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER);
+                progressDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                progressDialog.dismiss();
                 if (result) {
                     Intent data = new Intent();
                     data.putExtra("mode", "tour");
-                    data.putExtra("pin", etCodePinEntry.getText().toString());
+                    data.putExtra("pin", entry);
                     setResult(RESULT_OK, data);
                     finish();
                 } else {
-                    Log.d("FeedActivity", "Tour for " + etCodePinEntry.getText() + " not found!");
+                    Log.d("FeedActivity", "Tour for " + entry + " not found!");
                     Snackbar.make(barcodeScannerView, "Tour not found, please try again.", Snackbar.LENGTH_LONG).show();
                     barcodeScannerView.resume();
                     clearInput();
