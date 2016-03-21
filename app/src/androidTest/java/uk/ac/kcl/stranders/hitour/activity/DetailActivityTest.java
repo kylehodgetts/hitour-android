@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.RecyclerView;
 import android.test.ActivityInstrumentationTestCase2;
+import android.test.InstrumentationTestCase;
 import android.test.TouchUtils;
 import android.util.DisplayMetrics;
 import android.view.KeyEvent;
@@ -15,12 +16,8 @@ import android.widget.EditText;
 
 import uk.ac.kcl.stranders.hitour.R;
 
-public class DetailActivityTest extends ActivityInstrumentationTestCase2<FeedActivity> {
+public class DetailActivityTest extends InstrumentationTestCase {
 
-    // The testing starts in the feed activity in order to initialize required data.
-    public DetailActivityTest() {
-        super(FeedActivity.class);
-    }
 
     /**
      * Fetches the tour and unlocks two points.
@@ -33,8 +30,6 @@ public class DetailActivityTest extends ActivityInstrumentationTestCase2<FeedAct
         unlockSecondPoint();
     }
 
-
-
     /**
      * Checks if the ViewPager embedded in the DetailActivity works correctly
      * allowing users to switch between unlocked points.
@@ -43,10 +38,6 @@ public class DetailActivityTest extends ActivityInstrumentationTestCase2<FeedAct
      * If the code is correct the ViewPager will switch from the first to the third fragment.
      */
     public void testSwipe() {
-        Boolean isTablet = getActivity().getResources().getBoolean(R.bool.isTablet);
-        if(isTablet) { fail("The ViewPager and the DetailActivity are not used on tablets; " +
-                        "therefore, the activity cannot be tested"); }
-
         Instrumentation instrumentation = getInstrumentation();
         Instrumentation.ActivityMonitor activityMonitor = instrumentation.addMonitor(FeedActivity.class.getName(), null, false);
 
@@ -55,27 +46,32 @@ public class DetailActivityTest extends ActivityInstrumentationTestCase2<FeedAct
         intent.setClassName(instrumentation.getTargetContext(), FeedActivity.class.getName());
         instrumentation.startActivitySync(intent);
 
+        Boolean isTablet = activityMonitor.getLastActivity().getResources().getBoolean(R.bool.isTablet);
+        if(isTablet) { fail("The ViewPager and the DetailActivity are not used on tablets; " +
+                "therefore, the activity cannot be tested"); }
+
+
         instrumentation.removeMonitor(activityMonitor);
+        RecyclerView recyclerView = (RecyclerView) activityMonitor.getLastActivity().findViewById(R.id.rv_feed);
 
         activityMonitor =
                 getInstrumentation().addMonitor(DetailActivity.class.getName(), null, false);
-        RecyclerView recyclerView = (RecyclerView) getActivity().findViewById(R.id.rv_feed);
-        TouchUtils.clickView(this, recyclerView.getChildAt(0));
+        TouchUtils.clickView(this, recyclerView.getChildAt(2));
 
         getInstrumentation().waitForIdleSync();
 
-        DetailActivity detailActivity = (DetailActivity) getInstrumentation().waitForMonitorWithTimeout(activityMonitor, 500);
+        DetailActivity detailActivity = (DetailActivity) getInstrumentation().waitForMonitorWithTimeout(activityMonitor, 1000);
         int _pos1 = detailActivity.getCurrentPosition();
 
         int[] xy = new int[2];
-        View v = getActivity().getCurrentFocus();
+        View v = detailActivity.findViewById(R.id.detail_body);
         v.getLocationOnScreen(xy);
         final int viewWidth = v.getWidth();
         final int viewHeight = v.getHeight();
         float x = xy[0] + (viewWidth / 6.0f);
         float fromY = xy[1] + (viewHeight / 6.0f);
         DisplayMetrics displaymetrics = new DisplayMetrics();
-        getActivity().getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+        detailActivity.getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
         int screenWidth = displaymetrics.widthPixels;
         //Drag from centre of screen to Leftmost edge of display
         TouchUtils.drag(this, (screenWidth - 1), x, fromY, fromY, 5);
@@ -206,7 +202,7 @@ public class DetailActivityTest extends ActivityInstrumentationTestCase2<FeedAct
                 etPasscodeEntry.requestFocus();
             }
         });
-        getInstrumentation().sendStringSync("POINT-4");
+        getInstrumentation().sendStringSync("POINT-5");
         getInstrumentation().sendCharacterSync(KeyEvent.KEYCODE_ENTER);
         activityMonitor = instrumentation.addMonitor(DetailActivity.class.getName(), null, false);
         TouchUtils.clickView(this, btnSubmit);
