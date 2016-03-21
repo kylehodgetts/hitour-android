@@ -1,12 +1,18 @@
 package uk.ac.kcl.stranders.hitour.activity;
 
+import android.app.Activity;
 import android.app.Instrumentation;
 import android.content.pm.ActivityInfo;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.TouchUtils;
+import android.view.KeyEvent;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
 
 import uk.ac.kcl.stranders.hitour.FeedAdapter;
 import uk.ac.kcl.stranders.hitour.R;
@@ -104,8 +110,45 @@ public class FeedActivityTest extends ActivityInstrumentationTestCase2<FeedActiv
 
     }
 
-    public void testLayoutDrawerList() {
-        getActivity().findViewById(R.id.nav_view);
+    public void testLayoutDrawerHeader() {
+        Instrumentation instrumentation = getInstrumentation();
+        Instrumentation.ActivityMonitor activityMonitor = instrumentation.addMonitor(FeedActivity.class.getName(), null, false);
+
+
+        FloatingActionButton fab = (FloatingActionButton) getActivity().findViewById(R.id.fab);
+
+
+        instrumentation.removeMonitor(activityMonitor);
+        activityMonitor = instrumentation.addMonitor(ScanningActivity.class.getName(), null, false);
+
+        TouchUtils.clickView(this, fab);
+
+        Activity currentActivity = getInstrumentation().waitForMonitorWithTimeout(activityMonitor, 500);
+
+        final EditText etPasscodeEntry = (EditText) currentActivity.findViewById(R.id.etCodePinEntry);
+        getInstrumentation().runOnMainSync(new Runnable() {
+            @Override
+            public void run() {
+                etPasscodeEntry.requestFocus();
+            }
+        });
+        getInstrumentation().sendStringSync("SNPenguins123");
+        getInstrumentation().sendCharacterSync(KeyEvent.KEYCODE_ENTER);
+
+        Button btnSubmit = (Button) currentActivity.findViewById(R.id.btnSubmit);
+
+        instrumentation.removeMonitor(activityMonitor);
+        activityMonitor = instrumentation.addMonitor(FeedActivity.class.getName(), null, false);
+        TouchUtils.clickView(this, btnSubmit);
+
+        currentActivity = getInstrumentation().waitForMonitorWithTimeout(activityMonitor, 10000);
+
+        instrumentation.removeMonitor(activityMonitor);
+
+        TextView nameTextView = (TextView) currentActivity.findViewById(R.id.nav_tour_info);
+
+        assertEquals(nameTextView.getText().toString(), "Tour with 2nd year students");
+
     }
 
 }
