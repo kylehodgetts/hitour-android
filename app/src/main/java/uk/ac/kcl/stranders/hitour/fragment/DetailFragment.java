@@ -45,7 +45,7 @@ import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.*;
 public class DetailFragment extends Fragment {
 
     /**
-     * Static String to name to store in a bundle the item's position in the feed addapter.
+     * Static String to name to store in a bundle the item's position in the feed adapter.
      */
     public static final String ARG_ITEM_POSITION = "ITEM_POSITION";
 
@@ -73,11 +73,6 @@ public class DetailFragment extends Fragment {
      * Stores the root view where the fragment is inflated to
      */
     private View mRootView;
-
-    /**
-     * Stores the main image shown for the point
-     */
-    private ImageView mImageView;
 
     /**
      * Stores a list of all the videos for the point
@@ -133,8 +128,6 @@ public class DetailFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Map<String,String> partialPrimaryMapTour = new HashMap<>();
-        partialPrimaryMapTour.put(TOUR_ID, FeedActivity.currentTourId);
         try {
             pointTourCursor = FeedActivity.database.getUnlocked(UNLOCK_STATE_UNLOCKED, FeedActivity.currentTourId);
         } catch (NotInSchemaException e) {
@@ -205,7 +198,7 @@ public class DetailFragment extends Fragment {
 
             TextView titleView = (TextView) mRootView.findViewById(R.id.text_title);
             TextView bodyView = (TextView) mRootView.findViewById(R.id.text_body);
-            mImageView = (ImageView) mRootView.findViewById(R.id.photo);
+            ImageView mImageView = (ImageView) mRootView.findViewById(R.id.photo);
 
             if (pointTourCursor != null && pointDataCursor != null) {
                 mRootView.setAlpha(0);

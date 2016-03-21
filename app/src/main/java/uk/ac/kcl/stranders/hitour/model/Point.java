@@ -206,7 +206,7 @@ public class Point implements Parcelable {
         updatedAt = in.readString();
         url = in.readString();
         description = in.readString();
-        data = new ArrayList<Data>();
+        data = new ArrayList<>();
         in.readList(data, Data.class.getClassLoader());
     }
 

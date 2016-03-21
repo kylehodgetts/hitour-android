@@ -243,7 +243,7 @@ public class  DBWrap {
      * Convenience function that checks whether the given primary keys are in the table
      * @param primaryKeys   The primary keys to be checked
      * @param table         The table in which the keys are supposed to be
-     * @param content       The content to which write these keys, can be null if we dont want to write any
+     * @param content       The content to which write these keys, can be null if we don't want to write any
      * @param exactSize     Whether the keys have to be exact or only subset it enough
      * @throws NotInSchemaException In case that the request was malformed, ie does not match the schema
      */
@@ -373,7 +373,7 @@ public class  DBWrap {
      * Get all rows for a given tourID with the UNLOCK value being set to isUnlocked.
      *
      * @param isUnlocked the value of the point lock state
-     * @param tourId
+     * @param tourId ID of the tour to check
      * @return Cursor with filtered rows from the POINT_TOUR table
      * @throws NotInSchemaException
      */

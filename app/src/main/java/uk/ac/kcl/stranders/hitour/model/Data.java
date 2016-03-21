@@ -206,7 +206,7 @@ public class Data implements Parcelable {
         url = in.readString();
         createdAt = in.readString();
         updatedAt = in.readString();
-        audiences = new ArrayList<Audience>();
+        audiences = new ArrayList<>();
         in.readList(audiences, Audience.class.getClassLoader());
         rank = in.readInt();
     }

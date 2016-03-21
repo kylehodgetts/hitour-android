@@ -53,6 +53,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -234,9 +235,6 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
                 new NavigationView.OnNavigationItemSelectedListener() {
                     @Override
                     public boolean onNavigationItemSelected(MenuItem item) {
-
-                        // TODO: Refactor this block of code
-
                         // If the "about" section is clicked, the DialogFragment shows up
                         if (item.getItemId() == R.id.app_info_item) {
                             FragmentManager fm = getSupportFragmentManager();
@@ -464,8 +462,6 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
                 Cursor tourCursor = database.getWholeByPrimary(TOUR_TABLE, primaryKeysMap);
                 tourCursor.moveToFirst();
                 mMenu.add(0, i, Menu.NONE, tourCursor.getString(tourCursor.getColumnIndex(NAME))).setIcon(R.drawable.ic_action_local_hospital);
-                // TODO: Fix content description
-//                mMenu.getItem(i).getActionView().setContentDescription(getString(R.string.content_description_tour_selection, mMenu.getItem(i).getTitle()));
             }
             mMenu.setGroupCheckable(0, true, true);
             if(mMenu.size() > 0) {
@@ -476,7 +472,6 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         }
         mMenu.addSubMenu("s");
         mMenu.add(R.id.end_padder, R.id.app_info_item, Menu.NONE, getString(R.string.about)).setIcon(R.drawable.ic_action_live_help);
-//        mMenu.getItem(i).getActionView().setContentDescription(getString(R.string.content_description_tour_selection, mMenu.getItem(i).getTitle()));
     }
 
     /**
@@ -491,8 +486,8 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         TextView startDateTextView = (TextView) findViewById(R.id.tour_date);
         TextView expirationDateTextView = (TextView) findViewById(R.id.expiration_date);
 
-        SimpleDateFormat sdfStart = new SimpleDateFormat("yyyy-MM-dd");
-        SimpleDateFormat sdfFinish = new SimpleDateFormat("dd-MM-yyyy");
+        SimpleDateFormat sdfStart = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
+        SimpleDateFormat sdfFinish = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH);
 
         String name = sessionCursor.getString(sessionCursor.getColumnIndex(NAME));
         String startDate = sessionCursor.getString(sessionCursor.getColumnIndex(START_DATE));
@@ -729,15 +724,12 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
     private boolean sessionExistsOffline(String startDate, String duration) {
         Calendar calendarFinish = getFinishDate(startDate, duration);
         Calendar calendarNow = Calendar.getInstance();
-        if (calendarNow.after(calendarFinish)) {
-            return false;
-        }
-        return true;
+        return !calendarNow.after(calendarFinish);
     }
 
     private Calendar getFinishDate(String startDate, String duration) {
         try {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
             Calendar calendarFinish = Calendar.getInstance();
             calendarFinish.setTime(sdf.parse(startDate));
             calendarFinish.add(Calendar.DATE, Integer.parseInt(duration));

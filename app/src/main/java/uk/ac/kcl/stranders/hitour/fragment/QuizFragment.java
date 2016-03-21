@@ -4,7 +4,6 @@ import android.content.res.Configuration;
 import android.database.Cursor;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -35,14 +34,9 @@ public class QuizFragment extends Fragment {
     private WebView mWebView;
 
     /**
-     * Static String to name to store in a bundle the item's position in the feed addapter.
+     * Static String to name to store in a bundle the item's position in the feed adapter.
      */
     public static final String ARG_ITEM_POSITION = "ITEM_POSITION";
-
-    /**
-     * Stores the view used in the fragment
-     */
-    private View mView;
 
     /**
      * Static {@link QuizFragment} tag used to identify a fragment.
@@ -67,7 +61,7 @@ public class QuizFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        mView = inflater.inflate(R.layout.fragment_quiz, container, false);
+        View mView = inflater.inflate(R.layout.fragment_quiz, container, false);
 
         // Get the cursor that will get the quiz url from the database
         Map<String, String> partialPrimaryMap = new HashMap<>();

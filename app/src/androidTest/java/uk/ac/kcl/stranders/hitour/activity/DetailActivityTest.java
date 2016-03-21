@@ -5,7 +5,6 @@ import android.app.Instrumentation;
 import android.content.Intent;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.RecyclerView;
-import android.test.ActivityInstrumentationTestCase2;
 import android.test.InstrumentationTestCase;
 import android.test.TouchUtils;
 import android.util.DisplayMetrics;

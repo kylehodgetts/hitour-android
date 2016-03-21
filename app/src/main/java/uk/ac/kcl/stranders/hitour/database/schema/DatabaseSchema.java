@@ -15,7 +15,7 @@ public class DatabaseSchema {
     private int version;
 
     /**
-     * Constructor for the database schema, gives the database a name and current verison
+     * Constructor for the database schema, gives the database a name and current version
      * @param databaseName  The name of the database
      * @param version       The version of the database
      */

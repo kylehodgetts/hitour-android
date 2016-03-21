@@ -20,7 +20,6 @@ public class ImageDialogFragment extends DialogFragment {
 
     public static String FRAGMENT_TAG = "IMAGE_DIALOG_FRAGMENT";
 
-    private ImageView mImageView;
     private static Bitmap mBitmap;
 
     // These matrices will be used to move and zoom image
@@ -54,7 +53,7 @@ public class ImageDialogFragment extends DialogFragment {
     public ImageDialogFragment() { }
 
     /**
-     * Get a new intance of the dialog fragment with an image in it
+     * Get a new instance of the dialog fragment with an image in it
      *
      * @param arg      argument for the bundle
      * @param bmp      {@link Bitmap} image to be put in the dialog
@@ -88,9 +87,9 @@ public class ImageDialogFragment extends DialogFragment {
     public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.image_dialog_fragment, container, false);
 
-        mImageView = (ImageView) view.findViewById(R.id.image_dialog);
+        ImageView mImageView = (ImageView) view.findViewById(R.id.image_dialog);
         if (orient != getResources().getConfiguration().orientation) {
-            if (orient== LANDSCAPE) {
+            if (orient == LANDSCAPE) {
                 orient = PORTRAIT;
                 fullScreen();
             } else if(orient == PORTRAIT) {

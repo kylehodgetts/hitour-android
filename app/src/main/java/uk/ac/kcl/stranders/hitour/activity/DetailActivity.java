@@ -70,8 +70,6 @@ public class DetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
 
-        Map<String,String> partialPrimaryMap = new HashMap<>();
-        partialPrimaryMap.put("TOUR_ID", FeedActivity.currentTourId);
         try {
             mCursor = FeedActivity.database.getUnlocked(DatabaseConstants.UNLOCK_STATE_UNLOCKED, FeedActivity.currentTourId);
         } catch (NotInSchemaException e) {
