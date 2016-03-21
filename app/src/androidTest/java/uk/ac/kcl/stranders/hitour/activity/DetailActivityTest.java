@@ -60,7 +60,8 @@ public class DetailActivityTest extends InstrumentationTestCase {
 
         getInstrumentation().waitForIdleSync();
 
-        DetailActivity detailActivity = (DetailActivity) getInstrumentation().waitForMonitorWithTimeout(activityMonitor, 1000);
+        DetailActivity detailActivity = (DetailActivity) getInstrumentation().waitForMonitorWithTimeout(activityMonitor, 2000);
+        getInstrumentation().removeMonitor(activityMonitor);
         int _pos1 = detailActivity.getCurrentPosition();
 
         int[] xy = new int[2];
