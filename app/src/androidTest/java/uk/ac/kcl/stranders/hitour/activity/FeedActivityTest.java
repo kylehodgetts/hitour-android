@@ -2,6 +2,7 @@ package uk.ac.kcl.stranders.hitour.activity;
 
 import android.app.Activity;
 import android.app.Instrumentation;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -14,7 +15,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import uk.ac.kcl.stranders.hitour.FeedAdapter;
 import uk.ac.kcl.stranders.hitour.R;
 import uk.ac.kcl.stranders.hitour.fragment.DetailFragment;
 
@@ -75,38 +75,65 @@ public class FeedActivityTest extends ActivityInstrumentationTestCase2<FeedActiv
     }
 
     /**
-     * Test that checks whether the {@link uk.ac.kcl.stranders.hitour.fragment.DetailFragment}
-     * exists after selecting the list item from the {@link FeedAdapter}.
+     * Test that checks whether the locked item cannot be accessed.
      */
-    public void testListItemSelection() {
-        int ITEM_ID = 0;
-        Instrumentation.ActivityMonitor activityMonitor =
-                getInstrumentation().addMonitor(DetailActivity.class.getName(), null, false);
+    public void testAccessLockedFragment() {
+        Instrumentation instrumentation = getInstrumentation();
+        Instrumentation.ActivityMonitor activityMonitor = instrumentation.addMonitor(FeedActivity.class.getName(), null, false);
 
-        RecyclerView recyclerView = (RecyclerView) getActivity().findViewById(R.id.rv_feed);
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.setClassName(instrumentation.getTargetContext(), FeedActivity.class.getName());
+        instrumentation.startActivitySync(intent);
+
+        Activity currentActivity = getInstrumentation().waitForMonitorWithTimeout(activityMonitor, 500);
+        FloatingActionButton fab = (FloatingActionButton) currentActivity.findViewById(R.id.fab);
+
+        instrumentation.removeMonitor(activityMonitor);
+        activityMonitor = instrumentation.addMonitor(ScanningActivity.class.getName(), null, false);
+
+        TouchUtils.clickView(this, fab);
+
+        currentActivity = getInstrumentation().waitForMonitorWithTimeout(activityMonitor, 500);
+
+        final EditText etPasscodeEntry = (EditText) currentActivity.findViewById(R.id.etCodePinEntry);
+        getInstrumentation().runOnMainSync(new Runnable() {
+            @Override
+            public void run() {
+                etPasscodeEntry.requestFocus();
+            }
+        });
+        getInstrumentation().sendStringSync("SNPenguins123");
+        getInstrumentation().sendCharacterSync(KeyEvent.KEYCODE_ENTER);
+
+        Button btnSubmit = (Button) currentActivity.findViewById(R.id.btnSubmit);
+
+        instrumentation.removeMonitor(activityMonitor);
+        activityMonitor = instrumentation.addMonitor(FeedActivity.class.getName(), null, false);
+        TouchUtils.clickView(this, btnSubmit);
+
+        currentActivity = getInstrumentation().waitForMonitorWithTimeout(activityMonitor, 20000);
         getInstrumentation().waitForIdleSync();
 
-        // Select the first list item.
-        TouchUtils.clickView(this, recyclerView.getChildAt(ITEM_ID));
-        getInstrumentation().waitForIdleSync();
+        RecyclerView mFeed = (RecyclerView) currentActivity.findViewById(R.id.rv_feed);
+        assertNotNull(mFeed);
+        TouchUtils.clickView(this, mFeed.getChildAt(0));
 
-        FeedActivity feedActivity = getActivity();
+        FeedActivity feedActivity = (FeedActivity) currentActivity;
         Boolean isTablet = feedActivity.getResources().getBoolean(R.bool.isTablet);
 
-        if(isTablet) {
+        if (isTablet) {
             Fragment detailFragment =
                     feedActivity.getSupportFragmentManager().findFragmentByTag(DetailFragment.FRAGMENT_TAG);
 
-            assertNotNull(detailFragment);
+            assertNull(detailFragment);
         } else {
             DetailActivity detailActivity = (DetailActivity)
                     getInstrumentation().waitForMonitorWithTimeout(activityMonitor, 5000);
 
-            Fragment detailFragment = detailActivity.getSupportFragmentManager().getFragments().get(0);
-            assertNotNull(detailFragment);
-            detailActivity.finish();
-
+            assertNull(detailActivity);
         }
+        instrumentation.removeMonitor(activityMonitor);
 
     }
 
