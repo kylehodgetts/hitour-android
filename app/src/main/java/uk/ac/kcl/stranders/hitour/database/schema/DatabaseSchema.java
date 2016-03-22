@@ -6,7 +6,7 @@ import java.util.Map;
 
 /**
  * @version 1.0
- * An abstraction over the database schema for sqllite database
+ * An abstraction over the database schema for SQLite database
  */
 public class DatabaseSchema {
 

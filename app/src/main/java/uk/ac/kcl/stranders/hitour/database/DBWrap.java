@@ -375,7 +375,6 @@ public class  DBWrap {
      * @param isUnlocked the value of the point lock state
      * @param tourId ID of the tour to check
      * @return Cursor with filtered rows from the POINT_TOUR table
-     * @throws NotInSchemaException
      */
     public Cursor getUnlocked(String isUnlocked, String tourId) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();

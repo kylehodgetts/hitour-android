@@ -4,6 +4,9 @@ import android.graphics.Typeface;
 import android.text.TextPaint;
 import android.text.style.TypefaceSpan;
 
+/**
+ * Sets a custom font for the app title.
+ */
 public class CustomTypefaceSpan extends TypefaceSpan {
 
     private final Typeface newType;

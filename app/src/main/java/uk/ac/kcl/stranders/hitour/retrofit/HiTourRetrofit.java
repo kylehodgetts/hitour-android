@@ -9,6 +9,11 @@ import uk.ac.kcl.stranders.hitour.model.Tour;
 import uk.ac.kcl.stranders.hitour.model.TourResponse;
 import uk.ac.kcl.stranders.hitour.model.TourSession;
 
+/**
+ * A type-safe HTTP client for Android and Java that allowed us
+ * to simplify the process of data fetching from the web API
+ * and the creation of an interface to access fetched data.
+ */
 public class HiTourRetrofit {
 
     private HiTourApi hiTourApi;
@@ -21,17 +26,15 @@ public class HiTourRetrofit {
 
     private CallbackRetrofit mCallback;
 
-
-
     public interface CallbackRetrofit {
         void onAllRequestsFinished();
     }
 
     /**
      * Sets up Retrofit.
+     *
      * @param mCallback {@link uk.ac.kcl.stranders.hitour.retrofit.HiTourRetrofit.CallbackRetrofit}
-     * @param passphrase
-     * The passphrase of the tour to be downloaded
+     * @param passphrase The passphrase of the tour to be downloaded
      */
     public HiTourRetrofit(CallbackRetrofit mCallback, String passphrase) {
         this.mCallback = mCallback;

@@ -4,7 +4,7 @@ import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.*;
 
 /**
  * @version 1.0
- *
+ * Schema for the hiTour Android database.
  */
 public class HiSchema extends DatabaseSchema {
 

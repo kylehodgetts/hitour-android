@@ -136,6 +136,9 @@ public class FeedActivityTest extends ActivityInstrumentationTestCase2<FeedActiv
 
     }
 
+    /**
+     * Test that check whether the header of a navigation drawer is updated correctly.
+     */
     public void testLayoutDrawerHeader() {
         Instrumentation instrumentation = getInstrumentation();
         Instrumentation.ActivityMonitor activityMonitor = instrumentation.addMonitor(FeedActivity.class.getName(), null, false);

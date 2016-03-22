@@ -1,15 +1,7 @@
-<?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
+<fragment xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/container"
+    android:id="@+id/fragment_artists"
+    android:name="uk.ac.kcl.stranders.hitour.fragment.QuizFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activity.QuizActivity"
-    tools:ignore="MergeRootFrame">
-
-    <WebView
-        android:id="@+id/activity_quiz_webview"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
-</merge>
+    tools:layout="@layout/fragment_quiz" />

@@ -17,7 +17,6 @@ import uk.ac.kcl.stranders.hitour.R;
 
 public class DetailActivityTest extends InstrumentationTestCase {
 
-
     /**
      * Fetches the tour and unlocks two points.
      * @throws Exception

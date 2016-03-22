@@ -18,8 +18,14 @@ import uk.ac.kcl.stranders.hitour.R;
 
 public class ImageDialogFragment extends DialogFragment {
 
+    /**
+     * Static String to identify the fragment.
+     */
     public static String FRAGMENT_TAG = "IMAGE_DIALOG_FRAGMENT";
 
+    /**
+     * Bitmap for an image that is displayed in the fragment.
+     */
     private static Bitmap mBitmap;
 
     // These matrices will be used to move and zoom image

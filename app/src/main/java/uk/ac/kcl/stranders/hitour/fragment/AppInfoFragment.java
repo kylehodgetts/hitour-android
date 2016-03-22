@@ -12,16 +12,14 @@ import android.widget.TextView;
 import uk.ac.kcl.stranders.hitour.R;
 
 /**
- * DialogFragment that shows the application information from any activity
+ * DialogFragment that shows the application information from any activity.
  */
 public class AppInfoFragment extends DialogFragment {
 
     /**
-     * Empty constructor required
+     * Empty constructor required.
      */
-    public AppInfoFragment(){
-
-    }
+    public AppInfoFragment(){ }
 
     /**
      * Creates and inflates the fragment layout in a DialogFragment format
@@ -41,7 +39,7 @@ public class AppInfoFragment extends DialogFragment {
         mTextView.setText(Html.fromHtml(getString(R.string.about_app_content)));
         mTextView.setMovementMethod(LinkMovementMethod.getInstance());
 
-        getDialog().setTitle("About hiTour");
+        getDialog().setTitle(R.string.about_title);
 
         return view;
     }

@@ -61,6 +61,9 @@ public class ScanningActivity extends AppCompatActivity {
      */
     private EditText etCodePinEntry;
 
+    /**
+     * Stores a passphrase that is provided to the {@link ScanningActivity#etCodePinEntry}
+     */
     private String entry;
 
     /**
