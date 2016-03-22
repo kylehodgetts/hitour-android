@@ -6,6 +6,7 @@
     <string name="hint_scanning">Scan a code or type a pin.</string>
     <string name="submit">Submit</string>
     <string name="about">About</string>
+    <string name="about_title">About hiTour</string>
     <string name="snake_bar_message_alert_scanner_view">Point not found, please try again.</string>
     <string name="start_date">Start date:</string>
     <string name="expiration_date">Expiration date:</string>

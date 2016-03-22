@@ -27,6 +27,9 @@ public class DataManipulationTest extends ActivityInstrumentationTestCase2<FeedA
         super(FeedActivity.class);
     }
 
+    /**
+     * Initialize and populate the database.
+     */
     @Override
     public void setUp() {
 
@@ -327,6 +330,9 @@ public class DataManipulationTest extends ActivityInstrumentationTestCase2<FeedA
 
     }
 
+    /**
+     * Test that sessions get added and removed correctly in this order
+     */
     public void testOrderTwo() {
 
         try {

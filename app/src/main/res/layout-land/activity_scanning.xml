@@ -5,10 +5,10 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingEnd="@dimen/activity_horizontal_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingStart="@dimen/activity_horizontal_margin"
-    android:paddingEnd="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".activity.ScanningActivity">
 
@@ -33,8 +33,8 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="16dp"
             android:hint="@string/hint_scanning"
-            android:singleLine="true"
-            android:inputType="textNoSuggestions"/>
+            android:inputType="textNoSuggestions"
+            android:singleLine="true" />
 
         <LinearLayout
             android:layout_width="wrap_content"

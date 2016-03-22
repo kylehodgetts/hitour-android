@@ -69,6 +69,9 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
      */
     private DetailFragment fragment;
 
+    /**
+     * The empty view that is displayed if the feed adapter is empty.
+     */
     private View emptyView;
 
     /**
@@ -290,6 +293,11 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
         return unlockState;
     }
 
+    /**
+     * Checks if all points are unlocked for a current tour.
+     * @param tour_id Tour ID
+     * @return true if all points are unlocked
+     */
     private boolean allUnlocked(Integer tour_id){
         Map<String, String> primaryKey = new HashMap<>();
         primaryKey.put("TOUR_ID",""+tour_id);
@@ -326,10 +334,18 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
             ((AppCompatActivity) mContext).getSupportFragmentManager().beginTransaction().remove(fragment).commit();
     }
 
+    /**
+     * Sets {@link FeedAdapter#emptyView}.
+     * @param emptyView the view that displays a message if the feed adapter is empty
+     */
     public void setEmptyView(View emptyView) {
         this.emptyView = emptyView;
     }
 
+    /**
+     * Sets the visibility of {@link FeedAdapter#emptyView}.
+     * @param visibility either {@link View#GONE} or {@link View#VISIBLE}
+     */
     public void setEmptyViewVisibility(int visibility) {
         if (visibility == View.GONE || visibility == View.VISIBLE) {
             emptyView.setVisibility(visibility);

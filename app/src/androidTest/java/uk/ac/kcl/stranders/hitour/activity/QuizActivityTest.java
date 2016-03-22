@@ -277,7 +277,7 @@ public class QuizActivityTest extends InstrumentationTestCase {
 
         currentActivity = getInstrumentation().waitForMonitorWithTimeout(activityMonitor, 50000);
         assertNotNull(currentActivity);
-        WebView webView = (WebView) currentActivity.findViewById(R.id.activity_quiz_webview);
+        WebView webView = (WebView) currentActivity.findViewById(R.id.fragment_quiz_webview);
         assertTrue(webView.isShown());
     }
 

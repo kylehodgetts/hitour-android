@@ -1,3 +1,2 @@
 <menu xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".activity.DetailActivity">
-</menu>
+    tools:context=".activity.DetailActivity"></menu>

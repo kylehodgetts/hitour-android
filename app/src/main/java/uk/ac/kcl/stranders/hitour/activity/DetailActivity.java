@@ -9,14 +9,12 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
 
 import uk.ac.kcl.stranders.hitour.R;
-import uk.ac.kcl.stranders.hitour.database.NotInSchemaException;
 import uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants;
 import uk.ac.kcl.stranders.hitour.fragment.DetailFragment;
 
@@ -34,7 +32,6 @@ public class DetailActivity extends AppCompatActivity {
      * Stores the key for the pin passed with an intent.
      */
     public final static String EXTRA_PIN = "uk.ac.kcl.stranders.hitour.DetailActivity.pin";
-
 
     /**
      * Stores the cursor that provides access to the points data.
@@ -104,6 +101,10 @@ public class DetailActivity extends AppCompatActivity {
         mPager.setCurrentItem(mStartPosition, false);
     }
 
+    /**
+     * Find the start position of a point in the ViewPager.
+     * @param pointId Point ID
+     */
     private void findStartPosition(String pointId) {
         mCursor.moveToPosition(0);
         mStartPosition = -1;
@@ -142,6 +143,9 @@ public class DetailActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Populates the ViewPager that allows users to swipe between points.
+     */
     private class DetailPagerAdapter extends FragmentStatePagerAdapter {
         public DetailPagerAdapter(FragmentManager fm) {
             super(fm);

@@ -66,7 +66,7 @@ public class QuizFragment extends Fragment {
         // Get the cursor that will get the quiz url from the database
         Map<String, String> partialPrimaryMap = new HashMap<>();
         partialPrimaryMap.put(TOUR_ID, FeedActivity.currentTourId);
-        Cursor tourCursor = null;
+        Cursor tourCursor;
 
         try {
             tourCursor = FeedActivity.database.getWholeByPrimary(TOUR_TABLE, partialPrimaryMap);
@@ -93,7 +93,7 @@ public class QuizFragment extends Fragment {
             public boolean onTouch(View v, MotionEvent event) {
                 if (!Utilities.isNetworkAvailable(getActivity().getApplicationContext())) {
                     getActivity().getSupportFragmentManager().popBackStack();
-                    Toast.makeText(getActivity(),"@string/no_network_quiz", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), R.string.no_network_quiz, Toast.LENGTH_SHORT).show();
                 }
                 return false;
             }
