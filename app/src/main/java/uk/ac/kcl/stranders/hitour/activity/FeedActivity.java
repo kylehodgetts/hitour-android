@@ -9,7 +9,6 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Typeface;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -42,12 +41,9 @@ import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -547,9 +543,11 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         partialPrimaryMap.put("TOUR_ID", tourId);
         try {
             Cursor tourCursor = database.getWholeByPrimary(TOUR_TABLE, partialPrimaryMap);
-            // Clear the fragment on change so point from previous tour does not show on tablet
-            if(currentFeedAdapter != null)
-                currentFeedAdapter.clearFragment();
+            // Make sure point from previous tour does not show on tablet
+            CardView cardView = (CardView) findViewById(R.id.point_detail_container);
+            if(cardView != null) {
+                cardView.removeAllViews();
+            }
 
             Cursor feedCursor = database.getWholeByPrimaryPartialSorted(POINT_TOUR_TABLE, partialPrimaryMap, RANK);
             tourCursor.moveToFirst();feedCursor.moveToFirst();
