@@ -29,6 +29,7 @@ import uk.ac.kcl.stranders.hitour.activity.QuizActivity;
 import uk.ac.kcl.stranders.hitour.database.NotInSchemaException;
 import uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants;
 import uk.ac.kcl.stranders.hitour.fragment.DetailFragment;
+import uk.ac.kcl.stranders.hitour.utilities.Utilities;
 import uk.ac.kcl.stranders.hitour.fragment.QuizFragment;
 
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.DESCRIPTION;
@@ -163,7 +164,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         if(position == pointTourCursor.getCount()) {
-            holder.tvTitle.setText("Quiz");
+            holder.tvTitle.setText(R.string.quiz);
             holder.ivThumbnail.setImageDrawable(ContextCompat.getDrawable(mContext,R.drawable.profile));
             holder.quiz = true;
             holder.tour_id = Integer.parseInt(FeedActivity.currentTourId);
@@ -186,7 +187,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
                 holder.point_id = Integer.parseInt(pointTourCursor.getString(pointTourCursor.getColumnIndex(POINT_ID)));
                 holder.tour_id = Integer.parseInt(pointTourCursor.getString(pointTourCursor.getColumnIndex(TOUR_ID)));
             if(!url.equals("none")) {
-                url = FeedActivity.createFilename(url);
+                url = Utilities.createFilename(url);
                 String localFilesAddress = mContext.getFilesDir().toString();
                 url = localFilesAddress + "/" + url;
                 Bitmap bitmap = BitmapFactory.decodeFile(url);
@@ -214,7 +215,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> im
      * Observes the ScannerActivity and update a viewHolder's view if appropriate
      *
      * @param observable in class ScannerActivity
-     * @param data       a pair point and tour from ScannerActivty
+     * @param data       a pair point and tour from ScannerActivity
      */
     @Override
     public void update(Observable observable, Object data) {

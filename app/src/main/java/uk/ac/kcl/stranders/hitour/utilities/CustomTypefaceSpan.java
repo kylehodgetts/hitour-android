@@ -1,4 +1,4 @@
-package uk.ac.kcl.stranders.hitour;
+package uk.ac.kcl.stranders.hitour.utilities;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.text.TextPaint;

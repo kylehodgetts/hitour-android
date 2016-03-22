@@ -11,8 +11,6 @@ import uk.ac.kcl.stranders.hitour.model.TourSession;
 
 public class HiTourRetrofit {
 
-    private Retrofit retrofit;
-
     private HiTourApi hiTourApi;
 
     private Tour tour;
@@ -39,7 +37,7 @@ public class HiTourRetrofit {
         this.mCallback = mCallback;
         this.passphrase = passphrase;
 
-        retrofit = new Retrofit.Builder()
+        Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://hitour.herokuapp.com/api/A7DE6825FD96CCC79E63C89B55F88/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
@@ -57,10 +55,14 @@ public class HiTourRetrofit {
     /**
      * Invoked when the request is successfully finished.
      */
-    public void onRequestFinished() {
+    private void onRequestFinished() {
         mCallback.onAllRequestsFinished();
     }
 
+    /**
+     * Fetches the tour JSON from url and populates models
+     * @param call Call<TourResponse>
+     */
     private void fetchTour(Call<TourResponse> call) {
 
         call.enqueue(new Callback<TourResponse>() {
@@ -75,6 +77,7 @@ public class HiTourRetrofit {
             @Override
             public void onFailure(Call<TourResponse> call, Throwable t) {
                 t.printStackTrace();
+                onRequestFinished();
             }
         });
 

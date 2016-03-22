@@ -27,7 +27,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:hint="@string/hint_scanning"
-            android:singleLine="true" />
+            android:singleLine="true"
+            android:inputType="textNoSuggestions"/>
 
         <LinearLayout
             android:layout_width="wrap_content"

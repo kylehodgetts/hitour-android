@@ -11,6 +11,7 @@
     <string name="expiration_date">Expiration date:</string>
     <string name="open_drawer">Open the drawer</string>
     <string name="close_drawer">Close the drawer</string>
+    <string name="quiz">Quiz</string>
 
     <string name="empty_feed_title">Your feed is empty.</string>
     <string name="empty_feed_hint">You can start a Tour by pressing the scanner button bellow.</string>

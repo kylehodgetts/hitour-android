@@ -1,8 +1,10 @@
 package uk.ac.kcl.stranders.hitour.activity;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Typeface;
@@ -18,6 +20,7 @@ import android.util.Log;
 import android.util.Pair;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -33,17 +36,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 
-import uk.ac.kcl.stranders.hitour.CustomTypefaceSpan;
+import uk.ac.kcl.stranders.hitour.utilities.CustomTypefaceSpan;
 import uk.ac.kcl.stranders.hitour.R;
 import uk.ac.kcl.stranders.hitour.database.NotInSchemaException;
-import uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants;
+import uk.ac.kcl.stranders.hitour.utilities.Utilities;
 
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.PASSPHRASE;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_ID;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.POINT_TOUR_TABLE;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.RANK;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.TOUR_ID;
-import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.UNLOCK;
+import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.*;
 
 /**
  * {@link AppCompatActivity} class that is used to retrieve input by means of scanning a QR Code or
@@ -62,6 +60,8 @@ public class ScanningActivity extends AppCompatActivity {
      * Field that stores a reference to the {@link EditText} field on the Activity
      */
     private EditText etCodePinEntry;
+
+    private String entry;
 
     /**
      * Field to store a {@link BarcodeCallback} which handles what the barcode scanner should accept
@@ -135,7 +135,7 @@ public class ScanningActivity extends AppCompatActivity {
      *
      * Otherwise an error message is shown to the user and the input is cleared ready for the next input.
      */
-    public void submit() {
+    private void submit() {
 
         // Hide keyboard when submit is pressed so Snackbar can be seen
         View view = this.getCurrentFocus();
@@ -160,14 +160,14 @@ public class ScanningActivity extends AppCompatActivity {
             isTour = true;
         }
 
-        etCodePinEntry.setText(result);
+        entry = result;
 
         // Check if user wants to add a session or a point
         if (isTour) {
             // For when the user attempts to add a session
             try {
                 // Checks to see if tour session is already on device
-                Cursor sessionCursor = FeedActivity.database.getAll("SESSION");
+                Cursor sessionCursor = FeedActivity.database.getAll(SESSION_TABLE);
                 boolean alreadyExists = false;
                 for (int i = 0; i < sessionCursor.getCount(); i++) {
                     sessionCursor.moveToPosition(i);
@@ -176,7 +176,7 @@ public class ScanningActivity extends AppCompatActivity {
                     }
                 }
                 if (alreadyExists) {
-                    Log.d("FeedActivity", "Tour for " + etCodePinEntry.getText() + " already exists!");
+                    Log.d("FeedActivity", "Tour for " + entry + " already exists!");
                     Snackbar.make(barcodeScannerView, "Tour already downloaded on this device.", Snackbar.LENGTH_LONG).show();
                     barcodeScannerView.resume();
                     clearInput();
@@ -198,7 +198,7 @@ public class ScanningActivity extends AppCompatActivity {
 
                 //Replace unlock with a value of 1
                 Map<String, String> tourPointColumnsMap = new HashMap<>();
-                tourPointColumnsMap.put(UNLOCK, "1");
+                tourPointColumnsMap.put(UNLOCK, UNLOCK_STATE_UNLOCKED);
                 Map<String, String> tourPointPrimaryKeysMap = new HashMap<>();
                 Log.i("inScanning", "" + FeedActivity.currentTourId);
                 tourPointPrimaryKeysMap.put(TOUR_ID, "" + FeedActivity.currentTourId);
@@ -208,7 +208,7 @@ public class ScanningActivity extends AppCompatActivity {
                     cursorGetRank.moveToFirst();
                     String pointRank = cursorGetRank.getString(cursorGetRank.getColumnIndex(RANK));
                     tourPointColumnsMap.put(RANK, pointRank);
-                    FeedActivity.database.insert(tourPointColumnsMap, tourPointPrimaryKeysMap, "POINT_TOUR");
+                    FeedActivity.database.insert(tourPointColumnsMap, tourPointPrimaryKeysMap, POINT_TOUR_TABLE);
                 } catch (NotInSchemaException e) {
                     Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
                 }
@@ -219,7 +219,7 @@ public class ScanningActivity extends AppCompatActivity {
                 setResult(RESULT_OK, data);
                 finish();
             } else {
-                Log.d("FeedActivity", "Point for " + etCodePinEntry.getText() + " not found!");
+                Log.d("FeedActivity", "Point for " + entry + " not found!");
                 Snackbar.make(barcodeScannerView, "Point not found, please try again.", Snackbar.LENGTH_LONG).show();
                 barcodeScannerView.resume();
                 clearInput();
@@ -238,13 +238,13 @@ public class ScanningActivity extends AppCompatActivity {
             return false;
         }
         Map<String, String> partialPrimaryMapTour = new HashMap<>();
-        partialPrimaryMapTour.put("TOUR_ID", FeedActivity.currentTourId);
+        partialPrimaryMapTour.put(TOUR_ID, FeedActivity.currentTourId);
         Cursor pointTourCursor;
         try {
-            pointTourCursor = FeedActivity.database.getWholeByPrimaryPartial("POINT_TOUR", partialPrimaryMapTour);
+            pointTourCursor = FeedActivity.database.getWholeByPrimaryPartial(POINT_TOUR_TABLE, partialPrimaryMapTour);
             pointTourCursor.moveToPosition(0);
             do {
-                String id = pointTourCursor.getString(pointTourCursor.getColumnIndex(DatabaseConstants.POINT_ID));
+                String id = pointTourCursor.getString(pointTourCursor.getColumnIndex(POINT_ID));
                 if (id.equals(passphrase)) {
                     return true;
                 }
@@ -256,19 +256,35 @@ public class ScanningActivity extends AppCompatActivity {
     }
 
         private class TourSubmit extends AsyncTask<String, Double, Boolean> {
+
+            ProgressDialog progressDialog = new ProgressDialog(ScanningActivity.this);
+
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+                setRequestedOrientation(getResources().getConfiguration().orientation);
+                progressDialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                progressDialog.setMessage("Checking if tour exists");
+                progressDialog.show();
+                progressDialog.setCancelable(false);
+            }
+
             protected Boolean doInBackground(String... params) {
-                return FeedActivity.sessionExistsOnline(params[0]);
+                return Utilities.sessionExistsOnline(params[0]);
             }
 
             protected void onPostExecute(Boolean result) {
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER);
+                progressDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                progressDialog.dismiss();
                 if (result) {
                     Intent data = new Intent();
                     data.putExtra("mode", "tour");
-                    data.putExtra("pin", etCodePinEntry.getText().toString());
+                    data.putExtra("pin", entry);
                     setResult(RESULT_OK, data);
                     finish();
                 } else {
-                    Log.d("FeedActivity", "Tour for " + etCodePinEntry.getText() + " not found!");
+                    Log.d("FeedActivity", "Tour for " + entry + " not found!");
                     Snackbar.make(barcodeScannerView, "Tour not found, please try again.", Snackbar.LENGTH_LONG).show();
                     barcodeScannerView.resume();
                     clearInput();

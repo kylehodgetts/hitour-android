@@ -118,10 +118,10 @@ public class TableSchema {
 
     /**
      * Constructs a String containing all primary keys that are inter-spaced with a given string,
-     * last n number of characters is remover
+     * last n number of characters is removed
      * @param spacing The string to be used while inter-spacing
      * @param remlast The number of characters to be removed at the end
-     * @return
+     * @return correct String
      */
     private String primaryList(String spacing, int remlast) {
         String res = "";

@@ -24,14 +24,15 @@ Ana Jalba, Dominik Kulon, Benjamin Temple) at King\'s College London.<br />
 		<br />
 
 		The hiTour Android app uses the following 3rd party libraries, resources and tools:<br />
-		- Design<br />
-		- Pallete<br />
 		- Zxing Android Embedded<br />
 		- Zxing<br />
 		- CircleImageView<br />
 		- Retrofit<br />
 		- Gson<br />
 		- Converter Gson<br />
+		- ExoMedia<br />
+		- JUnit<br />
+		- OkHttp<br />
 
 		<br />
 

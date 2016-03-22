@@ -20,32 +20,31 @@ public class ImageDialogFragment extends DialogFragment {
 
     public static String FRAGMENT_TAG = "IMAGE_DIALOG_FRAGMENT";
 
-    private ImageView mImageView;
     private static Bitmap mBitmap;
 
     // These matrices will be used to move and zoom image
-    Matrix matrix = new Matrix();
-    Matrix savedMatrix = new Matrix();
+    private Matrix matrix = new Matrix();
+    private Matrix savedMatrix = new Matrix();
 
     // We can be in one of these 3 states
-    static final int NONE = 0;
-    static final int DRAG = 1;
-    static final int ZOOM = 2;
-    int mode = NONE;
+    private static final int NONE = 0;
+    private static final int DRAG = 1;
+    private static final int ZOOM = 2;
+    private int mode = NONE;
 
     // Remember some things for zooming
-    PointF start = new PointF();
-    PointF mid = new PointF();
-    float oldDist = 1f;
+    private PointF start = new PointF();
+    private PointF mid = new PointF();
+    private float oldDist = 1f;
 
     // Remember some things for the full screen functionality
-    int LANDSCAPE = Configuration.ORIENTATION_LANDSCAPE;
-    int PORTRAIT = Configuration.ORIENTATION_PORTRAIT;
-    static int orient = 0;
-    static DisplayMetrics displaymetrics;
-    static int displayHeight;
+    private int LANDSCAPE = Configuration.ORIENTATION_LANDSCAPE;
+    private int PORTRAIT = Configuration.ORIENTATION_PORTRAIT;
+    private static int orient = 0;
+    private static DisplayMetrics displaymetrics;
+    private static int displayHeight;
     static int displayWidth;
-    static ImageDialogFragment frag;
+    private static ImageDialogFragment frag;
     static Activity act;
 
     /**
@@ -54,7 +53,7 @@ public class ImageDialogFragment extends DialogFragment {
     public ImageDialogFragment() { }
 
     /**
-     * Get a new intance of the dialog fragment with an image in it
+     * Get a new instance of the dialog fragment with an image in it
      *
      * @param arg      argument for the bundle
      * @param bmp      {@link Bitmap} image to be put in the dialog
@@ -80,7 +79,7 @@ public class ImageDialogFragment extends DialogFragment {
      *
      * @param bmp {@link Bitmap} the full screen image
      */
-    public void setBitmap(Bitmap bmp) {
+    private void setBitmap(Bitmap bmp) {
         mBitmap = bmp;
     }
 
@@ -88,9 +87,9 @@ public class ImageDialogFragment extends DialogFragment {
     public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.image_dialog_fragment, container, false);
 
-        mImageView = (ImageView) view.findViewById(R.id.image_dialog);
+        ImageView mImageView = (ImageView) view.findViewById(R.id.image_dialog);
         if (orient != getResources().getConfiguration().orientation) {
-            if (orient== LANDSCAPE) {
+            if (orient == LANDSCAPE) {
                 orient = PORTRAIT;
                 fullScreen();
             } else if(orient == PORTRAIT) {
