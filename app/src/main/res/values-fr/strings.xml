@@ -11,6 +11,23 @@
     <string name="content_description_submits">Valider</string>
     <string name="content_description_item_feed">Fil d\'objet %1$s</string>
     <string name="content_description_launch_scanner">Lancer le Scanner</string>
-    <string name="content_description_tour_selection">Selection du tour %1$s</string>
+    <string name="content_description_tour_selection">Selection du guide %1$s</string>
+
+
+    <string name="empty_feed_hint">Vous pouvez commencer un guide en appuyant sur le bouton du scanner situé au-dessus</string>
+    <string name="about_app_title">À propos de cette application</string>
+    <string name="about">À Propos</string>
+    <string name="start_date">Date de commencement:</string>
+    <string name="expiration_date">Date d'expiration:</string>
+
+    <string name="open_drawer">Ouverture du tirroir</string>
+    <string name="close_drawer">Fermuture du tirroir</string>
+    <string name="quiz">Questionnaire</string>
+    <string name="empty_feed_title">Votre fil d\'object se trouve etre vide.</string>
+    <string name="empty_tours_header"> Il n'y a pas de guide actuellement disponible.</string>
+    <string name="title_activity_quiz">QuizActivity</string>
+    <string name="action_settings">Configuration</string>
+    <string name="no_network_quiz">Il n'y a pas de connection réseau. Le questionnaire ne peu donc pas etre accédé.</string>
+    <string name="tour_not_complete">Vous devez finir l'intégrité du tour (le guide).</string>
 
 </resources>
