@@ -10,7 +10,7 @@ import uk.ac.kcl.stranders.hitour.activity.FeedActivity;
 
 public class SessionValidationOnline extends AsyncTask<Map<String, String>, Double, ArrayList<String>> {
 
-    Context context;
+    private final Context context;
 
     public SessionValidationOnline(Context context) {
         this.context = context;

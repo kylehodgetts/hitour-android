@@ -21,7 +21,7 @@ public class DatabaseInstrumentationTest extends ActivityInstrumentationTestCase
         super(FeedActivity.class);
     }
 
-    DBWrap db;
+    private DBWrap db;
 
     /**
      * Sets up the class, creates a new database, drops the old one and populates the new database

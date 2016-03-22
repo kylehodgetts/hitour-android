@@ -135,7 +135,7 @@ public class ScanningActivity extends AppCompatActivity {
      *
      * Otherwise an error message is shown to the user and the input is cleared ready for the next input.
      */
-    public void submit() {
+    private void submit() {
 
         // Hide keyboard when submit is pressed so Snackbar can be seen
         View view = this.getCurrentFocus();

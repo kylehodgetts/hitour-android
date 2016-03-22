@@ -55,13 +55,13 @@ public class HiTourRetrofit {
     /**
      * Invoked when the request is successfully finished.
      */
-    public void onRequestFinished() {
+    private void onRequestFinished() {
         mCallback.onAllRequestsFinished();
     }
 
     /**
      * Fetches the tour JSON from url and populates models
-     * @param call
+     * @param call Call<TourResponse>
      */
     private void fetchTour(Call<TourResponse> call) {
 

@@ -19,9 +19,9 @@ import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.*;
 
 public class DataManipulationTest extends ActivityInstrumentationTestCase2<FeedActivity> {
 
-    TourSession tourSessionOne, tourSessionTwo, tourSessionThree;
-    Tour tourOne, tourTwo;
-    DBWrap database;
+    private TourSession tourSessionOne, tourSessionTwo, tourSessionThree;
+    private Tour tourOne, tourTwo;
+    private DBWrap database;
 
     public DataManipulationTest() {
         super(FeedActivity.class);

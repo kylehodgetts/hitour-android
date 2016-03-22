@@ -32,7 +32,7 @@ public class QuizActivityTest extends InstrumentationTestCase {
     /**
      * Unlocks the first point in the test tour
      */
-    public void unlockFirstPoint() {
+    private void unlockFirstPoint() {
         Instrumentation instrumentation = getInstrumentation();
         Instrumentation.ActivityMonitor activityMonitor = instrumentation.addMonitor(FeedActivity.class.getName(), null, false);
 
@@ -96,7 +96,7 @@ public class QuizActivityTest extends InstrumentationTestCase {
     /**
      * Test that unlocks the second point in the test tour
      */
-    public void unlockSecondPoint() {
+    private void unlockSecondPoint() {
         Instrumentation instrumentation = getInstrumentation();
         Instrumentation.ActivityMonitor activityMonitor = instrumentation.addMonitor(FeedActivity.class.getName(), null, false);
 
@@ -160,7 +160,7 @@ public class QuizActivityTest extends InstrumentationTestCase {
     /**
      * Test that unlocks the third point in the test tour
      */
-    public void unlockThirdPoint() {
+    private void unlockThirdPoint() {
         Instrumentation instrumentation = getInstrumentation();
         Instrumentation.ActivityMonitor activityMonitor = instrumentation.addMonitor(FeedActivity.class.getName(), null, false);
 

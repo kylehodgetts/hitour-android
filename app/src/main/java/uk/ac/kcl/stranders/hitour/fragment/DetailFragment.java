@@ -97,7 +97,7 @@ public class DetailFragment extends Fragment {
     /**
      * Store the display sizes
      */
-    static DisplayMetrics displaymetrics;
+    private static DisplayMetrics displaymetrics;
 
     /**
      * Default empty required public constructor
@@ -128,11 +128,7 @@ public class DetailFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        try {
-            pointTourCursor = FeedActivity.database.getUnlocked(UNLOCK_STATE_UNLOCKED, FeedActivity.currentTourId);
-        } catch (NotInSchemaException e) {
-            Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
-        }
+        pointTourCursor = FeedActivity.database.getUnlocked(UNLOCK_STATE_UNLOCKED, FeedActivity.currentTourId);
 
         if(pointTourCursor.getCount() > 0) {
 

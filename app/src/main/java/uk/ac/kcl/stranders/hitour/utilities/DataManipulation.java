@@ -27,7 +27,7 @@ public class DataManipulation {
      * @param tour Tour object that is used by tourSession
      * @param context the Context of addition to the database
      * @param database the DBWrap which wraps database to which additions should be made
-     * @return
+     * @return ArrayList of urls of data to be downloaded
      */
     public static ArrayList<String> addSession(TourSession tourSession, Tour tour, Context context, DBWrap database) {
 

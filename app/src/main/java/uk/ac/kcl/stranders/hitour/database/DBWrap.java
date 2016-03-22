@@ -377,7 +377,7 @@ public class  DBWrap {
      * @return Cursor with filtered rows from the POINT_TOUR table
      * @throws NotInSchemaException
      */
-    public Cursor getUnlocked(String isUnlocked, String tourId) throws NotInSchemaException {
+    public Cursor getUnlocked(String isUnlocked, String tourId) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
         String[] projection = {

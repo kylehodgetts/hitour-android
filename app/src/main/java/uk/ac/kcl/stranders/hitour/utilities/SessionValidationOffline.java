@@ -19,7 +19,7 @@ import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.START
 
 public class SessionValidationOffline extends AsyncTask<Map<String, String>, Double, ArrayList<String>> {
 
-    Context context;
+    private final Context context;
 
     public SessionValidationOffline(Context context) {
         this.context = context;

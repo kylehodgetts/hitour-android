@@ -459,7 +459,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
     /**
      * Changes a font of the app title.
      */
-    public void setTitleFont() {
+    private void setTitleFont() {
         Typeface font = Typeface.createFromAsset(this.getAssets(), "fonts/ubuntu_l.ttf");
 
         // Set font for title in action bar on a phone.
@@ -574,7 +574,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
 
         /**
          * Creates a DownloadToStorage object and sets the url of data to be downloaded
-         * @param url
+         * @param url url of website to download from
          */
         private DownloadToStorage(String url) {
             this.url = url;
@@ -585,9 +585,8 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
 
         /**
          * Attempts to download data from url and store in internal storage of device
-         * @throws Exception
          */
-        public void run() throws Exception {
+        public void run() {
             Request request = new Request.Builder()
                     .url(url)
                     .build();
@@ -684,7 +683,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
 
     /**
      * Set the current adapter of the feed
-     * @param adapter
+     * @param adapter the FeedAdapter
      */
     private void setCurrentFeedAdapter(FeedAdapter adapter){
         currentFeedAdapter = adapter;
