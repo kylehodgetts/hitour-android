@@ -61,6 +61,8 @@ import uk.ac.kcl.stranders.hitour.utilities.DataManipulation;
 import uk.ac.kcl.stranders.hitour.utilities.CustomTypefaceSpan;
 import uk.ac.kcl.stranders.hitour.FeedAdapter;
 import uk.ac.kcl.stranders.hitour.R;
+import uk.ac.kcl.stranders.hitour.utilities.SessionValidationOffline;
+import uk.ac.kcl.stranders.hitour.utilities.SessionValidationOnline;
 import uk.ac.kcl.stranders.hitour.utilities.Utilities;
 import uk.ac.kcl.stranders.hitour.database.DBWrap;
 import uk.ac.kcl.stranders.hitour.database.NotInSchemaException;
@@ -135,8 +137,14 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
      */
     private Menu mMenu;
 
+    /**
+     * Stores a reference to the {@link HiTourRetrofit} object in which the tour info is downloaded
+     */
     private static HiTourRetrofit hiTourRetrofit;
 
+    /**
+     * Stores a reference to the {@link FeedAdapter} that is currently being utilised by the app
+     */
     private static FeedAdapter currentFeedAdapter;
 
     /**
@@ -148,14 +156,20 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Set the currentTourId if there was a previous tour before orientation changes
         if(savedInstanceState != null) {
             if(savedInstanceState.containsKey(CURRENT_TOUR_ID)) {
                 currentTourId = savedInstanceState.getString(CURRENT_TOUR_ID);
             }
         }
 
+        // Set up the database
         database = new DBWrap(this, new HiSchema(1));
+
+        //Set up the main layout
         setContentView(R.layout.activity_feed);
+
+        // Find the toolbar and implement its behaviour and look correctly
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         setTitleFont();
@@ -163,6 +177,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer);
 
+        // Check that all sessions on device are still valid
         checkSessionDates();
 
         mFeed = (RecyclerView) findViewById(R.id.rv_feed);
@@ -189,6 +204,8 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
 
         mFeed.setLayoutManager(mLayoutManager);
 
+        // Correctly set up the feed with the current tour
+        // or if not tour currently, the one from the top of the app drawer list
         try {
             final Cursor sessionCursor = database.getAll(SESSION_TABLE);
             if (currentTourId != null) {
@@ -231,6 +248,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
             supportActionBar.setDisplayHomeAsUpEnabled(true);
         }
 
+        // Set the behaviour of the items in the navigation drawer
         navigationView.setNavigationItemSelectedListener(
                 new NavigationView.OnNavigationItemSelectedListener() {
                     @Override
@@ -265,7 +283,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
                 }
         );
 
-
+        // Set the behaviour of the floating action button to open the ScanningActivity
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setContentDescription(fab.getResources().getString(R.string.content_description_launch_scanner));
         fab.setOnClickListener(new View.OnClickListener() {
@@ -284,6 +302,10 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
 
     }
 
+    /**
+     * Add the current tour's id to the bundle when orientation changes
+     * @param savedInstanceState the bundle which will be saved
+     */
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         // Save the currently selected tour's ID
@@ -364,6 +386,11 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         }
     }
 
+    /**
+     * Add items to the action bar if it visible
+     * @param menu the menu to add
+     * @return if a menu was created
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -371,6 +398,11 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         return true;
     }
 
+    /**
+     * Sets the hamburger icon to open the app drawer
+     * @param item item in menu that was selected
+     * @return if an option was selected
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
@@ -495,7 +527,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
 
         nameTextView.setText(name);
 
-        Calendar expirationDateCalendar = getFinishDate(startDate, duration);
+        Calendar expirationDateCalendar = Utilities.getFinishDate(startDate, duration);
         String expirationDate = sdfFinish.format(expirationDateCalendar.getTime());
         expirationDateTextView.setText(Html.fromHtml("<b>" + FeedActivity.this.getString(R.string.expiration_date) + "</b><br/>" + expirationDate));
 
@@ -507,6 +539,9 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         startDateTextView.setText(Html.fromHtml("<b>" + FeedActivity.this.getString(R.string.start_date) + "</b><br/>" + startDate));
     }
 
+    /**
+     * Provide all necessary updates to update the feed adapter for the specified tour
+     */
     private void populateFeedAdapter(String tourId) {
         Map<String,String> partialPrimaryMap = new HashMap<>();
         partialPrimaryMap.put("TOUR_ID", tourId);
@@ -515,7 +550,6 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
             // Clear the fragment on change so point from previous tour does not show on tablet
             if(currentFeedAdapter != null)
                 currentFeedAdapter.clearFragment();
-
 
             Cursor feedCursor = database.getWholeByPrimaryPartialSorted(POINT_TOUR_TABLE, partialPrimaryMap, RANK);
             tourCursor.moveToFirst();feedCursor.moveToFirst();
@@ -532,11 +566,18 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         }
     }
 
+    /**
+     * Class that implements OkHttps to allow download of all types of data
+     */
     private class DownloadToStorage {
 
         private final OkHttpClient client = new OkHttpClient();
         private String url;
 
+        /**
+         * Creates a DownloadToStorage object and sets the url of data to be downloaded
+         * @param url
+         */
         private DownloadToStorage(String url) {
             this.url = url;
             client.setConnectTimeout(5, TimeUnit.SECONDS);
@@ -544,6 +585,10 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
             client.setReadTimeout(5, TimeUnit.SECONDS);
         }
 
+        /**
+         * Attempts to download data from url and store in internal storage of device
+         * @throws Exception
+         */
         public void run() throws Exception {
             Request request = new Request.Builder()
                     .url(url)
@@ -582,7 +627,11 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         }
     }
 
+    /**
+     * Updates that should happen when a piece of data finishes downloading
+     */
     private void onDownloadFinish() {
+        // Further position in download queue
         downloadPosition++;
         runOnUiThread(new Runnable() {
             @Override
@@ -590,6 +639,7 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
                 progressDialog.setMessage("Downloading data: " + downloadPosition + " of " + downloadItemCount + " files downloaded");
             }
         });
+        // If end of download queue reached set the feed adapter and remove the ProgressDialog
         if(downloadPosition == downloadItemCount) {
             progressDialog.dismiss();
             downloadItemCount = 0;
@@ -609,6 +659,9 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         }
     }
 
+    /**
+     * Check the dates of all sessions in database to make sure that they are still valid
+     */
     private void checkSessionDates() {
         try {
             Cursor sessionCursor = database.getAll(SESSION_TABLE);
@@ -620,10 +673,10 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
                 sessionIdPassphraseMap.put(passphrase, sessionId);
             }
             if(Utilities.isNetworkAvailable(this)) {
-                SessionValidationOnline sessionValidationOnline = new SessionValidationOnline();
+                SessionValidationOnline sessionValidationOnline = new SessionValidationOnline(this);
                 sessionValidationOnline.execute(sessionIdPassphraseMap);
             } else {
-                SessionValidationOffline sessionValidationOffline = new SessionValidationOffline();
+                SessionValidationOffline sessionValidationOffline = new SessionValidationOffline(this);
                 sessionValidationOffline.execute(sessionIdPassphraseMap);
             }
         } catch (NotInSchemaException e) {
@@ -631,44 +684,10 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
         }
     }
 
-    private class SessionValidationOnline extends AsyncTask<Map<String, String>, Double, ArrayList<String>> {
-        protected ArrayList<String> doInBackground(Map<String, String>... params) {
-            Map<String, String> sessionIdPassphraseMap = params[0];
-            ArrayList<String> sessionIdArrayList = new ArrayList<>();
-            for(Map.Entry<String, String> entry : sessionIdPassphraseMap.entrySet()) {
-                if(!sessionExistsOnline(entry.getKey())) {
-                    sessionIdArrayList.add(entry.getValue());
-                }
-            }
-            return sessionIdArrayList;
-        }
-        protected void onPostExecute(ArrayList<String> result) {
-            for (int i = 0; i < result.size(); i++) {
-                DataManipulation.removeSession(result.get(i), FeedActivity.this, database);
-            }
-        }
-    }
-
-    public static boolean sessionExistsOnline(String passphrase) {
-        try {
-            InputStream inputStream = new URL("https://hitour.herokuapp.com/api/A7DE6825FD96CCC79E63C89B55F88/" + passphrase).openStream();
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            StringBuilder text = new StringBuilder();
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                text.append(line);
-            }
-            String result = text.toString();
-            //Only return true if it starts with a curly brace indicating JSON
-            if(result.startsWith("{"))
-                return true;
-        }
-        catch (IOException e) {
-            Log.e("IO_FAIL", Log.getStackTraceString(e));
-        }
-        return false;
-    }
-
+    /**
+     * Set the current adapter of the feed
+     * @param adapter
+     */
     private void setCurrentFeedAdapter(FeedAdapter adapter){
         currentFeedAdapter = adapter;
     }
@@ -687,57 +706,6 @@ public class FeedActivity extends AppCompatActivity implements HiTourRetrofit.Ca
      */
     public static FeedAdapter getCurrentFeedAdapter(){
         return currentFeedAdapter;
-    }
-
-    private class SessionValidationOffline extends AsyncTask<Map<String, String>, Double, ArrayList<String>> {
-        protected ArrayList<String> doInBackground(Map<String, String>... params) {
-            try {
-                Map<String, String> sessionIdPassphraseMap = params[0];
-                ArrayList<String> sessionIdArrayList = new ArrayList<>();
-                for (Map.Entry<String, String> entry : sessionIdPassphraseMap.entrySet()) {
-                    Map<String, String> primaryKeysMap = new HashMap<>();
-                    primaryKeysMap.put(SESSION_ID, entry.getValue());
-                    // Get START_DATE and DURATION for this session
-                    Cursor sessionCursor = database.getWholeByPrimary(SESSION_TABLE, primaryKeysMap);
-                    sessionCursor.moveToFirst();
-                    String startDate = sessionCursor.getString(sessionCursor.getColumnIndex(START_DATE));
-                    String duration = sessionCursor.getString(sessionCursor.getColumnIndex(DURATION));
-                    if (!sessionExistsOffline(startDate, duration)) {
-                        sessionIdArrayList.add(entry.getValue());
-                    }
-                }
-                return sessionIdArrayList;
-            } catch (NotInSchemaException e) {
-                Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
-            }
-            return null;
-        }
-        protected void onPostExecute(ArrayList<String> result) {
-            if(result != null) {
-                for (int i = 0; i < result.size(); i++) {
-                    DataManipulation.removeSession(result.get(i), FeedActivity.this, database);
-                }
-            }
-        }
-    }
-
-    private boolean sessionExistsOffline(String startDate, String duration) {
-        Calendar calendarFinish = getFinishDate(startDate, duration);
-        Calendar calendarNow = Calendar.getInstance();
-        return !calendarNow.after(calendarFinish);
-    }
-
-    private Calendar getFinishDate(String startDate, String duration) {
-        try {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
-            Calendar calendarFinish = Calendar.getInstance();
-            calendarFinish.setTime(sdf.parse(startDate));
-            calendarFinish.add(Calendar.DATE, Integer.parseInt(duration));
-            return calendarFinish;
-        } catch (ParseException e) {
-            Log.e("PARSE_FAIL", Log.getStackTraceString(e));
-        }
-        return null;
     }
 
 }

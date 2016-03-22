@@ -39,6 +39,7 @@ import java.util.Observable;
 import uk.ac.kcl.stranders.hitour.utilities.CustomTypefaceSpan;
 import uk.ac.kcl.stranders.hitour.R;
 import uk.ac.kcl.stranders.hitour.database.NotInSchemaException;
+import uk.ac.kcl.stranders.hitour.utilities.Utilities;
 
 import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.*;
 
@@ -269,7 +270,7 @@ public class ScanningActivity extends AppCompatActivity {
             }
 
             protected Boolean doInBackground(String... params) {
-                return FeedActivity.sessionExistsOnline(params[0]);
+                return Utilities.sessionExistsOnline(params[0]);
             }
 
             protected void onPostExecute(Boolean result) {

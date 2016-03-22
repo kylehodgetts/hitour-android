@@ -210,6 +210,8 @@ public class DetailFragment extends Fragment {
                     Cursor pointCursor = FeedActivity.database.getWholeByPrimary(POINT_TABLE, primaryMap);
                     pointCursor.moveToFirst();
 
+                    // Set the title, description and image of the point
+
                     titleView.setText(pointCursor.getString(pointCursor.getColumnIndex(NAME)));
                     bodyView.setText(pointCursor.getString(pointCursor.getColumnIndex(DESCRIPTION)));
 
@@ -224,6 +226,7 @@ public class DetailFragment extends Fragment {
                     Log.e("DATABASE_FAIL", Log.getStackTraceString(e));
                 }
 
+                // Add all data items for the point
                 LinearLayout linearLayout = (LinearLayout) mRootView.findViewById(R.id.detail_body);
                 addContent(inflater, linearLayout, savedInstanceState);
             }
@@ -258,6 +261,7 @@ public class DetailFragment extends Fragment {
 
                     StringBuilder text = new StringBuilder();
                     if (fileExtension.matches("jpg|jpeg|png|gif")) {
+                        // Add image to the view
                         layoutDetail = (LinearLayout) inflater.inflate(R.layout.image_detail, container, false);
                         final ImageView imageView = (ImageView) layoutDetail.findViewById(R.id.image);
                         final Bitmap bitmap = BitmapFactory.decodeFile(url);
@@ -274,9 +278,11 @@ public class DetailFragment extends Fragment {
                         });
 
                     } else if (fileExtension.matches("mp4")) {
+                        // Add video to the view
                         layoutDetail = (LinearLayout) inflater.inflate(R.layout.video_detail, container, false);
                         addVideo(savedInstanceState, layoutDetail, i, url);
                     } else {
+                        // Add text to the view
                         layoutDetail = (LinearLayout) inflater.inflate(R.layout.text_detail, container, false);
                         try {
                             File file = new File(url);
@@ -423,6 +429,11 @@ public class DetailFragment extends Fragment {
         }
     }
 
+    /**
+     * Check that only data for the relevant audience of the tour is shown
+     * @param dataId the id of the datum to be checked
+     * @return true if it should be shown, false if it should not be shown
+     */
     private boolean checkDataAudience(String dataId) {
         try {
             Map<String, String> partialPrimaryMap = new HashMap<>();

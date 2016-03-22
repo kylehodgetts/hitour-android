@@ -21,6 +21,14 @@ import static uk.ac.kcl.stranders.hitour.database.schema.DatabaseConstants.*;
 
 public class DataManipulation {
 
+    /**
+     * Add a tour session to all relevant tables in database and make list of data to be downloaded
+     * @param tourSession TourSession object that gives information on particular session
+     * @param tour Tour object that is used by tourSession
+     * @param context the Context of addition to the database
+     * @param database the DBWrap which wraps database to which additions should be made
+     * @return
+     */
     public static ArrayList<String> addSession(TourSession tourSession, Tour tour, Context context, DBWrap database) {
 
         ArrayList<String> urlArrayList = new ArrayList<>();
@@ -383,6 +391,14 @@ public class DataManipulation {
         }
     }
 
+    /**
+     * Remove a piece of data from all relevant tables in the database and the device's storage
+     * without infringing on other data that might need access to the file
+     * @param dataId id of the datum to be removed
+     * @param context Context of the removal
+     * @param database the DBWrap from which it should be removed
+     * @throws NotInSchemaException
+     */
     private static void removeData(String dataId, Context context, DBWrap database) throws NotInSchemaException {
         HashMap<String, String> columnsMap = new HashMap<>();
         HashMap<String, String> primaryKeysMap = new HashMap<>();
@@ -398,6 +414,11 @@ public class DataManipulation {
         database.delete(columnsMap, primaryKeysMap, POINT_DATA_TABLE);
     }
 
+    /**
+     * Delete the file from the device if it exists
+     * @param url url of the data
+     * @param context Context in which deletion should take place
+     */
     private static void deleteDataFile(String url, Context context) {
         String filename = Utilities.createFilename(url);
         filename = context.getFilesDir().toString() + "/" + filename;
@@ -407,6 +428,13 @@ public class DataManipulation {
         }
     }
 
+    /**
+     * Check if a piece of datum is used by a point for its image
+     * @param dataUrl the url the datum was downloaded from
+     * @param database the DBWrap from which they both come
+     * @return true if is still needed, false if it is not
+     * @throws NotInSchemaException
+     */
     private static boolean usedByPoint(String dataUrl, DBWrap database) throws NotInSchemaException {
         Cursor pointCursor = database.getAll(POINT_TABLE);
         for(int i = 0; i < pointCursor.getCount(); i++) {
