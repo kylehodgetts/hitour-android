@@ -1,5 +1,11 @@
 # hiTour Android Application
 
+The app has been designed and developed as a second year project at King's College London for Royal Brompton Hospital in London to allow doctors deliver high quality tours around the hospital for their medical students. However, the project requirement was to build a modular and extensible system that could work with any organisation. We successfully achieved that and our product can be used by museums, art galleries, and other instutitions that organise tours or exhibitions.
+
+- [Content Management System](https://github.com/KyleHodgetts/project-run-cms)
+- [Android application](https://github.com/KyleHodgetts/project-run-android)
+- [iOS application](https://github.com/KyleHodgetts/project-run-ios)
+
 ## Application Demonstration
 
 [![Screen Cast Demo](http://img.youtube.com/vi/W2CoXSr3UuM/0.jpg)](http://www.youtube.com/watch?v=W2CoXSr3UuM "Screen Cast Demo")
