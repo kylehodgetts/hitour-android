@@ -15,7 +15,7 @@
 * [Ben Temple](https://github.com/ben-temple)
 
 ## Installation Instructions
-The project does not require any additional set up before installation.
+The project does not require any additional configuration.
 
 ## Contribution
 
