@@ -5,15 +5,21 @@
 
 	<string name="about_app_content">
   		<![CDATA[
-        v1.1.0 (build 23.0.2)<br />
- 		Copyright \u00a9 2016 hiTour.<br />
+ 		v1.0.0<br />
+		Initial release of v1.0.0 built by Stranders at King\'s College London.<br /><br />
 
-		<br />
+		<strong>Web Team</strong><br /><br />
+		- Kyle Hodgetts - Lead Web Developer<br />
+		- Tahmidul Islam<br />
+		- Phileas Hoquard<br />
+		- Ana Jalba<br /><br />
 
- 		<em>v1.1.0</em><br />
-		Initial release of v1.1.0, fully built from scratch by Team Stranders (Charlie Baker,
-		Adam Chlupacek, Phileas Hocquard, Kyle Hodgetts, Tahmidul Islam,
-Ana Jalba, Dominik Kulon, Benjamin Temple) at King\'s College London.<br />
+		<strong>Mobile Team</strong><br /><br />
+		- Dominik Kulon - Lead Mobile Developer<br />
+		- Charlie Baker<br />
+		- Adam Chlupacek<br />
+		- Benjamin Temple<br />
+
 
 		<br />
 
@@ -21,27 +27,36 @@ Ana Jalba, Dominik Kulon, Benjamin Temple) at King\'s College London.<br />
 
 		<br />
 
-		The hiTour Android app uses the following 3rd party libraries, resources and tools:<br />
-		- Zxing Android Embedded<br />
+		The hiTour Android app uses the following third party libraries, resources and tools:<br />
 		- Zxing<br />
-		- CircleImageView<br />
+		- Zxing Android Embedded<br />
 		- Retrofit<br />
+		- OkHttp<br />
+		- CircleImageView<br />
 		- Gson<br />
 		- Converter Gson<br />
 		- ExoMedia<br />
 		- JUnit<br />
-		- OkHttp<br />
 
 		<br />
 
-		<strong>Licence</strong><br />
+		<strong>License</strong><br />
 
 		<br />
 
-		This software contains the following licence:<br />
-		<a href="http://www.gnu.org/licenses/gpl-3.0.en.html">GNU GENERAL PUBLIC LICENSE</a><br />
-		Version 3, 29 June 2007<br />
-		Copyright © 2007 Free Software Foundation<br />
+Copyright 2016 Stranders <br /> <br />
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at <br /> <br />
+
+    http://www.apache.org/licenses/LICENSE-2.0 <br /> <br />
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 
   		]]>
  	</string>

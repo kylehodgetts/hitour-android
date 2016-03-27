@@ -1,15 +1,13 @@
-package uk.ac.kcl.stranders.hitour.database;
+package stranders.hitour.database;
 
-
-import junit.framework.TestCase;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import uk.ac.kcl.stranders.hitour.database.schema.DataType;
-import uk.ac.kcl.stranders.hitour.database.schema.DatabaseSchema;
-import uk.ac.kcl.stranders.hitour.database.schema.TableSchema;
+import stranders.hitour.database.schema.DataType;
+import stranders.hitour.database.schema.DatabaseSchema;
+import stranders.hitour.database.schema.TableSchema;
 
 /**
  * @version 1.0
