@@ -2,6 +2,8 @@
 
 The app has been designed and developed as a second year project at King's College London for Royal Brompton Hospital in London to allow doctors deliver high quality tours around the hospital for their medical students. However, the project requirement was to build a modular and extensible system that could work with any organisation. We successfully achieved that and our product can be used by museums, art galleries, and other instutitions that organise tours or exhibitions.
 
+<a href="https://play.google.com/store/apps/details?id=stranders.hitour&utm_source=global_co&utm_medium=prtnr&utm_content=Mar2515&utm_campaign=PartBadge&pcampaignid=MKT-AC-global-none-all-co-pr-py-PartBadges-Oct1515-1"><img alt="Get it on Google Play" src="https://play.google.com/intl/en_us/badges/images/apps/en-play-badge.png" height="60" /></a>
+
 - [Content Management System](https://github.com/KyleHodgetts/project-run-cms)
 - [Android application](https://github.com/KyleHodgetts/project-run-android)
 - [iOS application](https://github.com/KyleHodgetts/project-run-ios)
